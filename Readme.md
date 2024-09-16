@@ -1,7 +1,3 @@
-Voici une version mise à jour du README en tenant compte des nouvelles informations que vous avez fournies :
-
----
-
 # Gestionnaire de Garages Multiplateforme 🚗🔧
 
 Une solution tout-en-un pour les indépendants et petites équipes de garages. Ce projet est une application web et mobile multiplateforme conçue pour optimiser la gestion des garages.
