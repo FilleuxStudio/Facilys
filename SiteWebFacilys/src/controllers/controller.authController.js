@@ -32,6 +32,13 @@ exports.login = async (req, res) => {
       expiresIn: rememberMe ? '7d' : '1h' // Token valide 1 heure ou 7 jours
     });
 
+     // Stocker les informations de l'utilisateur dans la session
+     req.session.user = {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+
     // Définir la durée du cookie selon "Remember me"
     const cookieDuration = rememberMe ? cookieConfig.rememberMeDuration : cookieConfig.sessionDuration;
 
@@ -41,7 +48,7 @@ exports.login = async (req, res) => {
       maxAge: cookieDuration // Durée de vie du cookie
     });
 
-    res.redirect('/my-account');
+    res.redirect('/account');
   } catch (err) {
     console.error('Erreur lors de la connexion :', err);
     res.status(500).send('Erreur serveur');

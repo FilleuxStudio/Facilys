@@ -3,6 +3,7 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 const smtpConfig = require('../config/smtp-server');
 const authController = require('../controllers/controller.authController');
+const accountController = require('../controllers/controller.accountController');
 
 const now =  new Date().getFullYear();
 
@@ -60,6 +61,8 @@ router.post('/register', authController.register);
 
 // Route pour le formulaire de connexion
 router.post('/login', authController.login);
+
+router.get('/account', accountController.account);
 
 //// Exemple de route protégée
 //router.get('/home', authenticate, (req, res) => {
