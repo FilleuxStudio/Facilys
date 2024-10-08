@@ -22,7 +22,7 @@ const now =  new Date().getFullYear();
         return res.redirect('/login');
       }
 
-      res.render('account', { user: req.session.user, currentDateTime: now, title: 'Mon compte' });
+      res.render('account', { user: req.session.user, currentDateTime: now,  csrfToken: req.session.csrfToken, title: 'Mon compte' });
 
     } catch (error) {
       // Si le token est invalide ou expiré
@@ -36,3 +36,35 @@ const now =  new Date().getFullYear();
     res.status(500).send('Erreur serveur');
   }
 };
+
+exports.accountDetails = async(req, res) => {
+    try {
+      const { email } = req.body;
+  
+      if (!email) {
+        return res.status(400).json({ error: 'Email requis' });
+      }
+  
+      const userData = await User.findByEmail(email);
+  
+      if (!userData) {
+        return res.status(404).json({ error: 'Utilisateur non trouvé' });
+      }
+  
+      res.json(userData);
+  
+    } catch (err) {
+      console.error('Erreur lors de la récupération des informations du compte:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  };
+
+  exports.accoutUpdate = async(req, res) => {
+    try {
+      
+  
+    } catch (err) {
+      console.error('Erreur lors de la récupération des informations du compte:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  };

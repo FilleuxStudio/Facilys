@@ -7,9 +7,10 @@ const accountController = require('../controllers/controller.accountController')
 
 const now =  new Date().getFullYear();
 
+////// Page Website //////
 // Route pour la page "À propos de nous"
 router.get('/about', (req, res) => {
-    res.render('about'); // Affiche la page about.ejs
+    res.render('about', { currentDateTime: now, title: 'À propos de Facilys' }); // Affiche la page about.ejs
 });
 
 // Route pour la page "contact"
@@ -53,22 +54,29 @@ router.get('/privacy-policy', (req, res) =>{
 
 // Route pour la page login et register
 router.get('/login', (req, res) =>{
-    res.render('login', { currentDateTime: now, title: 'Connexion', csrfToken: req.session.csrfToken })
+    const message = req.query.message || null;
+    res.render('login', { currentDateTime: now, message: message, title: 'Connexion', csrfToken: req.session.csrfToken })
   });
+
 
 // Route pour le formulaire d'inscription
 router.post('/register', authController.register);
 
+////// Page Dashboard //////
+
 // Route pour le formulaire de connexion
 router.post('/login', authController.login);
+router.get('/logout', authController.logout);
 
 router.get('/account', accountController.account);
+router.post('/accountDetails', accountController.accountDetails);
+router.post('/accountUpdate');
 
 //// Exemple de route protégée
 //router.get('/home', authenticate, (req, res) => {
 //    res.render('home', { user: req.user });
 //  });
 
-router.get('/logout', authController.logout);
+
 
 module.exports = router;

@@ -46,6 +46,11 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+});
+
 // Route de base
 app.get('/', (req, res) => {
   const now =  new Date().getFullYear();

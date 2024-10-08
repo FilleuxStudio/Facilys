@@ -17,14 +17,14 @@ exports.login = async (req, res) => {
     const user = await User.findByEmail(email);
 
     if (!user) {
-      return res.status(400).send('Email ou mot de passe incorrect.');
+      return res.status(400).redirect('/login?message=Email ou mot de passe incorrect.');
     }
 
     // Comparer le mot de passe
     const match = await argon2.verify(user.password, password);
 
     if (!match) {
-      return res.status(400).send('Email ou mot de passe incorrect.');
+      return res.status(400).redirect('/login?message=Email ou mot de passe incorrect.');
     }
 
     // Générer un token JWT
@@ -36,7 +36,8 @@ exports.login = async (req, res) => {
      req.session.user = {
       email: user.email,
       firstName: user.firstName,
-      lastName: user.lastName
+      lastName: user.lastName,
+      manager: user.manager,
     };
 
     // Définir la durée du cookie selon "Remember me"
@@ -74,9 +75,13 @@ exports.register = async (req, res) => {
         // Créer une instance de l'utilisateur
         const user = new User({
             companyName,
+            logo: "null",
             firstName,
             lastName,
             email,
+            siret: "null",
+            address: "null",
+            phone: "null",
             password: hashedPassword, // Mot de passe haché
             manager: false, // Par défaut, false, peut être ajusté selon vos besoins
         });

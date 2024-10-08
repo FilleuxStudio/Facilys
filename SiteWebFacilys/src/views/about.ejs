@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Contact Facilys</title>
+    <title>À propos de Facilys</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,7 +26,7 @@
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    
+
                                     <%- include('partials/header-login') %>
 
                                 </div>
@@ -91,10 +91,10 @@
                                 <ul>
                                     <li><a href="/">Boutique</a></li>
                                     <li>
-                                        <a href="/about">À propos de nous</a>
+                                        <a class="active" href="/about">À propos de nous</a>
                                     </li>
                                     <li>
-                                        <a class="active" href="/contact">Contact</a>
+                                        <a href="/contact">Contact</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -168,90 +168,109 @@
     
     <%- include('partials/nav-mobile') %>
 
-    <main class="main">
+    <main class="main single-page">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
                 <div class="breadcrumb">
                     <a href="/" rel="nofollow">Boutique</a>
                     <span></span> Pages
-                    <span></span> Contact
+                    <span></span> À propos de Facilys
                 </div>
             </div>
         </div>
-        <section class="section-border pt-50 pb-50">
-            <div class="container">
-                <div class="row text-center">
-                    <div class="col-md-4 mb-4 mb-md-0" style="margin: auto;">
-                        <h4 class="mb-15 text-brand">Studio</h4>
-                             1188 Av. du Cateau<br>
-                             59400 Cambrai, France<br>
-                        <abbr title="Phone">Tél : </abbr> (+33) 06 74 52 14 63<br>
-                        <abbr title="Email">Email : </abbr><a href="mailto:contact@facilys.fr">contact@facilys.fr</a><br>
-                        <a class="btn btn-outline btn-sm btn-brand-outline font-weight-bold text-brand bg-white text-hover-white mt-20 border-radius-5 btn-shadow-brand hover-up" href="https://maps.app.goo.gl/bhStjw2CS6CvS5hN9"><i class="fi-rs-marker mr-10"></i>Voir la Map</a>
+        <section class="section-padding">
+            <div class="container pt-25">
+                <div class="row">
+                    <div class="col-lg-6 align-self-center mb-lg-0 mb-4">
+                        <h6 class="mt-0 mb-15 text-uppercase font-sm text-brand wow fadeIn animated">Notre application</h6>
+                        <h1 class="font-heading mb-40">
+                            Nous créons une solution de gestion simple et efficace pour les petits garages
+                        </h1>
+                        <p>Notre application est conçue pour simplifier les opérations des petits garages, en automatisant les tâches courantes et en facilitant la gestion des clients et des stocks.</p>
+                        <p>Elle vous permet de gérer vos activités quotidiennes, vos rendez-vous et vos factures, tout en améliorant la productivité de votre entreprise grâce à une interface intuitive.</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <img src="/imgs/page/about-1.jpg" alt="">
                     </div>
                 </div>
             </div>
         </section>
-        <section class="pt-50 pb-50">
+        <section id="team" class="pt-25 wow fadeIn animated">
             <div class="container">
-                <div class="row">
-                    <div class="col-xl-8 col-lg-10 m-auto">
-                        <div class="contact-from-area padding-20-row-col wow FadeInUp">
-                            <h3 class="mb-10 text-center">Envoyez-nous un message</h3>
-                            <p class="text-muted mb-30 text-center font-sm">Ce formulaire permettra de contacter le support de l'application.</p>
-                            <% if (message) { %>
-                                <p class="form-messege text-success text-center"><%= message %></p>
-                            <% } %>
-                            <form class="contact-form-style text-center" id="contact-support"  method="POST" action="/contact-support">
-                                <div class="row">
-                                    <div class="col-lg-12 col-md-12">
-                                        <div class="input-style mb-20">
-                                            <span class="text-danger f-right">*</span>
-                                            <input id="company" name="company" placeholder="Société" type="text" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6">
-                                        <div class="input-style mb-20">
-                                            <span class="text-danger f-right">*</span>
-                                            <input id="name" name="name" placeholder="Nom Complet" type="text" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6">
-                                        <div class="input-style mb-20">
-                                            <span class="text-danger f-right">*</span>
-                                            <input id="email" name="email" placeholder="Votre Email" type="email" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6">
-                                        <div class="input-style mb-20">
-                                            <span class="text-warning f-right">*</span>
-                                            <input id="phone" name="phone" placeholder="Votre Téléphone" type="tel">
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6">
-                                        <div class="input-style mb-20">
-                                            <span class="text-danger f-right">*</span>
-                                            <input id="subject" name="subject" placeholder="Sujet" type="text" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12 col-md-12">
-                                        <div class="textarea-style mb-30">
-                                            <span class="text-danger f-right">*</span>
-                                            <textarea id="message" name="message" placeholder="Message" required></textarea>
-                                        </div>
-                                        <button class="submit submit-auto-width" type="submit">Envoyer un message</button>
-                                    </div>
+                <div class="row mb-50 align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mt-0 mb-15 text-uppercase font-sm text-brand wow fadeIn animated">Notre équipe</h6>
+                        <h2 class="mb-15 wow fadeIn animated">Rencontrez le développeur</h2>
+                        <p class="text-grey-3 wow fadeIn animated">Je suis Dimitri, développeur passionné par les solutions sur mesure pour les petites entreprises. Mon objectif est de créer des outils technologiques simples et performants qui répondent aux besoins des garages.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-30">
+                        <a class="btn btn-outline btn-lg btn-brand-outline font-weight-bold text-brand text-hover-white border-radius-5 btn-shadow-brand hover-up">Tous les membres</a>
+                    </div>
+                </div>
+                <div class="position-relative">
+                    <div class="row wow fadeIn animated">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="blog-card border-radius-10 overflow-hidden text-center">
+                                <img src="/imgs/page/avatar-1.jpg" alt="" class="border-radius-10 mb-30 hover-up">
+                                <h4 class="fw-500 mb-0">Dimitri F</h4>
+                                <p class="fw-400 text-brand mb-10">Développeur Full-Stack</p>
+                                <div class="mobile-social-icon wow fadeIn animated mb-sm-5 mb-md-0 animated">
+                                    <a href="#"><img src="/imgs/theme/icons/icon-facebook.svg" alt=""></a>
+                                    <a href="#"><img src="/imgs/theme/icons/icon-youtube.svg" alt=""></a>
                                 </div>
-                            </form>
+                            </div>
+                        </div>
+                        <!--col-->
+                        <!--<div class="col-lg-3 col-md-6">
+                            <div class="blog-card border-radius-10 overflow-hidden text-center">
+                                <img src="/imgs/page/avatar-2.jpg" alt="" class="border-radius-10 mb-30 hover-up">
+                                <h4 class="fw-500 mb-0">Dilan Specter</h4>
+                                <p class="fw-400 text-brand mb-10">Head Engineer</p>
+                                <div class="mobile-social-icon wow fadeIn animated mb-sm-5 mb-md-0 animated">
+                                    <a href="#"><img src="/imgs/theme/icons/icon-facebook.svg" alt=""></a>
+                                    <a href="#"><img src="/imgs/theme/icons/icon-twitter.svg" alt=""></a>
+                                    <a href="#"><img src="/imgs/theme/icons/icon-instagram.svg" alt=""></a>
+                                    <a href="#"><img src="/imgs/theme/icons/icon-pinterest.svg" alt=""></a>
+                                </div>
+                            </div>
+                        </div>-->
+                    </div>
+                </div>
+            </div>
+        </section>
+       
+        <section class="section-padding">
+            <div class="container pb-25">
+                <h3 class="section-title mb-20 wow fadeIn animated text-center"><span>Clients</span> en vedette</h3>
+                <div class="carausel-6-columns-cover position-relative wow fadeIn animated">
+                    <div class="carausel-6-columns text-center" id="carausel-6-columns-3">
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-1.png" alt="">
+                        </div>
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-2.png" alt="">
+                        </div>
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-3.png" alt="">
+                        </div>
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-4.png" alt="">
+                        </div>
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-5.png" alt="">
+                        </div>
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-6.png" alt="">
+                        </div>
+                        <div class="brand-logo">
+                            <img class="img-grey-hover" src="/imgs/banner/brand-3.png" alt="">
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-
     <%- include('partials/footer') %>
-
     <!-- Preloader Start -->
     <div id="preloader-active">
         <div class="preloader d-flex align-items-center justify-content-center">
@@ -291,7 +310,6 @@
     <!-- Template  JS -->
     <script src="/js/maind134.js?v=3.4"></script>
     <script src="/js/shopd134.js?v=3.4"></script>
-
 </body>
 
 </html>

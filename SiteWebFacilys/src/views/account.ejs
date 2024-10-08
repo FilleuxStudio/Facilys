@@ -26,9 +26,9 @@
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    <a href="/login">
-                                        <i class="iconoir-user"></i>
-                                    </a>
+
+                                     <%- include('partials/header-login') %>
+
                                 </div>
                                 <div class="header-action-icon-2">
                                     <a class="mini-cart-icon" href="/shopping-cart">
@@ -189,20 +189,28 @@
                                         <li class="nav-item">
                                             <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
                                         </li>
+                                        <% if (user.manager == true) { %>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                            <a class="nav-link" id="product-tab" data-bs-toggle="tab" href="#product" role="tab" aria-controls="product" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Produits</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
+                                            <a class="nav-link" id="client-tab" data-bs-toggle="tab" href="#client" role="tab" aria-controls="client" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Clients</a>
+                                        </li>
+                                        <% } %>
+                                        <li class="nav-item">
+                                           <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Mes commandes</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
+                                            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Facture et abonnements</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
+                                            <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>Mon équipes</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" href="page-login-register.html"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Mes informations</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link text-danger" href="/logout"><i class="fi-rs-sign-out mr-10 text-danger"></i>Logout</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -212,17 +220,86 @@
                                     <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5 class="mb-0">Hello Rosie! </h5>
+                                                <h5 class="mb-0">Bienvenu <%=user.firstName%> </h5>
                                             </div>
                                             <div class="card-body">
-                                                <p>From your account dashboard. you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a> and <a href="#">edit your password and account details.</a></p>
+                                                <p>Depuis le Dashboard de votre compte, vous pouvez facilement vérifier, consulter et télécharger <a href="#">vos logiciels</a> , gérer <a href="#">vos équipes</a>, <a href="#">la facturation et les abonnements</a>, ainsi que modifier <a href="#">votre mot de passe</a> et les <a href="#"> détails de votre compte</a>.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Mes produits</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Logiciel</th>
+                                                                <th>Date d'ajout</th>
+                                                                <th>Prix de vente</th>
+                                                                <th>prix</th>
+                                                                <th>Type</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>test</td>
+                                                                <td>03/10/2024</td>
+                                                                <td>Illimité</td>
+                                                                <td>Validé</td>
+                                                                <td><a href="#" class="btn-small d-block">View</a>
+                                                                    <a href="#" class="btn-small d-block">View</a>
+                                                                    <a href="#" class="btn-small d-block">View</a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5 class="mb-0">Your Orders</h5>
+                                                <h5 class="mb-0">Vos commandes</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Logiciel</th>
+                                                                <th>Date d'achat</th>
+                                                                <th>Date de retouvellement</th>
+                                                                <th>Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>test</td>
+                                                                <td>03/10/2024</td>
+                                                                <td>Illimité</td>
+                                                                <td>Validé</td>
+                                                                <td><a href="#" class="btn-small d-block">View</a>
+                                                                    <a href="#" class="btn-small d-block">View</a>
+                                                                    <a href="#" class="btn-small d-block">View</a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Facture et abonnement</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="table-responsive">
@@ -267,24 +344,44 @@
                                     <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5 class="mb-0">Orders tracking</h5>
+                                                <h5 class="mb-0">Facture et abonnement</h5>
                                             </div>
-                                            <div class="card-body contact-from-area">
-                                                <p>To track your order please enter your OrderID in the box below and press "Track" button. This was given to you on your receipt and in the confirmation email you should have received.</p>
-                                                <div class="row">
-                                                    <div class="col-lg-8">
-                                                        <form class="contact-form-style mt-30 mb-50" action="#" method="post">
-                                                            <div class="input-style mb-20">
-                                                                <label>Order ID</label>
-                                                                <input name="order-id" placeholder="Found in your order confirmation email" type="text" class="square">
-                                                            </div>
-                                                            <div class="input-style mb-20">
-                                                                <label>Billing email</label>
-                                                                <input name="billing-email" placeholder="Email you used during checkout" type="email" class="square">
-                                                            </div>
-                                                            <button class="submit submit-auto-width" type="submit">Track</button>
-                                                        </form>
-                                                    </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Order</th>
+                                                                <th>Date</th>
+                                                                <th>Status</th>
+                                                                <th>Total</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>#1357</td>
+                                                                <td>March 45, 2020</td>
+                                                                <td>Processing</td>
+                                                                <td>$125.00 for 2 item</td>
+                                                                <td><a href="#" class="btn-small d-block">View</a></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>#2468</td>
+                                                                <td>June 29, 2020</td>
+                                                                <td>Completed</td>
+                                                                <td>$364.00 for 5 item</td>
+                                                                <td><a href="#" class="btn-small d-block">View</a></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>#2366</td>
+                                                                <td>August 02, 2020</td>
+                                                                <td>Completed</td>
+                                                                <td>$280.00 for 3 item</td>
+                                                                <td><a href="#" class="btn-small d-block">View</a></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
@@ -294,7 +391,7 @@
                                             <div class="col-lg-6">
                                                 <div class="card mb-3 mb-lg-0">
                                                     <div class="card-header">
-                                                        <h5 class="mb-0">Billing Address</h5>
+                                                        <h5 class="mb-0">Mon équipes</h5>
                                                     </div>
                                                     <div class="card-body">
                                                         <address>3522 Interstate<br> 75 Business Spur,<br> Sault Ste. <br>Marie, MI 49783</address>
@@ -321,42 +418,56 @@
                                     <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5>Account Details</h5>
+                                                <h5>Vos informations</h5>
                                             </div>
                                             <div class="card-body">
-                                                <p>Already have an account? <a href="page-login-register.html">Log in instead!</a></p>
-                                                <form method="post" name="enq">
+                                                <form method="post" action="/accountUpdate">
                                                     <div class="row">
                                                         <div class="form-group col-md-6">
-                                                            <label>First Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="name" type="text">
+                                                            <label>Prénom <span class="required text-danger">*</span></label>
+                                                            <input required class="form-control square" name="firstName" id="firstName" type="text">
                                                         </div>
                                                         <div class="form-group col-md-6">
-                                                            <label>Last Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="phone">
+                                                            <label>Nom <span class="required text-danger">*</span></label>
+                                                            <input required class="form-control square" name="lastName" id="lastName" type="text">
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>Display Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="dname" type="text">
+                                                            <label>Société <span class="required text-danger">*</span></label>
+                                                            <input class="form-control square" name="companyName" id="companyName" type="text">
+                                                        </div>
+                                                        <div class="blog-card border-radius-10 overflow-hidden text-center">
+                                                            <img id="img-logo" src="/imgs/page/avatar-1.jpg" alt="logo société" class="border-radius-10 mb-30 hover-up" style="width: 180px;">                                                      
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>Email Address <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="email" type="email">
+                                                            <label>Logo</label>
+                                                            <input required class="form-control square" name="logo" id="logo" type="file"  accept=".png,.jpg,.jpeg,image/png,image/jpeg">
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>Current Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="password" type="password">
+                                                            <label>Siret <span class="required text-danger">*</span></label>
+                                                            <input required class="form-control square" name="siret" id="siret" type="text">
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>New Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="npassword" type="password">
+                                                            <label>Email <span class="required text-danger">*</span></label>
+                                                            <input required class="form-control square" name="email" id="email" type="email">
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>Confirm Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="cpassword" type="password">
+                                                            <label>Téléphone <span class="required text-danger">*</span></label>
+                                                            <input required class="form-control square" name="phone" id="phone" type="tel">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Adresse <span class="required text-danger">*</span></label>
+                                                            <input required class="form-control square" name="address" id="address" type="text">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Nouveau mot de passe</label>
+                                                            <input class="form-control square" name="npassword" id="npassword" type="password">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Confirmer le mot de passe </label>
+                                                            <input  class="form-control square" name="cpassword" id="cpassword" type="password">
                                                         </div>
                                                         <div class="col-md-12">
-                                                            <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Save</button>
+                                                            <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Enregistrer</button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -413,6 +524,68 @@
     <!-- Template  JS -->
     <script src="/js/maind134.js?v=3.4"></script>
     <script src="/js/shopd134.js?v=3.4"></script>
+
+    <script>
+        document.getElementById('account-detail-tab').addEventListener('click', function(event) {
+            // Récupérer l'email de l'utilisateur (assurez-vous que cet élément existe)
+            var userEmail = '<%=session.user.email%>';
+
+            fetch('/accountDetails', {
+                method: 'POST',
+                headers: {
+                    'CSRF-Token': '<%=csrfToken%>',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: userEmail })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    console.log(data);
+                    document.getElementById('firstName').value = data.firstName || '';
+                    document.getElementById('lastName').value = data.lastName || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('siret').value = data.siret || '';
+                    document.getElementById('address').value = data.address || '';
+                    document.getElementById('phone').value = data.phone || '';
+                    document.getElementById('companyName').value = data.companyName || '';
+                } else {
+                    console.error('Aucune donnée reçue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+        });
+    </script>
+    <script>
+            const inputLogo = document.getElementById('logo');
+            const imgView = document.getElementById('img-logo');
+        
+            inputLogo.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Vérifier si le fichier est une image
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+        
+                        reader.onload = function(e) {
+                            imgView.src = e.target.result;
+                        }
+        
+                        reader.readAsDataURL(file);
+                    } else {
+                        alert('Veuillez sélectionner un fichier image.');
+                        inputLogo.value = ''; // Réinitialiser l'input file
+                    }
+                }
+            });
+        </script>
 </body>
 
 </html>

@@ -188,6 +188,11 @@
                                     <div class="padding_eight_all bg-white">
                                         <div class="heading_s1">
                                             <h3 class="mb-30">Connexion</h3>
+                                            <% if (message) { %>
+                                                <div class="alert alert-danger">
+                                                  <%= message %>
+                                                </div>
+                                              <% } %>
                                         </div>
                                         <form method="post">
                                             <div class="form-group">

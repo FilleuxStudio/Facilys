@@ -1,0 +1,12 @@
+<% console.log('Session:', session); %>
+<% console.log('User:', session ? session.user : 'No session'); %>
+
+<% if(typeof session !== 'undefined' && session.user) { %>
+    <a href="/account">
+        <i class="iconoir-user"></i>
+    </a>
+<% }  else { %>
+    <a href="/login">
+        <i class="iconoir-user"></i>
+    </a>
+<% } %>
