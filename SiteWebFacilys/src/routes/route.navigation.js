@@ -6,7 +6,6 @@ const authController = require('../controllers/controller.authController');
 const accountController = require('../controllers/controller.accountController');
 
 const now =  new Date().getFullYear();
-
 ////// Page Website //////
 // Route pour la page "À propos de nous"
 router.get('/about', (req, res) => {
@@ -55,8 +54,8 @@ router.get('/privacy-policy', (req, res) =>{
 // Route pour la page login et register
 router.get('/login', (req, res) =>{
     const message = req.query.message || null;
-    res.render('login', { currentDateTime: now, message: message, title: 'Connexion', csrfToken: req.session.csrfToken })
-  });
+    res.render('login', { currentDateTime: now, message: message, title: 'Connexion' })
+});
 
 
 // Route pour le formulaire d'inscription
@@ -70,8 +69,7 @@ router.get('/logout', authController.logout);
 
 router.get('/account', accountController.account);
 router.post('/accountDetails', accountController.accountDetails);
-router.post('/accountUpdate');
-
+router.post('/accountUpdate', accountController.accoutUpdate);
 //// Exemple de route protégée
 //router.get('/home', authenticate, (req, res) => {
 //    res.render('home', { user: req.user });

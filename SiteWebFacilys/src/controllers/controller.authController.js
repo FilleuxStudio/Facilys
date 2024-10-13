@@ -5,11 +5,6 @@ const bcrypt = require('bcrypt');
 const argon2 = require('argon2');
 
 exports.login = async (req, res) => {
-    // Vérification du token CSRF
-    if (!req.body._csrf || req.body._csrf !== req.session.csrfToken) {
-      return res.status(403).send('Token CSRF invalide');
-    }
-
   const { email, password, rememberMe } = req.body;
 
   try {
@@ -63,10 +58,6 @@ exports.logout = (req, res) => {
 
 // Contrôleur d'inscription
 exports.register = async (req, res) => {
-    // Vérification du token CSRF
-    if (!req.body._csrf || req.body._csrf !== req.session.csrfToken) {
-      return res.status(403).send('Token CSRF invalide');
-    }
     const { companyName, firstName, lastName, email, password, passwordControl } = req.body;
     const checkTerm = transformCheckboxValue(req.body.checkTerm);
     try {

@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase-config'); // Assurez-vous que ce chemin est correct
+const { db } = require("../config/firebase-config"); // Assurez-vous que ce chemin est correct
 
 class User {
   constructor(data) {
@@ -16,7 +16,7 @@ class User {
 
   // Méthode pour sauvegarder l'utilisateur dans Firestore
   async save() {
-    const userRef = db.collection('users').doc(this.email); // Utiliser l'email comme identifiant unique
+    const userRef = db.collection("users").doc(this.email); // Utiliser l'email comme identifiant unique
     return await userRef.set({
       companyName: this.companyName,
       logo: this.logo,
@@ -33,13 +33,27 @@ class User {
 
   // Méthode pour récupérer un utilisateur par e-mail
   static async findByEmail(email) {
-    const userRef = db.collection('users').doc(email);
+    const userRef = db.collection("users").doc(email);
     const doc = await userRef.get();
 
     if (!doc.exists) {
       return null;
     }
     return doc.data();
+  }
+
+  // Méthode pour mettre à jour un utilisateur dans Firestore
+  static async update(email, updateData) {
+    const userRef = db.collection("users").doc(email);
+
+    try {
+      await userRef.update(updateData);
+      console.log("Document successfully updated");
+      return true;
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      return false;
+    }
   }
 }
 

@@ -7,6 +7,7 @@ const csrf = require('csurf');
 const dotenv = require('dotenv');
 const cookieConfig = require('./config/cookie-config');
 const crypto = require('crypto');
+const fileUpload = require('express-fileupload');
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -33,18 +34,36 @@ app.use(session({
   cookie: { secure: false } // Mettez à true en production avec HTTPS
 }));
 
+// Configuration de express-fileupload
+app.use(fileUpload({
+  createParentPath: true,
+  limits: { 
+    fileSize: 5 * 1024 * 1024 // limite à 5MB
+  },
+}));
+
 // Configuration de CSRF
 const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
-
 // Middleware pour générer le token CSRF
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
   // Générer le token CSRF si ce n'est pas déjà fait
   if (!req.session.csrfToken) {
     req.session.csrfToken = req.csrfToken();
   }
   next();
+});*/
+
+// Middleware pour générer le token CSRF dans les vues
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken(); // Génère et injecte le token dans les vues
+
+  if (req.is('multipart/form-data')) {
+    return next();
+  }
+  csrfProtection(req, res, next);
 });
+
 
 app.use((req, res, next) => {
   res.locals.session = req.session;
@@ -57,6 +76,12 @@ app.get('/', (req, res) => {
   res.render('home', { currentDateTime: now, title: 'Accueil' })
 });
 
+app.use((req, res, next) => {
+  console.log("Request URL:", req.originalUrl);
+  console.log("Request Method:", req.method);
+  console.log("Cookies:", req.cookies);
+  next();
+});
 // Router principal
 const navigationRoutes = require('./routes/route.navigation');
 app.use('/', navigationRoutes);
