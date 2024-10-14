@@ -42,6 +42,26 @@ class User {
     return doc.data();
   }
 
+  static async findAll() {
+    try {
+      const users = db.collection("users");
+      const snapshot = await users.get();
+
+      if (snapshot.empty) {
+        console.log('Aucun client trouvé.');
+        return [];
+      }
+
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la récupération des client:', error);
+      throw error;
+    }
+  }
+
   // Méthode pour mettre à jour un utilisateur dans Firestore
   static async update(email, updateData) {
     const userRef = db.collection("users").doc(email);

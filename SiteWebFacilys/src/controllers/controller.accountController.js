@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const Product = require("../models/product.model");
 const jwt = require("jsonwebtoken");
 const cookieConfig = require("../config/cookie-config");
 
@@ -6,8 +7,7 @@ exports.account = async (req, res) => {
   const now = new Date().getFullYear();
   try {
     // Vérifier si le cookie authToken existe
-    const token = req.cookies.authToken;
-
+    var token = req.cookies.authToken;
     if (!token) {
       // Si le cookie n'existe pas, rediriger vers la page de connexion
       return res.redirect("/login");
@@ -22,11 +22,17 @@ exports.account = async (req, res) => {
         return res.redirect("/login");
       }
 
-      res.render("account", {
-        user: req.session.user,
-        currentDateTime: now,
-        title: "Mon compte",
-      });
+      const productList = '';
+      const clientList = ''; 
+
+      /*if(req.session.user.manager == true){
+        productList =  await Product.findAll();
+        clientList = await User.findAll();
+      }*/
+
+      console.log(productList);
+
+      res.render("account", {user: req.session.user, currentDateTime: now, title: "Mon compte", Products: productList, Clients: clientList});
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);

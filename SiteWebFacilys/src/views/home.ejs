@@ -330,7 +330,7 @@
                                             </a>
                                         </div>
                                         <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="sale">Gratuit</span>
+                                            <span class="sale">Gratuit</span> 
                                         </div>
                                     </div>
                                     <div class="product-content-wrap">
@@ -354,6 +354,42 @@
                                     </div>
                                 </div>
                             </div>
+                            <% products.forEach(function(product) { %>
+                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                    <div class="product-cart-wrap mb-30">
+                                        <div class="product-img-action-wrap">
+                                            <div class="product-img product-img-zoom">
+                                                <a href="shop-product-right.html">
+                                                    <img class="default-img" src="<%= product.picture %>" alt="">
+                                                    <img class="hover-img" src="<%= product.picture %>" alt="">
+                                                </a>
+                                            </div>
+                                            <div class="product-badges product-badges-position product-badges-mrg">
+                                                <span class="sale" style="background: <%= product.colorBagde %>;"><%= product.type %></span>
+                                            </div>
+                                        </div>
+                                        <div class="product-content-wrap">
+                                            <div class="product-category">
+                                                <a href="shop-grid-right.html"><%= product.subtitle %></a>
+                                            </div>
+                                            <h2><a href="shop-product-right.html"><%= product.title %></a></h2>
+                                            <div class="rating-result" title="<%= product.advice %>">
+                                                <span>
+                                                    <span><%= product.advice %></span>
+                                                </span>
+                                            </div>
+                                            <div class="product-price">
+                                                <span><%= product.price %></span>
+                                                <span class="old-price"><%= product.oldPrice %></span>
+                                            </div>
+                                            <div class="product-action-1 show">
+                                                <a aria-label="Ajouter au panier" class="action-btn hover-up"
+                                                    href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                              <% }); %>
                         </div>
                         <!--End product-grid-4-->
                     </div>

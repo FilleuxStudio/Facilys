@@ -187,10 +187,10 @@
                                             </li>
                                             <% if (user.manager==true) { %>
                                             <li class="nav-item">
-                                                <a class="nav-link" id="product-tab" data-bs-toggle="tab" href="#product" role="tab" aria-controls="product" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Produits</a>
+                                                <a class="nav-link" id="product-tab" data-bs-toggle="tab" href="#product" role="tab" aria-controls="product" aria-selected="false"><i class="fi-rs-box mr-10"></i>Produits</a>
                                             </li>
                                             <li class="nav-item">
-                                                <a class="nav-link" id="client-tab" data-bs-toggle="tab" href="#client" role="tab" aria-controls="client" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Clients</a>
+                                                <a class="nav-link" id="client-tab" data-bs-toggle="tab" href="#client" role="tab" aria-controls="client" aria-selected="false"><i class="fi-rs-users mr-10"></i>Clients</a>
                                             </li>
                                             <% } %>
                                             <li class="nav-item">
@@ -230,11 +230,12 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <% if (user.manager==true) { %>
                                         <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
                                             <div class="card">
                                                 <div class="card-header d-flex justify-content-between">
                                                     <h5 class="mb-0">Mes produits</h5>
-                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Ajouter</button>
+                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AddProdcutModal">Ajouter</button>
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="table-responsive">
@@ -250,41 +251,90 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
+                                                                <% if(Products != '') { %>
+                                                                <% Products.forEach(function(product) { %>
                                                                 <tr>
-                                                                    <td>test</td>
-                                                                    <td>03/10/2024</td>
-                                                                    <td>Illimité</td>
-                                                                    <td>Validé</td>
+                                                                    <td><% product.subtitle %></td>
+                                                                    <td><% product.dateAdded %></td>
+                                                                    <td><% product.price %></td>
+                                                                    <td><% product.oldPrice %></td>
+                                                                    <td><% product.type %></td>
                                                                     <td>
-                                                                        <a href="#" class="btn-small d-block">View</a>
-                                                                        <a href="#" class="btn-small d-block">View</a>
-                                                                        <a href="#" class="btn-small d-block">View</a>
+                                                                        <a href="#" class="btn-small d-block"><i class="fi-rs-trash mr-10"></i></a>
                                                                     </td>
                                                                 </tr>
+                                                                <% }); %>
+                                                                <%   } %> 
                                                             </tbody>
                                                         </table>
                                                     </div>
                                                 </div>
                                             </div>
                                             <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="AddProdcutModal" tabindex="-1" aria-labelledby="AddProdcutModal" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Ajouter un produit</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          ...
+            <form method="POST" enctype="multipart/form-data" id="formAddProdcut">
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label>Titre <span class="required text-danger">*</span></label>
+                        <input required class="form-control square" name="title" id="title" type="text">
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>Sous-titre <span class="required text-danger">*</span></label>
+                        <input required class="form-control square" name="subtitle" id="subtitle" type="text">
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>Image</span></label>
+                        <input class="form-control square" name="pictureProduct" id="pictureProduct" type="file">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>Prix officiel <span class="required text-danger">*</span></label>
+                        <input required class="form-control square" name="price" id="price" type="number">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>Prix de réduction</label>
+                        <input class="form-control square" name="oldPrice" id="oldPrice" type="number">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>Avis</label>
+                        <input  class="form-control square" name="advice" id="advice" type="text">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>Type <span class="required text-danger">*</span></label>
+                        <select class="form-select" aria-label="Default select example" id="type" name="type">
+                            <option value="Monthly">Mensuel</option>
+                            <option value="annually">Annuel</option>
+                            <option value="Unlimited">Illimité</option>
+                            <option value="Free">Gratuit</option>
+                            <option value="FreeLimited">Gratuit Limité</option>
+                          </select>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>Couleur badge <span class="required text-danger">*</span></label>
+                        <input required class="form-control square" name="colorBagde" id="colorBagde" type="color">
+                    </div>
+                    <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary" name="submit" value="Submit">Valider</button>
+                    </div>
+                </div>
+            </form>
+            
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
         </div>
       </div>
     </div>
   </div>
                                         </div>
+                                        <% } %>
                                         <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                                             <div class="card">
                                                 <div class="card-header">
@@ -559,95 +609,118 @@
         <!-- Template  JS -->
         <script src="/js/maind134.js?v=3.4"></script>
         <script src="/js/shopd134.js?v=3.4"></script>
-
+        <script src="/js/account-fetch.js"></script>
         <script>
             document.getElementById("account-detail-tab").addEventListener("click", function (event) {
-                // Récupérer l'email de l'utilisateur (assurez-vous que cet élément existe)
-                var userEmail = "<%=session.user.email%>";
+    // Récupérer l'email de l'utilisateur (assurez-vous que cet élément existe)
+    var userEmail = "<%=session.user.email%>";
 
-                fetch("/accountDetails", {
-                    method: "POST",
-                    headers: {
-                        "CSRF-Token": "<%=csrfToken%>",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email: userEmail }),
-                })
-                    .then((response) => {
-                        if (!response.ok) {
-                            throw new Error("Erreur réseau");
-                        }
-                        return response.json();
-                    })
-                    .then((data) => {
-                        if (data) {
-                            document.getElementById("firstName").value = data.firstName || "";
-                            document.getElementById("lastName").value = data.lastName || "";
-                            document.getElementById("email").value = data.email || "";
-                            document.getElementById("siret").value = data.siret || "";
-                            document.getElementById("addressclient").value = data.address || "";
-                            document.getElementById("phone").value = data.phone || "";
-                            document.getElementById("companyName").value = data.companyName || "";
-                            document.getElementById("imglogo").src = data.logo || "";
-                            document.getElementById("imagelogo").value = data.logo || "";
-                        } else {
-                            console.error("Aucune donnée reçue");
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Erreur:", error);
-                    });
-            });
-        </script>
-        <script>
-            const inputLogo = document.getElementById("filelogo");
-            const imgView = document.getElementById("imglogo");
+    fetch("/accountDetails", {
+      method: "POST",
+      headers: {
+        "CSRF-Token": "<%=csrfToken%>",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: userEmail }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erreur réseau");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data) {
+          document.getElementById("firstName").value = data.firstName || "";
+          document.getElementById("lastName").value = data.lastName || "";
+          document.getElementById("email").value = data.email || "";
+          document.getElementById("siret").value = data.siret || "";
+          document.getElementById("addressclient").value = data.address || "";
+          document.getElementById("phone").value = data.phone || "";
+          document.getElementById("companyName").value = data.companyName || "";
+          document.getElementById("imglogo").src = data.logo || "";
+          document.getElementById("imagelogo").value = data.logo || "";
+        } else {
+          console.error("Aucune donnée reçue");
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur:", error);
+      });
+  });
 
-            inputLogo.addEventListener("change", function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    // Vérifier si le fichier est une image
-                    if (file.type.startsWith("image/")) {
-                        const reader = new FileReader();
+const inputLogo = document.getElementById("filelogo");
+const imgView = document.getElementById("imglogo");
 
-                        reader.onload = function (e) {
-                            imgView.src = e.target.result;
-                        };
+inputLogo.addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (file) {
+    // Vérifier si le fichier est une image
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
 
-                        reader.readAsDataURL(file);
-                    } else {
-                        alert("Veuillez sélectionner un fichier image.");
-                        inputLogo.value = ""; // Réinitialiser l'input file
-                    }
-                }
-            });
-        </script>
-        <script>
-            // Utilisation
-            document.getElementById("formUserInformation").addEventListener("submit", async function (e) {
-                event.preventDefault();
+      reader.onload = function (e) {
+        imgView.src = e.target.result;
+      };
 
-                const form = event.target;
-                const formData = new FormData(form);
+      reader.readAsDataURL(file);
+    } else {
+      alert("Veuillez sélectionner un fichier image.");
+      inputLogo.value = ""; // Réinitialiser l'input file
+    }
+  }
+});
 
-                try {
-                    const response = await fetch("/accountUpdate", {
-                        method: "POST",
-                        body: formData, // FormData gère automatiquement l'encodage multipart/form-data
-                        headers: {
-                            "CSRF-Token": "<%=csrfToken%>",
-                        },
-                    });
+// Utilisateur Get
+document.getElementById("formUserInformation").addEventListener("submit", async function (e) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    try {
+      const response = await fetch("/accountUpdate", {
+        method: "POST",
+        body: formData, // FormData gère automatiquement l'encodage multipart/form-data
+        headers: {
+          "CSRF-Token": "<%=csrfToken%>",
+        },
+      });
 
-                    if (response.ok) {
-                        console.log("Requête envoyée avec succès");
-                    } else {
-                        console.error("Erreur");
-                    }
-                } catch (error) {
-                    console.error("Erreur:", error);
-                }
-            });
+      if (response.ok) {
+        console.log("Requête envoyée avec succès");
+      } else {
+        console.error("Erreur");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  });
+  <% if (user.manager==true) { %>
+// Produit Get
+document.getElementById("formAddProdcut").addEventListener("submit", async function (e) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    try {
+      const response = await fetch("/managerAddProduct", {
+        method: "POST",
+        body: formData, // FormData gère automatiquement l'encodage multipart/form-data
+        headers: {
+          "CSRF-Token": "<%=csrfToken%>",
+        },
+      });
+
+      if (response.ok) {
+        console.log("Requête envoyée avec succès");
+      } else {
+        console.error("Erreur");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  });
+
+
+  <% } %>
         </script>
     </body>
 </html>
