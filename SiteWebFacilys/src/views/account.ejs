@@ -6,6 +6,7 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge" />
         <meta name="description" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="csrf-token" content="<%=csrfToken%>" />
         <!-- Favicon -->
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <!-- Template CSS -->
@@ -251,88 +252,154 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <% if(Products != '') { %>
-                                                                <% Products.forEach(function(product) { %>
-                                                                <tr>
-                                                                    <td><% product.subtitle %></td>
-                                                                    <td><% product.dateAdded %></td>
-                                                                    <td><% product.price %></td>
-                                                                    <td><% product.oldPrice %></td>
-                                                                    <td><% product.type %></td>
-                                                                    <td>
-                                                                        <a href="#" class="btn-small d-block"><i class="fi-rs-trash mr-10"></i></a>
-                                                                    </td>
-                                                                </tr>
-                                                                <% }); %>
-                                                                <%   } %> 
+                                                                <% if (Products && Products.length > 0) { %>
+                                                                    <% Products.forEach(function(product) { %>
+                                                                    <tr>
+                                                                        <td><%= product.subtitle %></td>
+                                                                        <td><%= product.dateAdded %></td>
+                                                                        <td><%= product.price %> €</td>
+                                                                        <td><%= product.oldPrice %> €</td>
+                                                                        <td><%= product.type %></td>
+                                                                        <td class="text-center">
+                                                                            <a data-bs-toggle="modal" data-bs-target="#DeleteProdcutModal"  OpenModelDelete data-id="<%= product.id %>" class="text-danger"><i class="fi-rs-trash"></i></a>
+                                                                            <a data-bs-toggle="modal" data-bs-target="#EditProdcutModal" OpenModelEdit data-id="<%= product.id %>" class="text-warning ml-2"><i class="fi-rs-edit"></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% }); %>
+                                                                <% } else { %>
+                                                                    <tr>
+                                                                        <td colspan="6">Aucun produit trouvé</td>
+                                                                    </tr>
+                                                                <% } %>
                                                             </tbody>
                                                         </table>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- Modal -->
-<div class="modal fade" id="AddProdcutModal" tabindex="-1" aria-labelledby="AddProdcutModal" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Ajouter un produit</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <form method="POST" enctype="multipart/form-data" id="formAddProdcut">
-                <div class="row">
-                    <div class="form-group col-md-12">
-                        <label>Titre <span class="required text-danger">*</span></label>
-                        <input required class="form-control square" name="title" id="title" type="text">
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Sous-titre <span class="required text-danger">*</span></label>
-                        <input required class="form-control square" name="subtitle" id="subtitle" type="text">
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Image</span></label>
-                        <input class="form-control square" name="pictureProduct" id="pictureProduct" type="file">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Prix officiel <span class="required text-danger">*</span></label>
-                        <input required class="form-control square" name="price" id="price" type="number">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Prix de réduction</label>
-                        <input class="form-control square" name="oldPrice" id="oldPrice" type="number">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Avis</label>
-                        <input  class="form-control square" name="advice" id="advice" type="text">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Type <span class="required text-danger">*</span></label>
-                        <select class="form-select" aria-label="Default select example" id="type" name="type">
-                            <option value="Monthly">Mensuel</option>
-                            <option value="annually">Annuel</option>
-                            <option value="Unlimited">Illimité</option>
-                            <option value="Free">Gratuit</option>
-                            <option value="FreeLimited">Gratuit Limité</option>
-                          </select>
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Couleur badge <span class="required text-danger">*</span></label>
-                        <input required class="form-control square" name="colorBagde" id="colorBagde" type="color">
-                    </div>
-                    <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
-                    <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary" name="submit" value="Submit">Valider</button>
-                    </div>
-                </div>
-            </form>
-            
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-        </div>
-      </div>
-    </div>
-  </div>
+                                            <!-- Modal Add -->
+                                            <div class="modal fade" id="AddProdcutModal" tabindex="-1" aria-labelledby="AddProdcutModal" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                   <div class="modal-content">
+                                                      <div class="modal-header">
+                                                         <h5 class="modal-title" id="exampleModalLabel">Ajouter un produit</h5>
+                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                         <form method="POST" enctype="multipart/form-data" id="formAddProdcut">
+                                                            <div class="row">
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Titre <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="title" id="title" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Sous-titre <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="subtitle" id="subtitle" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Image</span></label>
+                                                                  <input class="form-control square" name="pictureProduct" id="pictureProduct" type="file">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Prix officiel <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="price" id="price" type="number">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Prix de réduction</label>
+                                                                  <input class="form-control square" name="oldPrice" id="oldPrice" type="number">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Avis</label>
+                                                                  <input  class="form-control square" name="advice" id="advice" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Type <span class="required text-danger">*</span></label>
+                                                                  <select class="form-select" aria-label="Default select example" id="type" name="type">
+                                                                     <option value="Monthly">Mensuel</option>
+                                                                     <option value="annually">Annuel</option>
+                                                                     <option value="Unlimited">Illimité</option>
+                                                                     <option value="Free">Gratuit</option>
+                                                                     <option value="FreeLimited">Gratuit Limité</option>
+                                                                  </select>
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Couleur badge <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="colorBagde" id="colorBagde" type="color">
+                                                               </div>
+                                                               <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                                               <div class="col-md-12">
+                                                                  <button type="submit" class="btn btn-primary" name="submit" value="Submit">Valider</button>
+                                                               </div>
+                                                            </div>
+                                                         </form>
+                                                      </div>
+                                                      <div class="modal-footer">
+                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                             <!-- Modal Update -->
+                                             <div class="modal fade" id="EditProdcutModal" tabindex="-1" aria-labelledby="EditProdcutModal" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                   <div class="modal-content">
+                                                      <div class="modal-header">
+                                                         <h5 class="modal-title" id="EditProdcutModal">Modifier un produit</h5>
+                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                         <form method="POST" enctype="multipart/form-data" id="formEditProdcut">
+                                                            <div class="row">
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Titre <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="titleEdit" id="titleEdit" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Sous-titre <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="subtitleEdit" id="subtitleEdit" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Image</span></label>
+                                                                  <input class="form-control square" name="pictureProductEdit" id="pictureProductEdit" type="file">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Prix officiel <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="priceEdit" id="priceEdit" type="number">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Prix de réduction</label>
+                                                                  <input class="form-control square" name="oldPriceEdit" id="oldPriceEdit" type="number">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Avis</label>
+                                                                  <input  class="form-control square" name="adviceEdit" id="adviceEdit" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Type <span class="required text-danger">*</span></label>
+                                                                  <select class="form-select" aria-label="Default select example" id="typeEdit" name="typeEdit">
+                                                                     <option value="Monthly">Mensuel</option>
+                                                                     <option value="annually">Annuel</option>
+                                                                     <option value="Unlimited">Illimité</option>
+                                                                     <option value="Free">Gratuit</option>
+                                                                     <option value="FreeLimited">Gratuit Limité</option>
+                                                                  </select>
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Couleur badge <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="colorBagdeEdit" id="colorBagdeEdit" type="color">
+                                                               </div>
+                                                               <div class="col-md-12">
+                                                                  <button type="submit" class="btn-warning" name="submit" value="Submit">Modifier</button>
+                                                               </div>
+                                                            </div>
+                                                         </form>
+                                                      </div>
+                                                      <div class="modal-footer">
+                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                              <!-- Modal Delete-->
                                         </div>
                                         <% } %>
                                         <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
@@ -531,7 +598,7 @@
                                                             </div>
                                                             <div class="form-group col-md-12">
                                                                 <label>Email <span class="required text-danger">*</span></label>
-                                                                <input readonly class="form-control square" name="email" id="email" type="email" />
+                                                                <input readonly class="form-control square" name="email" id="email" type="email" value="<%=session.user.email%>"/>
                                                             </div>
                                                             <div class="form-group col-md-12">
                                                                 <label>Téléphone <span class="required text-danger">*</span></label>
@@ -610,7 +677,10 @@
         <script src="/js/maind134.js?v=3.4"></script>
         <script src="/js/shopd134.js?v=3.4"></script>
         <script src="/js/account-fetch.js"></script>
-        <script>
+        <% if (user.manager==true) { %>
+        <script src="/js/account-fetch-manager.js"></script>
+        <% } %>
+       <!-- <script>
             document.getElementById("account-detail-tab").addEventListener("click", function (event) {
     // Récupérer l'email de l'utilisateur (assurez-vous que cet élément existe)
     var userEmail = "<%=session.user.email%>";
@@ -721,6 +791,6 @@ document.getElementById("formAddProdcut").addEventListener("submit", async funct
 
 
   <% } %>
-        </script>
+        </script> -->
     </body>
 </html>

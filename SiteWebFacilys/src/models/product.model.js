@@ -19,7 +19,7 @@ class Product {
   async save() {
     const productoRef = db.collection('products').doc(this.id); // Utiliser id comme identifiant unique
     return await productoRef.set({
-      id: uuidv4(), 
+      id: this.id, 
       title: this.title,
       subtitle: this.subtitle,
       picture: this.picture,
@@ -54,12 +54,25 @@ class Product {
       }
 
       return snapshot.docs.map(doc => ({
-        id: doc.id,
         ...doc.data()
       }));
     } catch (error) {
       console.error('Erreur lors de la récupération des produits:', error);
       throw error;
+    }
+  }
+
+   // Méthode pour mettre à jour un utilisateur dans Firestore
+   static async update(id, updateData) {
+    const productsRef = db.collection("products").doc(id);
+
+    try {
+      await productsRef.update(updateData);
+      console.log("Document successfully updated");
+      return true;
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      return false;
     }
   }
 }

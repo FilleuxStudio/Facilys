@@ -8,7 +8,7 @@ class User {
     this.lastName = data.lastName;
     this.email = data.email;
     this.siret = data.siret;
-    this.address = data.address;
+    this.addressclient = data.addressclient;
     this.phone = data.phone;
     this.password = data.password; // Note: Le mot de passe doit être haché avant d'être stocké
     this.manager = data.manager;
@@ -24,7 +24,7 @@ class User {
       lastName: this.lastName,
       email: this.email,
       siret: this.siret,
-      address: this.address,
+      addressclient: this.addressclient,
       phone: this.phone,
       password: this.password, // Assurez-vous de hacher le mot de passe avant d'appeler cette méthode
       manager: this.manager,

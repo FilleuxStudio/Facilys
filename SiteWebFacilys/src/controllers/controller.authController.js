@@ -71,7 +71,7 @@ exports.register = async (req, res) => {
             lastName,
             email,
             siret: "null",
-            address: "null",
+            addressclient: "null",
             phone: "null",
             password: hashedPassword, // Mot de passe haché
             manager: false, // Par défaut, false, peut être ajusté selon vos besoins

@@ -37,10 +37,16 @@ exports.managerAddProduct = async (req, res) => {
 exports.managerGetProduct = async (req, res) => {
     try {
 
-        return await Product.findAll();
+        const productData = await Product.findById(req.body.id);
+        console.log(productData);
+    if (!productData) {
+        return res.status(404).json({ error: "produit non trouvé" });
+      }
+  
+      res.json(productData);
     } catch (error) {
-        console.error('Erreur lors de l\'ajout du produit', error);
-        res.status(500).send('Erreur lors de l\'ajout du produit');
+        console.error('Erreur lors de la récupération du produit', error);
+        res.status(500).send('Erreur lors de la récupération du produit');
     }
 };
 

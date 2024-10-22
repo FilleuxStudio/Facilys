@@ -22,15 +22,13 @@ exports.account = async (req, res) => {
         return res.redirect("/login");
       }
 
-      const productList = '';
-      const clientList = ''; 
+      var productList = [];
+      var clientList = [];
 
-      /*if(req.session.user.manager == true){
+      if(req.session.user.manager == true){
         productList =  await Product.findAll();
         clientList = await User.findAll();
-      }*/
-
-      console.log(productList);
+      }
 
       res.render("account", {user: req.session.user, currentDateTime: now, title: "Mon compte", Products: productList, Clients: clientList});
     } catch (error) {
