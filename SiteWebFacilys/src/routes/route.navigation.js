@@ -11,7 +11,7 @@ const now = new Date().getFullYear();
 //Route pour home 
 router.get('/', async (req, res) => {
     const now =  new Date().getFullYear();
-    const productShop = await managerController.managerGetProduct();
+    const productShop = await managerController.managerGetAllProducts();
     console.log(productShop);
     res.render('home', { currentDateTime: now, title: 'Accueil', products: productShop})
   });

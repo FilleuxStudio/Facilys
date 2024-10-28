@@ -11,8 +11,6 @@ exports.managerAddProduct = async (req, res) => {
         logoDataUrl = await convertToBase64Html(req.files.pictureProduct);
       }
     }
-
-    console.log(req.body);
         // Créer une instance de produit
         const product = new Product({
             title: title,
@@ -27,7 +25,7 @@ exports.managerAddProduct = async (req, res) => {
 
         await product.save();
 
-        res.status(201).send('success');
+        res.status(201).send('Ajouté avec succès.');
     } catch (error) {
         console.error('Erreur lors de l\'ajout du produit', error);
         res.status(500).send('Erreur lors de l\'ajout du produit');
@@ -48,6 +46,15 @@ exports.managerGetProduct = async (req, res) => {
         console.error('Erreur lors de la récupération du produit', error);
         res.status(500).send('Erreur lors de la récupération du produit');
     }
+};
+
+exports.managerGetAllProducts = async (req, res) => {
+  try {
+     return await Product.findAll();
+  } catch (error) {
+      console.error('Erreur lors de la récupération du produit', error);
+      res.status(500).send('Erreur lors de la récupération du produit');
+  }
 };
 
 

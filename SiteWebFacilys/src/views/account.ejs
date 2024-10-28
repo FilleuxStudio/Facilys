@@ -388,7 +388,7 @@
                                                                   <input required class="form-control square" name="colorBagdeEdit" id="colorBagdeEdit" type="color">
                                                                </div>
                                                                <div class="col-md-12">
-                                                                  <button type="submit" class="btn-warning" name="submit" value="Submit">Modifier</button>
+                                                                  <button type="submit" class="btn btn-warning" name="submit" value="Submit">Modifier</button>
                                                                </div>
                                                             </div>
                                                          </form>
@@ -400,6 +400,33 @@
                                                 </div>
                                              </div>
                                               <!-- Modal Delete-->
+                                              <div class="modal fade" id="DeleteProdcutModal" tabindex="-1" aria-labelledby="DeleteProdcutModal" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                   <div class="modal-content">
+                                                      <div class="modal-header">
+                                                         <h5 class="modal-title" id="DeleteProdcutModal">Supprimer un produit</h5>
+                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                         <form method="POST" id="formDeleteProdcut">
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <h3>Êtes-vous sûr de vouloir supprimer ce produit ?</h3>
+                                                                </div>
+                                                               <input type="hidden" name="idProduct" id="idProduct" />
+                                                               <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                                               <div class="col-md-12">
+                                                                  <button type="submit" class="btn btn-danger" name="submit" value="Submit">Supprimer</button>
+                                                               </div>
+                                                            </div>
+                                                         </form>
+                                                      </div>
+                                                      <div class="modal-footer">
+                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </div>
                                         </div>
                                         <% } %>
                                         <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">

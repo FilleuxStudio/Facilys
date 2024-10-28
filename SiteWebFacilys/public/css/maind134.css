@@ -843,9 +843,10 @@ h5.widget-title {
 .btn-brand {
   background-color: #003366 ;
   border-color: #003366 ;
+  color: white;
 }
 
-button.submit, button[type='submit'] {
+/*button.submit, button[type='submit'] {
   font-size: 15px;
   font-weight: 500;
   padding: 12px 40px;
@@ -858,7 +859,7 @@ button.submit, button[type='submit'] {
 
 button.submit:hover, button[type='submit']:hover {
   background-color: #325b84 !important;
-}
+}*/
 
 .btn-brand:hover {
   background-color: #325b84 !important;
