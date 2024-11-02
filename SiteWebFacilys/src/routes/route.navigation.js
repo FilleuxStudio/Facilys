@@ -100,6 +100,8 @@ router.post("/accountUpdate", accountController.accoutUpdate);
 // Route pour le manager
 router.post("/managerAddProduct", managerController.managerAddProduct);
 router.post("/managerGetProduct", managerController.managerGetProduct);
+router.post("/managerEditProduct", managerController.managerEditProducts);
+router.post("/managerDeleteProduct", managerController.managerDeleteProducts);
 //// Exemple de route protégée
 //router.get('/home', authenticate, (req, res) => {
 //    res.render('home', { user: req.user });

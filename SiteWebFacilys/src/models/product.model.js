@@ -75,6 +75,20 @@ class Product {
       return false;
     }
   }
+
+   // Méthode pour supprimer un produit de Firestore
+   static async delete(id) {
+    const productRef = db.collection('products').doc(id);
+
+    try {
+      await productRef.delete();
+      console.log("Document successfully deleted");
+      return true;
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+      return false;
+    }
+  }
 }
 
 module.exports = Product;

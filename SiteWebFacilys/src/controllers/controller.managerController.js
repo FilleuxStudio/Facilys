@@ -57,6 +57,60 @@ exports.managerGetAllProducts = async (req, res) => {
   }
 };
 
+exports.managerEditProducts = async (req, res) => {
+  const { idProduct, titleEdit, subtitleEdit, priceEdit, oldPriceEdit, adviceEdit, typeEdit, colorBagdeEdit } = req.body;
+  try {
+    let logoDataUrl = "";
+    
+    // Si un fichier image est fourni, le convertir en base64
+    if (req.files && req.files.pictureProductEdit) {
+      logoDataUrl = await convertToBase64Html(req.files.pictureProductEdit);
+    }
+
+    // Préparer les données de mise à jour
+    const updateData = {
+      title: titleEdit,
+      subtitle: subtitleEdit,
+      price: priceEdit,
+      oldPrice: oldPriceEdit,
+      advice: adviceEdit,
+      type: typeEdit,
+      colorBagde: colorBagdeEdit,
+    };
+
+    // Si une nouvelle image est fournie, inclure son URL
+    if (logoDataUrl) {
+      updateData.picture = logoDataUrl;
+    }
+
+    // Mettre à jour le produit dans Firestore
+    const updateResult = await Product.update(idProduct, updateData);
+    
+    if (updateResult) {
+      return res.status(200).send('Produit modifié avec succès.');
+    } else {
+      return res.status(403).send('Erreur lors de la modification du produit.');
+    }
+  } catch (error) {
+    console.error('Erreur lors de la modification du produit', error);
+    res.status(500).send('Erreur lors de la modification du produit');
+  }
+};
+
+exports.managerDeleteProducts = async (req, res) => {
+  try{
+    var deleteResult  = await Product.delete(req.body.idProduct);
+    if(deleteResult  === true){
+      return res.status(200).send("success");
+    }else{
+      return res.status(403).send("error");
+    }
+  }catch(error){
+    console.error('Erreur lors de la suppression du produit', error);
+      res.status(500).send('Erreur lors de la suppression du produit');
+  }
+}
+
 
 async function convertToBase64Html(file) {
     if (!file) {

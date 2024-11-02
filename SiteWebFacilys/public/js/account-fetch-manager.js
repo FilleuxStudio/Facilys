@@ -81,11 +81,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function editProduct(event){
+      event.preventDefault();
+      const formData = new FormData(formDeleteProdcut);
 
+      fetch('/managerEditProduct', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        }
+      })
+      .then(response => {
+        console.log(response)
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.text(); // Utilisation de .text() pour récupérer le message de réponse en texte brut
+    })
+    .then(data => {
+        alert(data); // Affiche le message "success" du serveur
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de la modification du produit.');
+    });
     }
 
     function deleteProduct(event){
+      event.preventDefault();
+      const formData = new FormData(formDeleteProdcut);
 
+      fetch('/managerDeleteProduct', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        }
+      })
+      .then(response => {
+        console.log(response)
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.text(); // Utilisation de .text() pour récupérer le message de réponse en texte brut
+    })
+    .then(data => {
+        alert(data); // Affiche le message "success" du serveur
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de la suppression du produit.');
+    });
     }
   
     function previewLogo(event) {
