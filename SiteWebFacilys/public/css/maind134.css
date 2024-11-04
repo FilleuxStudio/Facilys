@@ -605,6 +605,7 @@ body {
   line-height: 24px;
   font-style: normal;
   font-weight: 400;
+  background-color: #f5f5f7;
 }
 
 h1,
@@ -3371,13 +3372,14 @@ table .product-thumbnail img {
 .product-cart-wrap {
   position: relative;
   background-color: #fff;
-  border: 1px solid #979797;
+ /* border: 1px solid #979797;*/
   border-radius: 10px;
   overflow: hidden;
   transition: .2s;
   -moz-transition: .2s;
   -webkit-transition: .2s;
   -o-transition: .2s;
+  box-shadow: 2px 4px 12px #00000014;
 }
 
 .product-cart-wrap:hover {
@@ -7666,6 +7668,7 @@ span.fi-rs-apps {
 
 .footer-mid .widget-title {
   margin: 15px 0 20px 0;
+  background-color: #fff;
 }
 
 /*LAYOUT -> SPACING**/

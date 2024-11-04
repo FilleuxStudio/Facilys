@@ -30,6 +30,16 @@ router.get("/contact", (req, res) => {
   });
 });
 
+router.get("/shop-checkout", (req, res) => {
+  const productId = req.query.id;
+
+  if(!productId){
+    return res.status(400);
+  }
+
+  res.render("shop-checkout", { currentDateTime: now, title: "Commandes" });
+})
+
 router.post("/contact-support", (req, res) => {
   const transporter = nodemailer.createTransport({
     host: smtpConfig.host, // Remplacez par l'hôte SMTP de PlanetHoster

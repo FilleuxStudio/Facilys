@@ -15,7 +15,7 @@
     </head>
 
     <body>
-        <header class="header-area header-style-1 header-height-2">
+        <header class="header-area header-style-1 header-height-2 bg-white">
             <div class="header-middle header-middle-ptb-1 d-none d-lg-block">
                 <div class="container">
                     <div class="header-wrap d-flex justify-content-around">
@@ -179,7 +179,7 @@
                         <div class="col-lg-10 m-auto">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <div class="dashboard-menu">
+                                    <div class="dashboard-menu bg-white">
                                         <ul class="nav flex-column" role="tablist">
                                             <li class="nav-item">
                                                 <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false">
@@ -220,7 +220,7 @@
                                     <div class="tab-content dashboard-content">
                                         <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
                                             <div class="card">
-                                                <div class="card-header">
+                                                <div class="card-header bg-white">
                                                     <h5 class="mb-0">Bienvenu <%=user.firstName%></h5>
                                                 </div>
                                                 <div class="card-body">
@@ -234,7 +234,7 @@
                                         <% if (user.manager==true) { %>
                                         <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
                                             <div class="card">
-                                                <div class="card-header d-flex justify-content-between">
+                                                <div class="card-header d-flex justify-content-between bg-white">
                                                     <h5 class="mb-0">Mes produits</h5>
                                                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AddProdcutModal">Ajouter</button>
                                                 </div>
@@ -430,6 +430,141 @@
                                                 </div>
                                              </div>
                                         </div>
+                                        <div class="tab-pane fade" id="client" role="tabpanel" aria-labelledby="product-tab">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-between bg-white">
+                                                    <h5 class="mb-0">Mes clients</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Email</th>
+                                                                    <th>Type compte</th>
+                                                                    <th>Société</th>
+                                                                    <th>Nom</th>
+                                                                    <th>Logo</th>
+                                                                    <th>Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% if (Clients && Clients.length > 0) { %>
+                                                                    <% Clients.forEach(function(Client) { %>
+                                                                    <tr>
+                                                                        <td><%= Client.email %></td>
+                                                                        <td class="text-center" style="font-size: 1.5rem;"><%= Client.manager ? '🧙' : '🧑‍💼' %></td>
+                                                                        <td><%= Client.companyName %></td>
+                                                                        <td><%= Client.lastName %></td>
+                                                                        <td><img src="<%= Client.logo %>" alt="logo" width="64" style="width: 64px;"/></td>
+                                                                        <td class="text-center">
+                                                                            <a data-bs-toggle="modal" data-bs-target="#DeleteClientModal"  OpenModelDelete data-id="<%= Client.email %>" class="text-danger"><i class="fi-rs-trash"></i></a>
+                                                                            <a data-bs-toggle="modal" data-bs-target="#EditClientModal" OpenModelEdit data-id="<%= Client.email %>" class="text-warning ml-2"><i class="fi-rs-edit"></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% }); %>
+                                                                <% } else { %>
+                                                                    <tr>
+                                                                        <td colspan="6">Aucun client trouvé</td>
+                                                                    </tr>
+                                                                <% } %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <!-- Modal Update -->
+                                             <div class="modal fade" id="EditClientModal" tabindex="-1" aria-labelledby="EditClientModal" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                   <div class="modal-content">
+                                                      <div class="modal-header">
+                                                         <h5 class="modal-title" id="EditClientModal">Modifier un produit</h5>
+                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                         <form method="POST" enctype="multipart/form-data" id="formEditClient">
+                                                            <div class="row">
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Titre <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="titleEdit" id="titleEdit" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Sous-titre <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="subtitleEdit" id="subtitleEdit" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Image</span></label>
+                                                                  <input class="form-control square" name="pictureProductEdit" id="pictureProductEdit" type="file">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Prix officiel <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="priceEdit" id="priceEdit" type="number">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Prix de réduction</label>
+                                                                  <input class="form-control square" name="oldPriceEdit" id="oldPriceEdit" type="number">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Avis</label>
+                                                                  <input  class="form-control square" name="adviceEdit" id="adviceEdit" type="text">
+                                                               </div>
+                                                               <div class="form-group col-md-6">
+                                                                  <label>Type <span class="required text-danger">*</span></label>
+                                                                  <select class="form-select" aria-label="Default select example" id="typeEdit" name="typeEdit">
+                                                                     <option value="Monthly">Mensuel</option>
+                                                                     <option value="annually">Annuel</option>
+                                                                     <option value="Unlimited">Illimité</option>
+                                                                     <option value="Free">Gratuit</option>
+                                                                     <option value="FreeLimited">Gratuit Limité</option>
+                                                                  </select>
+                                                               </div>
+                                                               <div class="form-group col-md-12">
+                                                                  <label>Couleur badge <span class="required text-danger">*</span></label>
+                                                                  <input required class="form-control square" name="colorBagdeEdit" id="colorBagdeEdit" type="color">
+                                                               </div>
+                                                               <input type="hidden" name="idProduct" id="idProduct" />
+                                                               <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                                               <div class="col-md-12">
+                                                                  <button type="submit" class="btn btn-warning" name="submit" value="Submit">Modifier</button>
+                                                               </div>
+                                                            </div>
+                                                         </form>
+                                                      </div>
+                                                      <div class="modal-footer">
+                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                              <!-- Modal Delete-->
+                                              <div class="modal fade" id="DeleteClientModal" tabindex="-1" aria-labelledby="DeleteClientModal" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                   <div class="modal-content">
+                                                      <div class="modal-header">
+                                                         <h5 class="modal-title" id="DeleteClientModal">Supprimer un produit</h5>
+                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                         <form method="POST" id="formDeleteClient">
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <h3>Êtes-vous sûr de vouloir supprimer ce produit ?</h3>
+                                                                </div>
+                                                               <input type="hidden" name="idProduct" id="idProduct" />
+                                                               <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                                               <div class="col-md-12">
+                                                                  <button type="submit" class="btn btn-danger" name="submit" value="Submit">Supprimer</button>
+                                                               </div>
+                                                            </div>
+                                                         </form>
+                                                      </div>
+                                                      <div class="modal-footer">
+                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                        </div>
                                         <% } %>
                                         <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                                             <div class="card">
@@ -468,7 +603,7 @@
                                         </div>
                                         <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
                                             <div class="card">
-                                                <div class="card-header">
+                                                <div class="card-header bg-white">
                                                     <h5 class="mb-0">Facture et abonnement</h5>
                                                 </div>
                                                 <div class="card-body">
@@ -513,7 +648,7 @@
                                         </div>
                                         <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
                                             <div class="card">
-                                                <div class="card-header">
+                                                <div class="card-header bg-white">
                                                     <h5 class="mb-0">Facture et abonnement</h5>
                                                 </div>
                                                 <div class="card-body">
@@ -560,7 +695,7 @@
                                             <div class="row">
                                                 <div class="col-lg-6">
                                                     <div class="card mb-3 mb-lg-0">
-                                                        <div class="card-header">
+                                                        <div class="card-header bg-white">
                                                             <h5 class="mb-0">Mon équipes</h5>
                                                         </div>
                                                         <div class="card-body">

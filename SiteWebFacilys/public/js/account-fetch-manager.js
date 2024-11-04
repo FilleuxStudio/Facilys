@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if( window.getComputedStyle(document.getElementById('EditProdcutModal')).display === 'none'){
             document.getElementById('idProduct').value = data.id
           }else{
+            document.getElementById('idProduct').value = data.id
             document.getElementById('titleEdit').value = data.title
             document.getElementById('subtitleEdit').value = data.subtitle
             document.getElementById('priceEdit').value = data.price
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function editProduct(event){
       event.preventDefault();
-      const formData = new FormData(formDeleteProdcut);
+      const formData = new FormData(formEditProdcut);
 
       fetch('/managerEditProduct', {
         method: 'POST',
