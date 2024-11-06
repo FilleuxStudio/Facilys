@@ -12,7 +12,6 @@ const now = new Date().getFullYear();
 router.get('/', async (req, res) => {
     const now =  new Date().getFullYear();
     const productShop = await managerController.managerGetAllProducts();
-    console.log(productShop);
     res.render('home', { currentDateTime: now, title: 'Accueil', products: productShop})
   });
   
@@ -30,14 +29,50 @@ router.get("/contact", (req, res) => {
   });
 });
 
-router.get("/shop-checkout", (req, res) => {
+router.get("/shop-checkout", async (req, res) => {
   const productId = req.query.id;
 
   if(!productId){
-    return res.status(400);
+    return res.status(400).redirect("/");
   }
 
-  res.render("shop-checkout", { currentDateTime: now, title: "Commandes" });
+  // Temporarily set req.body.id for managerGetProduct compatibility
+  req.body = { id: productId };
+
+  try {
+      // Call managerGetProduct and handle its response manually
+      const productShop = await new Promise((resolve, reject) => {
+          managerController.managerGetProduct(req, {
+              json: resolve,
+              status: (code) => ({
+                  json: (error) => reject({ code, error })
+              }),
+              send: (error) => reject({ code: 500, error })
+          });
+      });
+
+      // Check if the user is logged in
+     /* if (!req.session.user) {
+          return res.redirect("/login");
+      }*/
+
+      // Calculate the result
+      let result = parseFloat(productShop.price) + (parseFloat(productShop.price) * 15 / 100);
+
+      // Render the checkout page
+      const now = new Date(); // Current date and time
+      res.render("shop-checkout", {
+          currentDateTime: now,
+          title: "Commandes",
+          Product: productShop,
+          Result: result
+      });
+  } catch (error) {
+      console.error('Erreur lors de la récupération du produit:', error.error || error);
+
+      // Redirect to the home page or display an error
+      res.status(error.code || 500).redirect("/");
+  }
 })
 
 router.post("/contact-support", (req, res) => {
