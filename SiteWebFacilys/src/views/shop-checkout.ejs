@@ -137,7 +137,7 @@
                                 </table>
                             </div>
                             <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                            <form>
+                            <form method="post" action="/payment">
                                 <div class="payment_method">
                                     <div class="mb-25">
                                         <h5>Paiement</h5>
@@ -161,6 +161,8 @@
                                         </div>
                                     </div>
                                 </div>
+                                <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                <input type="hidden" id="idProduct" name="idProduct" value="<%= Product.id %>"/>
                                 <button type="submit" class="btn btn-block btn-success mt-30">Passer commande</button>
                             </form>
                         </div>

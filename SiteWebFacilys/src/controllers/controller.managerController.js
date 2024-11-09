@@ -111,7 +111,6 @@ exports.managerDeleteProducts = async (req, res) => {
   }
 }
 
-
 async function convertToBase64Html(file) {
     if (!file) {
       throw new Error("Aucun fichier n'a été fourni");

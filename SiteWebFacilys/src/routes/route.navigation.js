@@ -5,6 +5,7 @@ const smtpConfig = require("../config/smtp-server");
 const authController = require("../controllers/controller.authController");
 const accountController = require("../controllers/controller.accountController");
 const managerController = require("../controllers/controller.managerController");
+const paymentController = require("../controllers/controller.paymentController");
 
 const now = new Date().getFullYear();
 ////// Page Website //////
@@ -36,11 +37,9 @@ router.get("/shop-checkout", async (req, res) => {
     return res.status(400).redirect("/");
   }
 
-  // Temporarily set req.body.id for managerGetProduct compatibility
   req.body = { id: productId };
 
   try {
-      // Call managerGetProduct and handle its response manually
       const productShop = await new Promise((resolve, reject) => {
           managerController.managerGetProduct(req, {
               json: resolve,
@@ -52,15 +51,13 @@ router.get("/shop-checkout", async (req, res) => {
       });
 
       // Check if the user is logged in
-     /* if (!req.session.user) {
+     if (!req.session.user) {
           return res.redirect("/login");
-      }*/
+      }
 
       // Calculate the result
       let result = parseFloat(productShop.price) + (parseFloat(productShop.price) * 15 / 100);
 
-      // Render the checkout page
-      const now = new Date(); // Current date and time
       res.render("shop-checkout", {
           currentDateTime: now,
           title: "Commandes",
@@ -74,6 +71,8 @@ router.get("/shop-checkout", async (req, res) => {
       res.status(error.code || 500).redirect("/");
   }
 })
+
+router.post("/payment", paymentController.paymentProduct);
 
 router.post("/contact-support", (req, res) => {
   const transporter = nodemailer.createTransport({

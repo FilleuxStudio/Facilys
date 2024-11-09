@@ -203,11 +203,11 @@
                                                 </a>
                                             </li>
                                             <li class="nav-item">
-                                                <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>Mon équipes</a>
+                                                <a class="nav-link" id="team-tab" data-bs-toggle="tab" href="#team" role="tab" aria-controls="team" aria-selected="true"><i class="fi-rs-user mr-10"></i>Mon équipes</a>
                                             </li>
                                             <li class="nav-item">
                                                 <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true">
-                                                    <i class="fi-rs-user mr-10"></i>Mes informations
+                                                    <i class="fi-rs-marker mr-10"></i>Mes informations
                                                 </a>
                                             </li>
                                             <li class="nav-item">
@@ -584,17 +584,24 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                <tr>
-                                                                    <td>test</td>
-                                                                    <td>03/10/2024</td>
-                                                                    <td>Illimité</td>
-                                                                    <td>Validé</td>
-                                                                    <td>
-                                                                        <a href="#" class="btn-small d-block">View</a>
-                                                                        <a href="#" class="btn-small d-block">View</a>
-                                                                        <a href="#" class="btn-small d-block">View</a>
-                                                                    </td>
-                                                                </tr>
+                                                                <% if (Orders && Orders.length > 0) { %>
+                                                                    <% Orders.forEach(function(Order) { %>
+                                                                    <tr>
+                                                                        <td><%= Order.productName %></td>
+                                                                        <td><%= Order.dateAdded %></td>
+                                                                        <td><%= Order.renewalDate %></td>
+                                                                        <td><%= Order.type %></td>
+                                                                        <td class="text-center">
+                                                                            <a data-id="<%= Orders.id %>" class="btn-small d-block text-danger"><i class="fi-rs-trash"></i></a>
+                                                                            <a data-id="<%= Orders.id %>" class="btn-small d-block text-warning ml-2"><i class="fi-rs-edit"></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% }); %>
+                                                                <% } else { %>
+                                                                    <tr>
+                                                                        <td colspan="6">Aucun client trouvé</td>
+                                                                    </tr>
+                                                                <% } %>
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -646,88 +653,52 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+                                        <div class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
                                             <div class="card">
-                                                <div class="card-header bg-white">
-                                                    <h5 class="mb-0">Facture et abonnement</h5>
+                                                <div class="card-header d-flex justify-content-between bg-white">
+                                                    <h5 class="mb-0">Mon équipes</h5>
+                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AddProdcutModal">Ajouter</button>
                                                 </div>
                                                 <div class="card-body">
-                                                    <div class="table-responsive">
-                                                        <table class="table">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Order</th>
-                                                                    <th>Date</th>
-                                                                    <th>Status</th>
-                                                                    <th>Total</th>
-                                                                    <th>Actions</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td>#1357</td>
-                                                                    <td>March 45, 2020</td>
-                                                                    <td>Processing</td>
-                                                                    <td>$125.00 for 2 item</td>
-                                                                    <td><a href="#" class="btn-small d-block">View</a></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>#2468</td>
-                                                                    <td>June 29, 2020</td>
-                                                                    <td>Completed</td>
-                                                                    <td>$364.00 for 5 item</td>
-                                                                    <td><a href="#" class="btn-small d-block">View</a></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>#2366</td>
-                                                                    <td>August 02, 2020</td>
-                                                                    <td>Completed</td>
-                                                                    <td>$280.00 for 3 item</td>
-                                                                    <td><a href="#" class="btn-small d-block">View</a></td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <div class="card mb-3 mb-lg-0">
-                                                        <div class="card-header bg-white">
-                                                            <h5 class="mb-0">Mon équipes</h5>
+                                                    <div class="row">
+                                                        <div class="col-lg-4">
+                                                            <div class="card mb-3 mb-lg-0">
+                                                                <div class="card-header bg-white">
+                                                                    <h5 class="mb-0">name</h5>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <p>
+                                                                        3522 Interstate<br />
+                                                                        75 Business Spur,<br />
+                                                                        Sault Ste. <br />
+                                                                        Marie, MI 49783
+                                                                    </p>
+                                                                    <p>New York</p>
+                                                                    <a href="#" class="btn btn-small btn-danger">Supprimer</a>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div class="card-body">
-                                                            <address>
-                                                                3522 Interstate<br />
-                                                                75 Business Spur,<br />
-                                                                Sault Ste. <br />
-                                                                Marie, MI 49783
-                                                            </address>
-                                                            <p>New York</p>
-                                                            <a href="#" class="btn-small">Edit</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <div class="card">
-                                                        <div class="card-header">
-                                                            <h5 class="mb-0">Shipping Address</h5>
-                                                        </div>
-                                                        <div class="card-body">
-                                                            <address>
-                                                                4299 Express Lane<br />
-                                                                Sarasota, <br />
-                                                                FL 34249 USA <br />
-                                                                Phone: 1.941.227.4444
-                                                            </address>
-                                                            <p>Sarasota</p>
-                                                            <a href="#" class="btn-small">Edit</a>
+                                                        <div class="col-lg-6">
+                                                            <div class="card">
+                                                                <div class="card-header">
+                                                                    <h5 class="mb-0">Shipping Address</h5>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <address>
+                                                                        4299 Express Lane<br />
+                                                                        Sarasota, <br />
+                                                                        FL 34249 USA <br />
+                                                                        Phone: 1.941.227.4444
+                                                                    </address>
+                                                                    <p>Sarasota</p>
+                                                                    <a href="#" class="btn-small">Edit</a>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
                                         </div>
                                         <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
                                             <div class="card">

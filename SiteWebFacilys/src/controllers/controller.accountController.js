@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const Product = require("../models/product.model");
+const Order = require("../models/order.model");
 const jwt = require("jsonwebtoken");
 const cookieConfig = require("../config/cookie-config");
 
@@ -24,13 +25,15 @@ exports.account = async (req, res) => {
 
       var productList = [];
       var clientList = [];
+      var OrderList = [];
 
       if(req.session.user.manager == true){
         productList =  await Product.findAll();
         clientList = await User.findAll();
       }
+      OrderList = await Order.findByUserId(req.session.user.email);
 
-      res.render("account", {user: req.session.user, currentDateTime: now, title: "Mon compte", Products: productList, Clients: clientList});
+      res.render("account", {user: req.session.user, currentDateTime: now, title: "Mon compte", Orders: OrderList, Products: productList, Clients: clientList});
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
