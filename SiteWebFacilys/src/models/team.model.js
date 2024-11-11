@@ -9,6 +9,7 @@ class Team {
     this.type = data.type;
     this.password = data.password;
     this.team = data.team;
+    this.manager = data.manager;
     this.email = data.email;
     this.dateAdded = data.dateAdded;
   }
@@ -23,6 +24,7 @@ class Team {
       type:this.type,
       password:this.password,
       team:this.team,
+      manager:this.manager,
       email:this.email,
       dateAdded: new Date().toISOString(),
     });
@@ -37,6 +39,24 @@ class Team {
       return null;
     }
     return doc.data();
+  }
+
+  static async findByUserId(idUser) {
+    try {
+      const teamtoRef = db.collection('teams').where('manager', '==', idUser);
+      const snapshot = await teamtoRef.get();
+
+      if (snapshot.empty) {
+        console.log(`Aucun collaborateur trouvée pour l'utilisateur avec idUser: ${idUser}`);
+        return [];
+      }
+
+      // Retourne les données des commandes trouvées
+      return snapshot.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error('Erreur lors de la récupération des collaborateur par idUser:', error);
+      throw error;
+    }
   }
 
   static async findAll() {
@@ -87,4 +107,4 @@ class Team {
   }
 }
 
-module.exports = Product;
+module.exports = Team;

@@ -140,6 +140,7 @@ router.get("/logout", authController.logout);
 router.get("/account", accountController.account);
 router.post("/accountDetails", accountController.accountDetails);
 router.post("/accountUpdate", accountController.accoutUpdate);
+router.post("/accountAddTeam", accountController.accountAddTeam);
 
 // Route pour le manager
 router.post("/managerAddProduct", managerController.managerAddProduct);

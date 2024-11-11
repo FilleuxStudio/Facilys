@@ -1,8 +1,10 @@
 const User = require("../models/user.model");
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
+const Team = require("../models/team.model");
 const jwt = require("jsonwebtoken");
 const cookieConfig = require("../config/cookie-config");
+const argon2 = require('argon2');
 
 exports.account = async (req, res) => {
   const now = new Date().getFullYear();
@@ -26,14 +28,16 @@ exports.account = async (req, res) => {
       var productList = [];
       var clientList = [];
       var OrderList = [];
+      var TeamList = [];
 
       if(req.session.user.manager == true){
         productList =  await Product.findAll();
         clientList = await User.findAll();
       }
       OrderList = await Order.findByUserId(req.session.user.email);
+      TeamList = await Team.findByUserId(req.session.user.email);
 
-      res.render("account", {user: req.session.user, currentDateTime: now, title: "Mon compte", Orders: OrderList, Products: productList, Clients: clientList});
+      res.render("account", {user: req.session.user, currentDateTime: now, title: "Mon compte", Orders: OrderList, Products: productList, Teams: TeamList, Clients: clientList});
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
@@ -100,6 +104,31 @@ exports.accoutUpdate = async (req, res) => {
       err
     );
     res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
+exports.accountAddTeam = async (req, res) => {
+  const { tlname, tfname, tpassword, ttype, temail, emailmanager } = req.body;
+  try {
+
+    var userManager = await User.findByEmail(emailmanager);
+      // Créer une instance de produit
+      const team = new Team({
+          fname: tfname,
+          lname: tlname,
+          type: ttype,
+          tpassword:  await argon2.hash(tpassword),
+          team: userManager.companyName,
+          manager: userManager.email,
+          email: temail,
+      });
+
+      await team.save();
+
+      res.status(201).send('Ajouté avec succès.');
+  } catch (error) {
+      console.error('Erreur lors de l\'ajout du produit', error);
+      res.status(500).send('Erreur lors de l\'ajout du produit');
   }
 };
 

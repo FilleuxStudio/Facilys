@@ -1,13 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
+  //Product
     const formAddProdcut = document.getElementById('formAddProdcut');
     const formEditProdcut = document.getElementById('formEditProdcut');
     const formDeleteProdcut = document.getElementById('formDeleteProdcut');
     const ModelEditProduct = document.querySelectorAll('[OpenModelEdit]');
     const ModelDeleteProduct = document.querySelectorAll('[OpenModelDelete]');
+
+  //Team
+  const formAddTeam = document.getElementById('formAddTeam');
   
     formAddProdcut.addEventListener('submit', addProduct);
     formEditProdcut.addEventListener('submit', editProduct);
     formDeleteProdcut.addEventListener('submit', deleteProduct);
+
+    formAddTeam.addEventListener('submit', addTeam);
 
     ModelEditProduct.forEach(element => {
       element.addEventListener('click', fetchProduct);
@@ -130,6 +136,31 @@ document.addEventListener('DOMContentLoaded', function() {
     .catch(error => {
         console.error('Erreur:', error);
         alert('Une erreur est survenue lors de la suppression du produit.');
+    });
+    }
+
+    function addTeam(event){
+      event.preventDefault();
+      const formData = new FormData(formAddTeam);
+
+      fetch('/accountAddTeam', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.text(); // Utilisation de .text() pour récupérer le message de réponse en texte brut
+    })
+    .then(data => {
+        alert(data); // Affiche le message "success" du serveur
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de l\'ajout du produit.');
     });
     }
   
