@@ -88,6 +88,10 @@ app.use("/", navigationRoutes);
 const subscribeRoute = require("./routes/route.subscribe");
 app.use("/subscribe", subscribeRoute);
 
+// API
+const navigationAPI = require("./routes/route.api");
+app.use("/api", navigationAPI);
+
 // Gestion des erreurs 404
 app.use((req, res, next) => {
   res.status(404).render("404", { title: "Page non trouvée" });
