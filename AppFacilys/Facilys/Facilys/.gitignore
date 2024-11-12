@@ -1,0 +1,103 @@
+# Dossiers de build et de dépendances
+bin/
+obj/
+node_modules/
+
+# Fichiers de build
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+
+# Fichiers de logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers de configuration Visual Studio
+.vs/
+*.vspscc
+*.vssscc
+.vscode/
+
+# Fichiers de configuration Rider
+.idea/
+
+# Fichiers de configuration utilisateur
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Fichiers de build .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Fichiers de cache Tye
+.tye/
+
+# Fichiers de configuration Blazor
+**/wwwroot/service-worker.js
+**/wwwroot/service-worker.published.js
+
+# Fichiers de configuration Electron
+**/bin/Desktop
+**/obj/Desktop
+
+# Fichiers de sauvegarde
+*~
+*.bak
+*.swp
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de publication
+**/Properties/PublishProfiles/
+**/Properties/ServiceDependencies/
+
+# Fichiers de test
+TestResults/
+
+# Fichiers de couverture de code
+coverage/
+
+# Fichiers de build Visual Studio Code
+.vscode/
+
+# Fichiers de configuration Azure
+*.pubxml
+*.publishproj
+
+# Fichiers de configuration NuGet
+*.nuget.props
+*.nuget.targets
+
+# Fichiers de migration Entity Framework
+Migrations/
+
+# Fichiers de configuration d'environnement
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+
+# Fichiers de secrets
+secrets.json
+*.secret
+
+# Dossiers et fichiers spécifiques à Electron.NET
+**/bin/electron
+**/obj/electron
+**/ElectronHostHook
+electron.manifest.json
+
+# Fichiers de build Electron
+**/release-builds

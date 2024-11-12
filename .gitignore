@@ -1,1 +1,9 @@
 /SiteWebFacilys/src/config/
+/SiteWebFacilys/node_modules/
+/AppFacilys/Facilys/.vs
+/AppFacilys/Facilys/obj/
+/AppFacilys/Facilys/Facilys/bin/
+
+node_modules/
+**/node_modules/
+**/obj/
