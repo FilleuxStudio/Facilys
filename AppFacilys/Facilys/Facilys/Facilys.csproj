@@ -17,5 +17,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Data\" />
+    <Folder Include="Components\Models\" />
+    <Folder Include="Components\Controllers\" />
+  </ItemGroup>
   
 </Project>

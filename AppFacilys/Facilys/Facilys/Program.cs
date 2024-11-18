@@ -1,5 +1,6 @@
 using Facilys.Components;
 using ElectronNET.API;
+using Facilys.Components.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,9 @@ builder.Services.AddElectron();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSingleton<AuthService>();
+
 
 var app = builder.Build();
 

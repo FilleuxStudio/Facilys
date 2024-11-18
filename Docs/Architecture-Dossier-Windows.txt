@@ -1,0 +1,9 @@
+Appdata/
+└──Local/
+    └──Facilys/
+    	├── Database/
+        │   └── data.db
+        ├── CoockieConnect.json
+        └── Company/
+             ├── company.xml
+             └── logo.png

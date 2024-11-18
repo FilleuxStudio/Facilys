@@ -30,6 +30,15 @@
         "filter": [ "**/*" ]
       },
       "**/*"
-    ]
+    ],
+    "win": {
+      "icon": "../../../wwwroot/favicon.ico"
+    },
+    "mac": {
+      "icon": "../../../Assets/app-icon.icns"
+    },
+    "linux": {
+      "icon": "../../../Assets/app-icon.png"
+    }
   }
 }
