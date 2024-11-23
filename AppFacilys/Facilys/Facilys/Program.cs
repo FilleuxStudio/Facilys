@@ -13,6 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Configuer Electron
 builder.WebHost.UseElectron(args);
+builder.WebHost.UseEnvironment("Development");
 builder.Services.AddElectron();
 
 // Add services to the container.

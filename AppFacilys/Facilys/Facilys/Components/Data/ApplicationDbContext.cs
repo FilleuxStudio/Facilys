@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Facilys.Components.Models;
+using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Facilys.Components.Data
 {
@@ -8,5 +10,26 @@ namespace Facilys.Components.Data
            : base(options)
         {
         }
+
+        public DbSet<Users> Users { get; set; }
+        public DbSet<VersionDatabase> versionDatabases { get; set; }
+        public DbSet<Clients> Clients { get; set; }
+        public DbSet<EmailsClients> Emails { get; set; }
+        public DbSet<PhonesClients> Phones { get; set; }
+        public DbSet<ProfessionalCustomer> ProfessionalClient { get; set; }
+        public DbSet<Vehicles> Vehicles { get; set; }
+        public DbSet<OtherVehicles> OtherVehicles { get; set; }
+        public DbSet<Invoices> Invoices { get; set; }
+        public DbSet<HistoryPart> HistoryParts { get; set; }
+        public DbSet<Inventorys> Inventorys { get; set; }
+        public DbSet<Quotes> Quotes { get; set; }
+        public DbSet<QuotesItems> QuotesItems { get; set; }
+
+        //Commande
+        /*
+        dotnet ef migrations add AddAllModels
+            dotnet ef database update*/
+
+
     }
 }
