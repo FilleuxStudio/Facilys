@@ -4,10 +4,20 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <!--<PublishSingleFile>false</PublishSingleFile>--> <!-- Désactive la génération en fichier unique -->
+    <!--EnableDefaultItems>false</EnableDefaultItems>--> <!-- Évite les items implicites -->
+    <RestoreUseSkipNonexistentTargets>false</RestoreUseSkipNonexistentTargets> <!-- Réduit les conflits -->
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="ElectronNET.API" Version="23.6.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
@@ -15,13 +25,23 @@
     <Content Include="..\electron.manifest.json">
       <Link>electron.manifest.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Data\" />
-    <Folder Include="Components\Models\" />
+    <None Include="ElectronHostHook/node_modules/**/*" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Folder Include="Components\Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\assets\images\favicon.ico">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
   
 </Project>
