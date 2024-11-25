@@ -6,13 +6,14 @@ namespace Facilys.Components.Data
 {
     public class ApplicationDbContext: DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-           : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
+            Database.EnsureCreated();
         }
 
         public DbSet<Users> Users { get; set; }
-        public DbSet<VersionDatabase> versionDatabases { get; set; }
+        public DbSet<VersionDatabase> VersionDatabases { get; set; }
+        public DbSet<SyncMetaData> SyncMetaDatas { get; set; }
         public DbSet<Clients> Clients { get; set; }
         public DbSet<EmailsClients> Emails { get; set; }
         public DbSet<PhonesClients> Phones { get; set; }

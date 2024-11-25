@@ -9,11 +9,21 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite($"Data Source={Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Facilys", "Database", "data.db")}"));
+{
+    var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+    var facilysPath = Path.Combine(documentsPath, "Facilys");
+    var databasePath = Path.Combine(facilysPath, "Database");
+    var dbFilePath = Path.Combine(databasePath, "data.db");
+
+    Directory.CreateDirectory(databasePath);
+
+    options.UseSqlite($"Data Source={dbFilePath}");
+});
+
 
 // Configuer Electron
 builder.WebHost.UseElectron(args);
-builder.WebHost.UseEnvironment("Development");
+//builder.WebHost.UseEnvironment("Development");
 builder.Services.AddElectron();
 
 // Add services to the container.
