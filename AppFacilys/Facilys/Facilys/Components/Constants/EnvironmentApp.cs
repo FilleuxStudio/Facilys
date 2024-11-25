@@ -2,6 +2,6 @@
 {
     public class EnvironmentApp
     {
-        public static readonly string FolderData = "Failys";
+        public static readonly string FolderData = "Facilys";
     }
 }

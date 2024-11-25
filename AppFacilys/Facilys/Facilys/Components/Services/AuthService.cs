@@ -4,6 +4,9 @@ using System.Text;
 using System.Text.Json;
 using System.Security.Cryptography;
 using Facilys.Components.Constants;
+using Facilys.Components.Data;
+using Facilys.Components.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Facilys.Components.Services
 {
@@ -11,6 +14,23 @@ namespace Facilys.Components.Services
     {
         private const string CookieFileName = "cookieConnect.json";
         private const int CookieValidityDays = 30;
+        private readonly ApplicationDbContext _context;
+
+        public AuthService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Users> AuthenticateAsync(string email, string password)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user != null && Users.VerifyPassword(password, user.Password))
+            {
+                SetAuthenticatedAsync(user);
+                return user;
+            }
+            return null;
+        }
 
         /// <summary>
         /// Vérifie si l'utilisateur est authentifié en chargeant et validant les données du cookie.
@@ -29,19 +49,18 @@ namespace Facilys.Components.Services
         /// Authentifie l'utilisateur en créant et sauvegardant un nouveau cookie.
         /// Utilise : System.Security.Cryptography pour générer la clé SHA256.
         /// </summary>
-        public async Task SetAuthenticatedAsync(string email, string password)
+        public async Task SetAuthenticatedAsync(Users user)
         {
-            string username = "test";
-
-            bool flag = APIWebSiteService.PostConnectionUser(email, password);
+            bool flag = APIWebSiteService.PostConnectionUser(user.Email, user.Password);
 
             var cookieData = new CookieData
             {
-                Username = username,
-                Email = email,
+                Id = user.Id,
+                Login = user.Login,
+                Email = user.Email,
                 IsConnected = true,
                 ExpirationDate = DateTime.UtcNow.AddDays(CookieValidityDays),
-                Key = GenerateSha256(username + DateTime.UtcNow.Ticks)
+                Key = GenerateSha256(user.Email + DateTime.UtcNow.Ticks)
             };
 
             await SaveCookieDataAsync(cookieData);
@@ -81,6 +100,7 @@ namespace Facilys.Components.Services
         {
             // Récupère le chemin "Documents"
             var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
+            Console.WriteLine(appDataPath);
 
             // Combine le chemin pour le dossier de l'application et le fichier cookie
             var directoryPath = Path.Combine(appDataPath, EnvironmentApp.FolderData);
@@ -150,7 +170,8 @@ namespace Facilys.Components.Services
 
     public class CookieData
     {
-        public string Username { get; set; } = String.Empty;
+        public Guid Id { get; set; } = Guid.Empty;
+        public string Login { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;
         public bool IsConnected { get; set; } = false;
         public DateTime ExpirationDate { get; set; } = DateTime.Now;

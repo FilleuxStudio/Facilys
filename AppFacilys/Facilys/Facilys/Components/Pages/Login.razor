@@ -1,4 +1,5 @@
 ﻿@page "/Login"
+@rendermode InteractiveServer
 @layout MainLayoutLogin
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
@@ -31,13 +32,13 @@
                                 }
                                 <EditForm FormName="login-form" Model="loginModel" OnValidSubmit="HandleValidSubmit" class="my-4">
                                     <div class="form-group mb-3">
-                                        <label for="email">Email</label>
-                                        <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+                                        <label for="Email">Email</label>
+                                        <InputText id="Email" class="form-control" @bind-Value="loginModel.Email" />
                                     </div>
 
                                     <div class="form-group mb-3">
-                                        <label for="password">Mot de passe</label>
-                                        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+                                        <label for="Password">Mot de passe</label>
+                                        <InputText id="Password" type="password" class="form-control" @bind-Value="loginModel.Password" />
                                     </div>
 
                                     <div class="form-group row mt-3">
@@ -63,7 +64,7 @@
     </div><!--end row-->
 </div><!-- container -->
 @code {
-    private LoginModel loginModel = new();
+   private LoginModel loginModel = new();
     private string errorMessage;
 
     private async Task HandleValidSubmit()
@@ -74,24 +75,20 @@
         if (string.IsNullOrWhiteSpace(loginModel.Email))
         {
             errorMessage = "L'email est requis.";
-            StateHasChanged();
-            await InvokeAsync(StateHasChanged);
+           // StateHasChanged();
+           // await InvokeAsync(StateHasChanged);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(loginModel.Password))
         {
             errorMessage = "Le mot de passe est requis.";
-            StateHasChanged();
-            await InvokeAsync(StateHasChanged);
             return;
         }
 
         if (loginModel.Password.Length < 6)
         {
             errorMessage = "Le mot de passe doit contenir au moins 6 caractères.";
-            StateHasChanged();
-            await InvokeAsync(StateHasChanged);
             return;
         }
 
@@ -99,12 +96,21 @@
         {
             // Logique d'authentification simulée
             // await AuthService.SetAuthenticatedAsync(email, password);
+
+            var user = await AuthService.AuthenticateAsync(loginModel.Email, loginModel.Password);
+            if (user != null)
+            {
+                // Redirigez l'utilisateur vers une page protégée ou tableau de bord
+                NavigationManager.NavigateTo("/dashboard");
+            }
+            else
+            {
+                errorMessage = "Identifiants incorrects.";
+            }
         }
         catch (Exception ex)
         {
             errorMessage = "Une erreur est survenue : " + ex.Message;
-            await InvokeAsync(StateHasChanged);
-            StateHasChanged();
         }
     }
 

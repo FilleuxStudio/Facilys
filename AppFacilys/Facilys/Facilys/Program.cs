@@ -30,7 +30,7 @@ builder.Services.AddElectron();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<AuthService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {
     client.BaseAddress = new Uri("https://filleuxstudio.fr/");
@@ -45,6 +45,14 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+
+// Initialisez la base de données avec l'utilisateur par défaut
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    DbInitializer.Initialize(services);
 }
 
 app.UseHttpsRedirection();
