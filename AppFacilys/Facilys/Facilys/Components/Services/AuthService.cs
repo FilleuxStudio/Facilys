@@ -26,7 +26,7 @@ namespace Facilys.Components.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user != null && Users.VerifyPassword(password, user.Password))
             {
-                SetAuthenticatedAsync(user);
+               await SetAuthenticatedAsync(user);
                 return user;
             }
             return null;
@@ -100,7 +100,7 @@ namespace Facilys.Components.Services
         {
             // Récupère le chemin "Documents"
             var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
-            Console.WriteLine(appDataPath);
+            //Console.WriteLine(appDataPath);
 
             // Combine le chemin pour le dossier de l'application et le fichier cookie
             var directoryPath = Path.Combine(appDataPath, EnvironmentApp.FolderData);

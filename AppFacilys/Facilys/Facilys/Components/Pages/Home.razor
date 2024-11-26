@@ -8,11 +8,11 @@
     {
        if(await AuthService.IsAuthenticatedAsync())
         {
-            NavigationManager.NavigateTo("/Dashboard");
+            NavigationManager.NavigateTo("/dashboard", forceLoad: true);
         }
         else
         {
-            NavigationManager.NavigateTo("/Login");
+            NavigationManager.NavigateTo("/login", forceLoad: true);
         }
         //NavigationManager.NavigateTo("/Login");
     }

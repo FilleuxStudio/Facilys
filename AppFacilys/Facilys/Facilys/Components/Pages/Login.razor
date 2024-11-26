@@ -1,4 +1,4 @@
-﻿@page "/Login"
+﻿@page "/login"
 @rendermode InteractiveServer
 @layout MainLayoutLogin
 @inject NavigationManager NavigationManager
@@ -43,9 +43,11 @@
 
                                     <div class="form-group row mt-3">
                                         <div class="col-sm-6 text-end">
-                                            <a href="auth-recover-pw.html" class="text-muted font-13"><i class="dripicons-lock"></i> Mot de passe oublié ?</a>
-                                        </div><!--end col-->
-                                    </div><!--end form-group-->
+                                            <NavLink href="/PwRecovery" class="text-muted font-13">
+                                                <i class="dripicons-lock"></i> Mot de passe oublié ?
+                                            </NavLink>
+                                        </div>
+                                    </div>
 
                                     <div class="form-group mb-0 row">
                                         <div class="col-12">
@@ -101,7 +103,7 @@
             if (user != null)
             {
                 // Redirigez l'utilisateur vers une page protégée ou tableau de bord
-                NavigationManager.NavigateTo("/dashboard");
+                NavigationManager.NavigateTo("/dashboard", forceLoad: true);
             }
             else
             {

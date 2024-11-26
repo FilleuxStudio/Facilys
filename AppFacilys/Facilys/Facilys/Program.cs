@@ -35,7 +35,7 @@ builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {
     client.BaseAddress = new Uri("https://filleuxstudio.fr/");
 });
-
+builder.Services.AddSingleton<PageTitleService>();
 
 var app = builder.Build();
 
