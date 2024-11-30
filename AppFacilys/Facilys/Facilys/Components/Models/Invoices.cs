@@ -19,6 +19,7 @@ namespace Facilys.Components.Models
         public PaymentMethod Payment { get; set; }
         public float TotalAmount { get; set; } = 0.00f;
         public string? Observations { get; set; } = string.Empty;
+        public string? RepairType { get; set; } = string.Empty;
         public string Status { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.Now;
     }

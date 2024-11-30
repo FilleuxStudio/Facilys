@@ -1,0 +1,13 @@
+﻿@inject IJSRuntime JSRuntime
+
+@code {
+    [Parameter] public string[] ScriptUrls { get; set; } = Array.Empty<string>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && ScriptUrls.Length > 0)
+        {
+            await JSRuntime.InvokeVoidAsync("dynamicScriptLoader.load", (object)ScriptUrls);
+        }
+    }
+}
