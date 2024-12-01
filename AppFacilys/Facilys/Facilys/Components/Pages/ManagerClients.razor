@@ -10,11 +10,10 @@
             <div class="card-header">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h4 class="card-title">Users Details</h4>
+                        <h4 class="card-title">Liste des clients</h4>
                     </div><!--end col-->
                     <div class="col-auto">
-                        <button class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Add User</button>
-                        <button class="btn btn-primary"><i class="fas fa-plus me-1"></i> Invite User</button>
+                        <button class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un client</button>
                     </div><!--end col-->
                 </div><!--end row-->
             </div><!--end card-header-->
@@ -23,53 +22,58 @@
                     <table class="table mb-0" id="datatable_1">
                         <thead class="table-light">
                             <tr>
-                                <th>Name</th>
-                                <th>ID</th>
-                                <th>Roal</th>
-                                <th>Last activity</th>
-                                <th>Status</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Véhicules</th>
+                                <th>Téléphone</th>
+                                <th>Statut</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="d-flex align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <img src="assets/images/users/avatar-1.jpg" class="me-2 thumb-md align-self-center rounded" alt="...">
-                                        <div class="flex-grow-1 text-truncate">
-                                            <h6 class="m-0">Unity Pugh</h6>
-                                            <a href="#" class="fs-12 text-primary">dummy@gmail.com</a>
-                                        </div><!--end media body-->
-                                    </div>
-                                </td>
-                                <td>#9958</td>
-                                <td><a href="#" class="text-body text-decoration-underline">Manager</a></td>
-                                <td>Today, 02:30pm</td>
-                                <td><span class="badge rounded text-success bg-success-subtle">Active</span></td>
-                                <td class="text-end">
-                                    <a href="#"><i class="las la-pen text-secondary fs-18"></i></a>
-                                    <a href="#"><i class="las la-trash-alt text-secondary fs-18"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="d-flex align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <img src="assets/images/users/avatar-1.jpg" class="me-2 thumb-md align-self-center rounded" alt="...">
-                                        <div class="flex-grow-1 text-truncate">
-                                            <h6 class="m-0">Scott Holland</h6>
-                                            <a href="#" class="fs-12 text-primary">exemple@gmail.com</a>
-                                        </div><!--end media body-->
-                                    </div>
-                                </td>
-                                <td>#3625</td>
-                                <td><a href="#" class="text-body text-decoration-underline">Member</a></td>
-                                <td>Yesterday, 10:15pm</td>
-                                <td><span class="badge rounded text-success bg-success-subtle">Active</span></td>
-                                <td class="text-end">
-                                    <a href="#"><i class="las la-pen text-secondary fs-18"></i></a>
-                                    <a href="#"><i class="las la-trash-alt text-secondary fs-18"></i></a>
-                                </td>
-                            </tr>
+                            @foreach (var client in managerClienViewtLists)
+                            {
+                                <tr>
+                                    <td class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 text-truncate">
+                                                <h6 class="m-0">@client.Client.Lname</h6>
+                                            @*     <a href="#" @onclick="OpenGoogleMaps" class="fs-12 text-primary">@client.Client.Address @client.Client.PostalCode @client.Client.City</a> *@
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@client.Client.Fname</td>
+                                    <td><a href="#" class="text-body text-decoration-underline">Manager</a></td>
+                                    <td>Today, 02:30pm</td>
+                                    <td><span class="badge rounded text-success bg-success-subtle">Active</span></td>
+                                    <td class="text-end">
+                                        <a href="#"><i class="las la-pen text-secondary fs-18"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-secondary fs-18"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                            @for(int i = 0; i < 10; i++){
+                                <tr>
+                                    <td class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <img src="assets/images/users/avatar-1.jpg" class="me-2 thumb-md align-self-center rounded" alt="...">
+                                            <div class="flex-grow-1 text-truncate">
+                                                <h6 class="m-0">Scott aaaaaaaaaaaa</h6>
+                                                <button @onclick="() => OpenGoogleMaps(i)" class="fs-12 text-primary">Ouvrir Google Maps</button>
+                                            </div><!--end media body-->
+                                        </div>
+                                    </td>
+                                    <td>#3625</td>
+                                    <td><a href="#" class="text-body text-decoration-underline">Member</a></td>
+                                    <td>Yesterday, 10:15pm</td>
+                                    <td><span class="badge rounded text-success bg-success-subtle">Active</span></td>
+                                    <td class="text-end">
+                                        <a href="#"><i class="las la-pen text-secondary fs-18"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-secondary fs-18"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                           
                             <tr>
                                 <td class="d-flex align-items-center">
                                     <div class="d-flex align-items-center">
@@ -288,19 +292,51 @@
 </div> <!-- end row -->
 
 @code {
+    List<ManagerClienViewtList> managerClienViewtLists = new();
+    ManagerClientViewModel managerClientViewModel = new();
+
+    private async Task OpenGoogleMaps(int clientIndex)
+    {
+        Console.WriteLine($"Ouvrir Google Maps pour le client {clientIndex}...");
+        await ElectronNET.API.Electron.Shell.OpenExternalAsync("https://www.google.com/maps");
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await InvokeAsync(() =>
         {
             PageTitleService.CurrentTitle = "Gestion clients";
         });
+
+        await LoadDataHeader();
     }
 
+    private async Task LoadDataHeader()
+    {
+        managerClientViewModel.EmailsClients = await DbContext.Emails.Include(c => c.Client).ToListAsync();
+        managerClientViewModel.PhonesClients = await DbContext.Phones.Include(c => c.Client).ToListAsync();
+        managerClientViewModel.Vehicles = await DbContext.Vehicles.Include(c => c.Client).ToListAsync();
+        var clients = await DbContext.Clients.ToListAsync();
 
-     private string[] scriptUrls = new[] { 
-        "/assets/libs/simple-datatables/umd/simple-datatables.js", 
-        "/assets/js/pages/datatable.init.js"
-    };
+        foreach(var client in clients){
+            managerClienViewtLists.Add(new()
+            {
+                    Client = client,
+                    EmailsClients = managerClientViewModel.EmailsClients.Where(c => c.Client.Id == client.Id).ToList(),
+                    PhonesClients = managerClientViewModel.PhonesClients.Where(c => c.Client.Id == client.Id).ToList(),
+                    Vehicles = managerClientViewModel.Vehicles.Where(c => c.Client.Id == client.Id).ToList(),
+            });
+        }  
+
+
+    }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
+    //         await JSRuntime.InvokeVoidAsync("loadScript", "/assets/js/pages/datatable.init.js");
+    //     }
+    // }
 }
-
-<DynamicScriptLoader ScriptUrls="scriptUrls" />

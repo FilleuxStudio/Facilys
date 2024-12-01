@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
 
 <NavMenu />
-
 
 <div class="page-wrapper">
     <!-- Page Content-->
@@ -35,14 +35,22 @@
     </div>
 </div>
 
-<script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("loadScript", "/assets/js/scriptLoader.js");
+        }
+    }
+}
+
+@* <script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/libs/simplebar/simplebar.min.js"></script>
 <script src="/assets/data/stock-prices.js"></script>
 <script src="/assets/libs/jsvectormap/js/jsvectormap.min.js"></script>
 <script src="/assets/libs/jsvectormap/maps/world.js"></script>
-<script src="/assets/js/pages/index.init.js"></script>
-<script src="/assets/js/app.js"></script>
-<script src="/assets/js/dynamic-script-loader.js"></script>
+<script src="/assets/js/app.js"></script> *@
 
 @* <script>
         document.addEventListener('DOMContentLoaded', function() {

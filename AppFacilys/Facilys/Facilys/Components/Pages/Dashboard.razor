@@ -124,7 +124,7 @@
                                     <td>@topClient.FirstName</td>
                                     <td>@topClient.RepairCount</td>
                                 </tr>
-                            }                 
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -140,7 +140,8 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h4 class="card-title">
-                            <p class="m-0 fs-12 fst-italic ps-2 text-muted">Dernières données mises à jour - il y a @DateTime.Now.Second Seconde<NavLink href="/" class="link-danger ms-1 "><i class="align-middle iconoir-refresh"></i></NavLink>
+                            <p class="m-0 fs-12 fst-italic ps-2 text-muted">
+                                Dernières données mises à jour - il y a @DateTime.Now.Second Seconde<NavLink href="/" class="link-danger ms-1 "><i class="align-middle iconoir-refresh"></i></NavLink>
                             </p>
                         </h4>
                     </div>
@@ -167,7 +168,7 @@
             PageTitleService.CurrentTitle = "Dashboard";
         });
 
-        LoadDataHeader();
+        await LoadDataHeader();
     }
 
     private async Task LoadDataHeader()
@@ -177,38 +178,42 @@
         int invoice = await DbContext.Invoices.CountAsync();
 
         var dataTopVehicle = await DbContext.HistoryParts
-        .Where(h => h.Vehicle != null)
-        .GroupBy(h => new { h.Vehicle.Id, h.Vehicle.Mark, h.Vehicle.Model, h.Vehicle.CirculationDate })
-        .Select(g => new
-        {
-            VehicleId = g.Key.Id,
-            VehicleMark = g.Key.Mark,
-            VehicleModel = g.Key.Model,
-            VehicleYear = g.Key.CirculationDate,
-            RepairCount = g.Count()
-        })
-        .OrderByDescending(x => x.RepairCount)
-        .Take(10)
-        .ToListAsync();
+                    .Where(h => h.Vehicle != null)
+                    .GroupBy(h => new { h.Vehicle.Id, h.Vehicle.Mark, h.Vehicle.Model, h.Vehicle.CirculationDate })
+                    .Select(g => new TopVehicle
+                        {
+                            VehicleId = g.Key.Id.ToString(),
+                            VehicleMark = g.Key.Mark,
+                            VehicleModel = g.Key.Model,
+                            VehicleYear = g.Key.CirculationDate,
+                            RepairCount = g.Count()
+                        })
+                    .OrderByDescending(x => x.RepairCount)
+                    .Take(10)
+                    .ToListAsync();
+
 
         var dataTopClient = await DbContext.HistoryParts
-           .Where(h => h.Vehicle != null || h.OtherVehicle != null)
-           .GroupBy(h => new
-           {
-               Client = h.Vehicle != null ? h.Vehicle.Client : h.OtherVehicle.Client
-           })
-           .Select(g => new
-           {
-               ClientId = g.Key.Client.Id,
-               LastName = g.Key.Client.Lname,
-               FirstName = g.Key.Client.Fname,
-               RepairCount = g.Count()
-           })
-       .OrderByDescending(x => x.RepairCount)
-       .Take(10)
-       .ToListAsync();
+            .Where(h => h.Vehicle != null || h.OtherVehicle != null)
+            .GroupBy(h => new
+            {
+                ClientId = h.Vehicle != null ? h.Vehicle.Client.Id : h.OtherVehicle.Client.Id,
+                LastName = h.Vehicle != null ? h.Vehicle.Client.Lname : h.OtherVehicle.Client.Lname,
+                FirstName = h.Vehicle != null ? h.Vehicle.Client.Fname : h.OtherVehicle.Client.Fname
+            })
+            .Select(g => new TopClient
+                {
+                    ClientId = g.Key.ClientId.ToString(),
+                    LastName = g.Key.LastName,
+                    FirstName = g.Key.FirstName,
+                    RepairCount = g.Count()
+                })
+            .OrderByDescending(x => x.RepairCount)
+            .Take(10)
+            .ToListAsync();
 
-        foreach(var vehicleObject in dataTopVehicle)
+
+        foreach (var vehicleObject in dataTopVehicle)
         {
             TopVehicleData.Add(new TopVehicle()
                 {

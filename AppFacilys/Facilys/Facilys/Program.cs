@@ -1,8 +1,7 @@
 using Facilys.Components;
 using ElectronNET.API;
-using Facilys.Components.Services;
-using Facilys.Components.Services;
 using ElectronNET.API.Entities;
+using Facilys.Components.Services;
 using Facilys.Components.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,8 +70,20 @@ async Task CreateElectronWindow()
     {
         Width = 1200,
         Height = 800,
-        Show = true // Affiche la fenêtre directement
+        Show = true, // Affiche la fenêtre directement
+        //WebPreferences = new WebPreferences
+        //{
+        //    ContextIsolation = false, // Permet une meilleure interaction avec les scripts JS
+        //    DevTools = true           // Activez si besoin de déboguer
+        //}
     });
+
+    // Vider le cache et recharger
+    window.OnReadyToShow += () =>
+    {
+        var session = window.WebContents.Session;
+        session.ClearCacheAsync(); // Efface le cache
+    };
 
     // Nettoyer le cache et recharger la fenêtre
     await ClearCache();
@@ -112,5 +123,7 @@ if (HybridSupport.IsElectronActive)
         await CreateElectronWindow();
     });
 }
+
+
 
 app.Run();
