@@ -3,7 +3,6 @@
 @inject PageTitleService PageTitleService
 @inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
-@using Microsoft.AspNetCore.Components.QuickGrid
 
 <div class="row">
     <div class="col-12">
@@ -14,7 +13,7 @@
                         <h4 class="card-title">Liste des clients</h4>
                     </div><!--end col-->
                     <div class="col-auto">
-                        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModalLarge"  class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un client</button>
+                        <button type="button" data-bs-toggle="modal"  data-bs-target="#OpenModalLargeAddClient"  class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un client</button>
                     </div><!--end col-->
                 </div><!--end row-->
             </div><!--end card-header-->
@@ -81,26 +80,112 @@
     </div> <!-- end col -->
 </div> <!-- end row -->
 
-<div class="modal fade bd-example-modal-lg" id="exampleModalLarge" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+<div class="@ModalManager.ModalClass" id="OpenModalLargeAddClient" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeAddClientLabel" style="@ModalManager.ModalDisplay" aria-hidden="@ModalManager.AriaHidden">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title m-0" id="myLargeModalLabel">Large Modal</h6>
+                <h6 class="modal-title m-0" id="OpenModalLargeAddClientLabel">Ajouter un clients</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-4 text-center">
-                        <img src="assets/images/extra/card/find.png" alt="" class="img-fluid">
-                    </div><!--end col-->
-                    <div class="col-lg-8 align-self-center">
-                        <div class="error-content text-center">
-                            <h1 class="fw-bold display-5">404!</h1>
-                            <h4 class=" mb-3">Looks like you've got lost...</h4>
-                            <button type="button" class="btn btn-primary">Back to Dashboard</button>
+                <EditForm class="" Model="@managerClientViewModel.Client" OnValidSubmit="SubmitAddClient" FormName="addClientForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Lname" class="form-label">Nom <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Lname" @bind-Value="managerClientViewModel.Client.Lname"  required />
+                            </div>
                         </div>
-                    </div><!--end col-->
-                </div><!--end row-->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Fname">Prénom <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Fanme" @bind-Value="managerClientViewModel.Client.Fname" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="Address" class="form-label">Adresse <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Address" @bind-Value="managerClientViewModel.Client.Address" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="city">Ville <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="useremail" @bind-Value="managerClientViewModel.Client.City" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="PostalCode">Code Postal <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="PostalCode" @bind-Value="managerClientViewModel.Client.PostalCode" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="Type">Type de client <span class="text-danger">*</span></label>
+                                <InputSelect class="form-select" id="Type" @bind-Value="managerClientViewModel.Client.Type" >
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="@TypeClient.Client">Client</option>
+                                    <option value="@TypeClient.ClientProfessional">Client professionnel</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="Phone" class="form-label">Téléphone <span class="text-danger">*</span></label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="Phone" @bind-value="currentPhone" @onkeyup="HandleKeyUpPhone" required aria-describedby="button-addon1" />
+                                <button class="btn btn-outline-success" type="button" @onclick="AddPhone" id="button-addon1">+</button>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phoneList" class="form-label">Liste des numéros</label>
+                                <select id="phoneList" class="form-select" size="3" multiple>
+                                    @foreach (var phone in managerClientViewModel.PhonesClients)
+                                    {
+                                        <option>@phone.Phone</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="email">Email <span class="text-warning">*</span></label>
+                                <div class="input-group mb-3">
+                                    <input type="email" class="form-control" id="email" @bind-value="currentEmail" @onkeyup="HandleKeyUpEmail" aria-describedby="button-addon2" />
+                                    <button class="btn btn-outline-secondary" type="button" @onclick="AddEmail" id="button-addon2">+</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="emailList" class="form-label">Liste des emails</label>
+                                <select id="emailList" class="form-select" size="3" multiple>
+                                    @foreach (var email in managerClientViewModel.EmailsClients)
+                                    {
+                                        <option>@email.Email</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="AdditionalInformation">Informations complémentaires</label>
+                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerClientViewModel.Client.AdditionalInformation"></InputTextArea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-primary px-4">Ajouter et passer au véhicule</button>
+                            <button type="submit" class="btn btn-primary px-4">Ajouter</button>
+                        </div>
+                    </div>
+                </EditForm>
             </div><!--end modal-body-->
         </div><!--end modal-content-->
     </div><!--end modal-dialog-->
@@ -110,7 +195,9 @@
 @code {
     List<ManagerClienViewtList> managerClienViewtLists = new();
     ManagerClientViewModel managerClientViewModel = new();
+    Modal ModalManager = new();
 
+    private string currentPhone = "", currentEmail= "";
 
     private async Task OpenGoogleMaps(string clientIndex)
     {
@@ -127,6 +214,9 @@
 
         await LoadDataHeader();
 
+        managerClientViewModel.Client = new();
+        managerClientViewModel.PhonesClients = new();
+        managerClientViewModel.EmailsClients = new();
     }
 
     private async Task LoadDataHeader()
@@ -146,6 +236,100 @@
             });
         }  
 
+    }
+
+    private void HandleKeyUpPhone(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == ";")
+        {
+            AddPhone();
+        }
+    }
+
+    private void HandleKeyUpEmail(KeyboardEventArgs e)
+    {
+
+        if (e.Key == "Enter" || e.Key == ";")
+        {
+            AddEmail();
+        }
+    }
+
+    private void AddPhone()
+    {
+        if (!string.IsNullOrWhiteSpace(currentPhone))
+        {
+            managerClientViewModel.PhonesClients.Add(new()
+            {
+                Id = Guid.NewGuid(),
+                    Phone = currentPhone.Trim(),
+            });
+            currentPhone = "";
+        }
+    }
+
+    private void AddEmail()
+    {
+        if (!string.IsNullOrWhiteSpace(currentEmail))
+        {
+            managerClientViewModel.EmailsClients.Add(new()
+                {
+                    Id = Guid.NewGuid(),
+                    Email = currentEmail.Trim(),
+                });
+            currentEmail = "";
+        }
+    }
+
+    private async Task SubmitAddClient()
+    {
+        managerClientViewModel.Client.Id = Guid.NewGuid();
+        managerClientViewModel.Client.DateCreated = DateTime.Now;
+        await DbContext.Clients.AddAsync(managerClientViewModel.Client);
+        await DbContext.SaveChangesAsync();
+
+        if(managerClientViewModel.PhonesClients.Count != 0){
+            for(int i = 0; i < managerClientViewModel.PhonesClients.Count; i++){
+                managerClientViewModel.PhonesClients[i].Client = managerClientViewModel.Client;
+            }
+
+            await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
+        }
+
+        if (managerClientViewModel.EmailsClients.Count != 0)
+        {
+            for (int i = 0; i < managerClientViewModel.EmailsClients.Count; i++)
+            {
+                managerClientViewModel.EmailsClients[i].Client = managerClientViewModel.Client;
+            }
+            await DbContext.Emails.AddRangeAsync(managerClientViewModel.EmailsClients);
+        }
+
+        await DbContext.SaveChangesAsync();
+        ResetForm();
+
+        ModalManager.CloseModal("OpenModalLargeAddClient");
+        StateHasChanged();
+
+        await  RefreshClientList();
+    }
+
+    private void ResetForm()
+    {
+        managerClientViewModel.Client = new(); // Réinitialisez avec un nouvel objet Client
+        managerClientViewModel.PhonesClients.Clear();
+        managerClientViewModel.EmailsClients.Clear();
+        currentPhone = string.Empty;
+        currentEmail = string.Empty;
+    }
+
+    private async Task RefreshClientList()
+    {
+        // Récupérer la liste mise à jour des clients depuis votre service
+        managerClienViewtLists.Clear();
+        await LoadDataHeader();
+       // await InvokeAsync(StateHasChanged);
+       // StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
