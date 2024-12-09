@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         if (data) {
           if( window.getComputedStyle(document.getElementById('EditProdcutModal')).display === 'none'){
-            document.getElementById('idProduct').value = data.id
+            document.getElementById('idProductDelete').value = data.id
           }else{
             document.getElementById('idProduct').value = data.id
             document.getElementById('titleEdit').value = data.title

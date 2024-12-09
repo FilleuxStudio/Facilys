@@ -99,7 +99,7 @@ exports.managerEditProducts = async (req, res) => {
 
 exports.managerDeleteProducts = async (req, res) => {
   try{
-    var deleteResult  = await Product.delete(req.body.idProduct);
+    var deleteResult  = await Product.delete(req.body.idProductDelete);
     if(deleteResult  === true){
       return res.status(200).send("success");
     }else{

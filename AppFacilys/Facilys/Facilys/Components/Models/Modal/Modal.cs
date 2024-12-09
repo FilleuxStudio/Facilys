@@ -1,5 +1,41 @@
 ﻿namespace Facilys.Components.Models.Modal
 {
+    public class ModalManagerId
+    {
+        private readonly Dictionary<string, Modal> modals = new();
+        public bool IsBackdropVisible { get; private set; } = false;
+
+        public void RegisterModal(string id)
+        {
+            if (!modals.ContainsKey(id))
+            {
+                modals[id] = new Modal();
+            }
+        }
+
+        public Modal GetModal(string id)
+        {
+            return modals.TryGetValue(id, out var modal) ? modal : null;
+        }
+
+        public void OpenModal(string id)
+        {
+            if (modals.ContainsKey(id))
+            {
+                modals[id].OpenModal(id);
+                IsBackdropVisible = true; // Activer le fond grisé
+            }
+        }
+
+        public void CloseModal(string id)
+        {
+            if (modals.ContainsKey(id))
+            {
+                modals[id].CloseModal(id);
+                IsBackdropVisible = modals.Any(m => m.Value.IsOpen);
+            }
+        }
+    }
     public class Modal
     {
         public string ModalDisplay { get; set; } = "display: none;";
@@ -7,6 +43,7 @@
         public string AriaHidden { get; set; } = "true";
         public string ShowClass { get; set; } = "";
         public string targetId { get; set; } = "";
+        public bool IsOpen { get; private set; } = false;
 
 
         public void OpenModal(string idModal)
@@ -16,6 +53,7 @@
             AriaHidden = "false";
             ShowClass = "show";
             targetId = idModal;
+            IsOpen = true;
         }
 
         public void CloseModal(string idModal)
@@ -26,6 +64,7 @@
             AriaHidden = "true";
             ShowClass = "";
             targetId = idModal;
+            IsOpen = false;
         }
     }
 }
