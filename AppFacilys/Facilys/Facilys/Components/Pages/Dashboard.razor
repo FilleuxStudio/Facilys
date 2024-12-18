@@ -169,13 +169,15 @@
         });
 
         await LoadDataHeader();
+        
+        StateHasChanged();
     }
 
     private async Task LoadDataHeader()
     {
-        int client = await DbContext.Clients.CountAsync();
-        int vehicle = await DbContext.Vehicles.CountAsync();
-        int invoice = await DbContext.Invoices.CountAsync();
+        client = await DbContext.Clients.CountAsync();
+        vehicle = await DbContext.Vehicles.CountAsync();
+        invoice = await DbContext.Invoices.CountAsync();
 
         var dataTopVehicle = await DbContext.HistoryParts
                     .Where(h => h.Vehicle != null)

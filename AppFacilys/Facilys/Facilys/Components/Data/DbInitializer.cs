@@ -27,6 +27,18 @@ namespace Facilys.Components.Data
                 DateAdded = DateTime.Now
             };
 
+            // Créez un utilisateur concessionnaire par défaut
+            var DealerUser = new Users
+            {
+                Lname = "Concessionnaire",
+                Fname = "Concessionnaire",
+                Email = "admin@facilys.fr",
+                Login = "ConcessionnaireLocal",
+                Password = Users.HashPassword("Dealer123456"), // Assurez-vous que le mot de passe respecte vos règles de sécurité
+                Role = RoleUser.User,
+                DateAdded = DateTime.Now
+            };
+
             context.Users.Add(adminUser);
             context.SaveChanges();
         }
