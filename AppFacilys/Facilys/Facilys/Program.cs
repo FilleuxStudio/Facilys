@@ -35,6 +35,7 @@ builder.Services.AddHttpClient<APIWebSiteService>(client =>
     client.BaseAddress = new Uri("https://filleuxstudio.fr/");
 });
 builder.Services.AddSingleton<PageTitleService>();
+builder.Services.AddScoped<VINDecoderService>();
 
 var app = builder.Build();
 
