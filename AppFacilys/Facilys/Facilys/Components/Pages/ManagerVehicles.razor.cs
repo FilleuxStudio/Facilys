@@ -139,5 +139,20 @@ namespace Facilys.Components.Pages
                 Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
             }
         }
+
+        private async Task SubmitEditVehicle()
+        {
+           
+        }
+
+        private async Task SubmitDeleteVehicleAllData()
+        {
+      
+        }
+
+        private async Task SubmitDeleteVehicle()
+        {
+         
+        }
     }
 }

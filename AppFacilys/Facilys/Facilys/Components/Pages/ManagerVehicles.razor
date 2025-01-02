@@ -182,96 +182,74 @@
 </div><!--end modal-->
 
 
-@* <div class="@modalManager.GetModal("OpenModalLargeEditVehicle")?.ModalClass" id="OpenModalLargeEditClient" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeEditClientLabel" style="@modalManager.GetModal("OpenModalLargeEditClient")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeEditClient")?.AriaHidden">
+<div class="@modalManager.GetModal("OpenModalLargeEditVehicle")?.ModalClass" id="OpenModalLargeEditVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeEditVehicleLabel" style="@modalManager.GetModal("OpenModalLargeEditVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeEditVehicle")?.AriaHidden">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title m-0" id="OpenModalLargeEditClientLabel">Modifier un clients</h6>
-                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeEditClient"))"></button>
+                <h6 class="modal-title m-0" id="OpenModalLargeEditVehicleLabel">Modifier un véhicule</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeEditVehicle"))"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
-                <EditForm class="" Model="@managerClientViewModel.Client" OnValidSubmit="SubmitEditClient" FormName="EditClientForm">
+                <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitEditVehicle" FormName="EditVehicleForm">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="Lname" class="form-label">Nom <span class="text-danger">*</span></label>
-                                <InputText class="form-control" id="Lname" @bind-Value="managerClientViewModel.Client.Lname" required />
+                                <label for="Immatriculation" class="form-label">Immatriculation <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Immatriculation" @bind-Value="managerVehicleViewModel.Vehicle.Immatriculation" required />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="Fname">Prénom <span class="text-danger">*</span></label>
-                                <InputText class="form-control" id="Fanme" @bind-Value="managerClientViewModel.Client.Fname" required />
+                                <label for="CirculationDate" class="form-label">Date 1er Immat <span class="text-danger">*</span></label>
+                                <InputDate class="form-control" id="CirculationDate" @bind-Value="managerVehicleViewModel.Vehicle.CirculationDate" required />
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="Address" class="form-label">Adresse <span class="text-danger">*</span></label>
-                                <InputText class="form-control" id="Address" @bind-Value="managerClientViewModel.Client.Address" required />
+                                <label for="Mark" class="form-label">Marque <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Mark" @bind-Value="managerVehicleViewModel.Vehicle.Mark" required />
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label" for="city">Ville <span class="text-danger">*</span></label>
-                                <InputText class="form-control" id="useremail" @bind-Value="managerClientViewModel.Client.City" required />
+                                <label class="form-label" for="Model">Modèle <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Model" @bind-Value="managerVehicleViewModel.Vehicle.Model" required />
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label" for="PostalCode">Code Postal <span class="text-danger">*</span></label>
-                                <InputText class="form-control" id="PostalCode" @bind-Value="managerClientViewModel.Client.PostalCode" required />
+                                <label class="form-label" for="Type">Type <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Type" @bind-Value="managerVehicleViewModel.Vehicle.Type" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="VIN">VIN <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="VIN" @bind-Value="managerVehicleViewModel.Vehicle.VIN" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="KM">KM <span class="text-warning">*</span></label>
+                                <InputNumber class="form-control" id="VIN" @bind-Value="managerVehicleViewModel.Vehicle.KM" />
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="Type">Type de client <span class="text-danger">*</span></label>
-                                <InputSelect class="form-select" id="Type" @bind-Value="managerClientViewModel.Client.Type">
-                                    <option value="">Sélectionnez un type</option>
-                                    <option value="@TypeClient.Client">Client</option>
-                                    <option value="@TypeClient.ClientProfessional">Client professionnel</option>
+                                <label class="form-label" for="Clients">Propriétaire <span class="text-danger">*</span></label>
+                                <InputSelect class="form-select" id="Clients" @bind-Value="selectClient">
+                                    <option value="@managerVehicleViewModel.Vehicle.Client.Id">@managerVehicleViewModel.Client.Lname @managerVehicleViewModel.Client.Fname</option>
+                                    @foreach (var client in managerVehicleViewModel.Clients)
+                                    {
+                                        <option value="@client.Id">@client.Lname @client.Fname</option>
+                                    }
                                 </InputSelect>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="Phone" class="form-label">Téléphone <span class="text-danger">*</span></label>
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" id="Phone" @bind-value="currentPhone" @onkeyup="HandleKeyUpPhone" aria-describedby="button-addon1" />
-                                <button class="btn btn-outline-success" type="button" @onclick="AddPhone" id="button-addon1">+</button>
-                            </div>
-                            <div class="mb-3">
-                                <label for="phoneList" class="form-label">Liste des numéros</label>
-                                <select id="phoneList" class="form-select" size="3" multiple @onchange="HandlePhoneSelection" @onkeydown="HandleKeyDownPhone">
-                                    @foreach (var phone in managerClientViewModel.PhonesClients)
-                                    {
-                                        <option value="@phone.Phone">@phone.Phone</option>
-                                    }
-                                </select>
-                                <button class="btn btn-sm btn-outline-danger" type="button" @onclick="RemoveSelectedPhones">Supprimer</button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label" for="email">Email <span class="text-warning">*</span></label>
-                                <div class="input-group mb-3">
-                                    <input type="email" class="form-control" id="email" @bind-value="currentEmail" @onkeyup="HandleKeyUpEmail" aria-describedby="button-addon2" />
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="AddEmail" id="button-addon2">+</button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="emailList" class="form-label">Liste des emails</label>
-                                <select id="emailList" class="form-select" size="3" multiple @onchange="HandleEmailSelection" @onkeydown="HandleKeyDownEmail">
-                                    @foreach (var email in managerClientViewModel.EmailsClients)
-                                    {
-                                        <option value="@email.Email" >@email.Email</option>
-                                    }
-                                </select>
-                                <button class="btn btn-sm btn-outline-danger" type="button" @onclick="RemoveSelectedEmails">Supprimer</button>
                             </div>
                         </div>
                     </div>
@@ -279,13 +257,13 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="AdditionalInformation">Informations complémentaires</label>
-                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerClientViewModel.Client.AdditionalInformation"></InputTextArea>
+                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerVehicleViewModel.Vehicle.AdditionalInformation"></InputTextArea>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 text-end">
-                            <button type="submit" class="btn btn-warning px-4">Modifier</button>
+                            <button type="submit" class="btn btn-primary px-4">Modifier</button>
                         </div>
                     </div>
                 </EditForm>
@@ -294,16 +272,16 @@
     </div><!--end modal-dialog-->
 </div><!--end modal-->
 
-<div class="@modalManager.GetModal("OpenModalLargeDeleteVehicle")?.ModalClass" id="OpenModalLargeDeleteClient" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeDeleteClientLabel" style="@modalManager.GetModal("OpenModalLargeDeleteClient")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeDeleteClient")?.AriaHidden">
+<div class="@modalManager.GetModal("OpenModalLargeDeleteVehicle")?.ModalClass" id="OpenModalLargeDeleteVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeDeleteVehicleLabel" style="@modalManager.GetModal("OpenModalLargeDeleteVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeDeleteVehicle")?.AriaHidden">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title m-0" id="OpenModalLargeDeleteClientLabel">Supprimer un clients : @managerClientViewModel.Client.Lname @managerClientViewModel.Client.Fname</h6>
-                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeDeleteClient"))"></button>
+                <h6 class="modal-title m-0" id="OpenModalLargeDeleteVehicleLabel">Supprimer un véhicule : @managerVehicleViewModel.Vehicle.Mark @managerVehicleViewModel.Vehicle.Immatriculation</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeDeleteVehicle"))"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
-                <EditForm class="" Model="@managerClientViewModel.Client" OnValidSubmit="SubmitDeleteClientAllData" FormName="DeleteClientAllDataForm">
-                    <p class="text-center">Si vous cliquez ici, toutes les données appartenant à ce client seront effacées de manière irréversible.</p>
+                <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitDeleteVehicleAllData" FormName="DeleteVehicleAllDataForm">
+                    <p class="text-center">Si vous cliquez ici, toutes les données appartenant à ce véhicule seront effacées de manière irréversible.</p>
                     <div class="row mb-3">
                         <div class="col-sm-12 text-end">
                             <button type="submit" class="btn btn-danger px-4">Supprimer complètement</button>
@@ -311,8 +289,8 @@
                     </div>
                 </EditForm>
                 <br />
-                <EditForm class="" Model="@managerClientViewModel.Client" OnValidSubmit="SubmitDeleteClient" FormName="DeleteClientForm">
-                    <p class="text-center">Si vous cliquez ici, seul le client sera supprimé, mais ses données relatives aux véhicules seront conservées.</p>
+                <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitDeleteVehicle" FormName="DeleteVehicleForm">
+                    <p class="text-center">Si vous cliquez ici, seul le véhicule sera supprimé, mais ses données relatives au client seront conservées.</p>
                     <div class="row">
                         <div class="col-sm-12 text-end">
                             <button type="submit" class="btn btn-danger px-4">Supprimer</button>
@@ -322,7 +300,7 @@
             </div><!--end modal-body-->
         </div><!--end modal-content-->
     </div><!--end modal-dialog-->
-</div><!--end modal--> *@
+</div><!--end modal-->
 
 @if (modalManager.IsBackdropVisible)
 {
