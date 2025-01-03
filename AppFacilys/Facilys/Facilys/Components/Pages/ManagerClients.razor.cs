@@ -69,20 +69,20 @@ namespace Facilys.Components.Pages
             StateHasChanged();
         }
 
-        private async void OpenModalData(string id, Guid idUser)
+        private async void OpenModalData(string idModal, Guid idUser)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
-            modalManager.OpenModal(id);
+            modalManager.OpenModal(idModal);
             managerClientViewModel.Client = await DbContext.Clients.Where(i => i.Id == idUser).FirstOrDefaultAsync();
             managerClientViewModel.EmailsClients = await DbContext.Emails.Include(c => c.Client).Where(u => u.Client.Id == idUser).ToListAsync();
             managerClientViewModel.PhonesClients = await DbContext.Phones.Include(c => c.Client).Where(u => u.Client.Id == idUser).ToListAsync();
             StateHasChanged();
         }
 
-        private async void CloseModal(string id)
+        private async void CloseModal(string idModal)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", false);
-            modalManager.CloseModal(id);
+            modalManager.CloseModal(idModal);
             ResetForm();
             StateHasChanged();
         }

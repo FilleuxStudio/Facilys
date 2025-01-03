@@ -40,7 +40,7 @@ namespace Facilys.Components.Pages
         private async Task LoadDataHeader()
         {
 
-           var vehicles = await DbContext.Vehicles.Include(c => c.Client).ToListAsync();
+            var vehicles = await DbContext.Vehicles.Include(c => c.Client).Where(v => v.StatusDataView != StatusData.Delete).ToListAsync();
             foreach (var vehicle in vehicles)
             {
                 managerVehicleViewLists.Add(new()
@@ -80,6 +80,12 @@ namespace Facilys.Components.Pages
             modalManager.OpenModal(id);
             managerVehicleViewModel.Vehicle = await DbContext.Vehicles.Include(c => c.Client).Where(v => v.Id == idVehicle).FirstOrDefaultAsync();
             managerVehicleViewModel.OtherVehicle = await DbContext.OtherVehicles.Include(c => c.Client).Where(v => v.Id == idVehicle).FirstOrDefaultAsync();
+            if (managerVehicleViewModel.Vehicle != null)
+                managerVehicleViewModel.Client = await DbContext.Clients.FindAsync(managerVehicleViewModel.Vehicle.Client.Id);
+            else
+                managerVehicleViewModel.Client = await DbContext.Clients.FindAsync(managerVehicleViewModel.OtherVehicle.Client.Id);
+
+            selectClient = managerVehicleViewModel.Client.Id;
             StateHasChanged();
         }
 
@@ -87,7 +93,7 @@ namespace Facilys.Components.Pages
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             modalManager.OpenModal(id);
-            VINDecoderService decoderService = new VINDecoderService();
+            VINDecoderService decoderService = new();
             VinInfo = decoderService.DecodeVIN(vin);
             managerVehicleViewModel.Vehicle = await DbContext.Vehicles.Include(c => c.Client).Where(v => v.VIN == vin).FirstOrDefaultAsync();
             StateHasChanged();
@@ -103,12 +109,12 @@ namespace Facilys.Components.Pages
 
         private void ResetForm()
         {
-            managerVehicleViewModel.Client = new(); 
+            managerVehicleViewModel.Client = new();
             managerVehicleViewModel.Vehicle = new();
             managerVehicleViewModel.HistoryPart = new();
         }
 
-        private async Task RefreshClientList()
+        private async Task RefreshVehicleList()
         {
             // Récupérer la liste mise à jour des clients depuis votre service
             managerVehicleViewLists.Clear();
@@ -132,7 +138,7 @@ namespace Facilys.Components.Pages
 
                 CloseModal("OpenModalLargeAddVehicle");
 
-                await RefreshClientList();
+                await RefreshVehicleList();
             }
             catch (Exception ex)
             {
@@ -142,17 +148,95 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitEditVehicle()
         {
-           
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+                DbContext.Vehicles.Update(managerVehicleViewModel.Vehicle);
+                await DbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                ResetForm();
+                CloseModal("OpenModalLargeEditVehicle");
+                await RefreshVehicleList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+            }
         }
 
         private async Task SubmitDeleteVehicleAllData()
         {
-      
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+
+                var vehicleId = managerVehicleViewModel.Vehicle.Id;
+
+                // Supprimer les factures et l'historique des pièces liés aux véhicules
+                await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: false);
+                await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: true);
+
+                DbContext.Vehicles.Remove(managerVehicleViewModel.Vehicle);
+
+                await DbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // Réinitialiser le formulaire et rafraîchir la liste des clients
+                ResetForm();
+                CloseModal("OpenModalLargeDeleteVehicle");
+                await RefreshVehicleList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données véhicule");
+            }
         }
 
         private async Task SubmitDeleteVehicle()
         {
-         
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+                managerVehicleViewModel.Vehicle.StatusDataView = StatusData.Delete;
+                DbContext.Vehicles.Update(managerVehicleViewModel.Vehicle);
+                await DbContext.SaveChangesAsync();
+
+
+                await DbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                ResetForm();
+                CloseModal("OpenModalLargeDeleteVehicle");
+                await RefreshVehicleList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+            }
+        }
+
+        // Méthode helper pour supprimer les factures et l'historique
+        private async Task DeleteInvoicesAndHistoryForVehicle(Guid vehicleId, bool isOtherVehicle)
+        {
+            var invoices = isOtherVehicle
+                ? await DbContext.Invoices.Where(i => i.OtherVehicle.Id == vehicleId).ToListAsync()
+                : await DbContext.Invoices.Where(i => i.Vehicle.Id == vehicleId).ToListAsync();
+
+            foreach (var invoice in invoices)
+            {
+                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM HistoryPart WHERE IdInvoice = {0}", invoice.Id);
+            }
+
+            if (isOtherVehicle)
+            {
+                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Invoices WHERE IdOtherVehicle = {0}", vehicleId);
+            }
+            else
+            {
+                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Invoices WHERE IdVehicle = {0}", vehicleId);
+            }
         }
     }
 }

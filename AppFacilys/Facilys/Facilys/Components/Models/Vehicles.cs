@@ -23,6 +23,7 @@ namespace Facilys.Components.Models
         [Required]
         public DateTime CirculationDate { get; set; } = DateTime.Now;
         public int KM { get; set; } = 0;
+        public StatusData StatusDataView { get; set; } = StatusData.Valid;
         [Required]
         public DateTime DateAdded { get; set; } = DateTime.Now;
     }
@@ -40,8 +41,15 @@ namespace Facilys.Components.Models
         public string Mark { get; set; } = string.Empty;
         [Required]
         public string Model { get; set; } = string.Empty;
+        public StatusData StatusDataView { get; set; } = StatusData.Valid;
         public string? AdditionalInformation { get; set; } = string.Empty;
         [Required]
         public DateTime DateAdded { get; set; } = DateTime.Now;
+    }
+
+    public enum StatusData
+    {
+        Valid = 0,
+        Delete = 1,
     }
 }

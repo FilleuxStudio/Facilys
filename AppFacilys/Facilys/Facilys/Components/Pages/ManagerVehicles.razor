@@ -154,13 +154,13 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title m-0" id="OpenModaSmallInfoVinLabel">Ajouter un véhicule client</h6>
+                <h6 class="modal-title m-0" id="OpenModaSmallInfoVinLabel">Information du VIN</h6>
                 <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModaSmallInfoVin"))"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
                 <div class="row">
                     <div class="col-lg-3 text-center align-self-center">
-                        <img src="~/assets/images/extra/card/info.png" alt="info" class="img-fluid">
+                        <img src="/assets/images/extra/card/info.png" alt="info" class="img-fluid">
                     </div><!--end col-->
                     <div class="col-lg-9">
                         <h5>Information VIN</h5>
@@ -194,8 +194,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="Immatriculation" class="form-label">Immatriculation <span class="text-danger">*</span></label>
-                                <InputText class="form-control" id="Immatriculation" @bind-Value="managerVehicleViewModel.Vehicle.Immatriculation" required />
+                                <label for="Immatriculation" class="form-label">Immatriculation</label>
+                                <InputText class="form-control" id="Immatriculation" @bind-Value="managerVehicleViewModel.Vehicle.Immatriculation" readonly />
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -244,7 +244,6 @@
                             <div class="mb-3">
                                 <label class="form-label" for="Clients">Propriétaire <span class="text-danger">*</span></label>
                                 <InputSelect class="form-select" id="Clients" @bind-Value="selectClient">
-                                    <option value="@managerVehicleViewModel.Vehicle.Client.Id">@managerVehicleViewModel.Client.Lname @managerVehicleViewModel.Client.Fname</option>
                                     @foreach (var client in managerVehicleViewModel.Clients)
                                     {
                                         <option value="@client.Id">@client.Lname @client.Fname</option>
@@ -290,7 +289,7 @@
                 </EditForm>
                 <br />
                 <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitDeleteVehicle" FormName="DeleteVehicleForm">
-                    <p class="text-center">Si vous cliquez ici, seul le véhicule sera supprimé, mais ses données relatives au client seront conservées.</p>
+                    <p class="text-center">Si vous cliquez ici, seul le véhicule aura l'attribution supprimée, mais ses données relatives au client et à la facture seront conservées.</p>
                     <div class="row">
                         <div class="col-sm-12 text-end">
                             <button type="submit" class="btn btn-danger px-4">Supprimer</button>
