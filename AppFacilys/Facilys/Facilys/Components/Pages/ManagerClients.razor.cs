@@ -34,6 +34,7 @@ namespace Facilys.Components.Pages
             await LoadDataHeader();
 
             managerClientViewModel.Client = new();
+            managerClientViewModel.VehicleClient = new();
             managerClientViewModel.PhonesClients = new();
             managerClientViewModel.EmailsClients = new();
 
@@ -233,8 +234,8 @@ namespace Facilys.Components.Pages
             await SubmitAddClient();
 
             managerClientViewModel.VehicleClient = new();
-            managerClientViewModel.Client = await DbContext.Clients.LastOrDefaultAsync();
-            selectClient = managerClientViewModel.Client.Id;
+            managerClientViewModel.VehicleClient.Client = await DbContext.Clients.OrderByDescending(c => c.DateCreated).FirstOrDefaultAsync();
+            selectClient = managerClientViewModel.VehicleClient.Client.Id;
             OpenModal("OpenModalLargeAddVehicle");
         }
         private async Task SubmitEditClient()
@@ -399,7 +400,24 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitAddVehicleStepTow()
         {
+            try
+            {
+                managerClientViewModel.VehicleClient.Id = Guid.NewGuid();
+                managerClientViewModel.VehicleClient.DateAdded = DateTime.Now;
+                managerClientViewModel.VehicleClient.Client = await DbContext.Clients.FindAsync(selectClient);
+                await DbContext.Vehicles.AddAsync(managerClientViewModel.VehicleClient);
+                await DbContext.SaveChangesAsync();
 
+                ResetForm();
+
+                CloseModal("OpenModalLargeAddVehicle");
+
+                await RefreshClientList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
+            }
         }
 
 

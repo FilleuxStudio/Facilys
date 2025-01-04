@@ -23,8 +23,8 @@
                     <table class="table mb-0" id="datatable_1">
                         <thead class="table-light">
                             <tr>
-                                <th>Nom</th>
-                                <th>Prénom</th>
+                                <th>Nom / N° Siret</th>
+                                <th>Prénom / Nom d'entreprise</th>
                                 <th>Véhicules</th>
                                 <th>Téléphone</th>
                                 <th>Statut</th>
@@ -73,13 +73,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="Lname" class="form-label">Nom <span class="text-danger">*</span></label>
+                                <label for="Lname" class="form-label">Nom / N° Siret <span class="text-danger">*</span></label>
                                 <InputText class="form-control" id="Lname" @bind-Value="managerClientViewModel.Client.Lname"  required />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="Fname">Prénom <span class="text-danger">*</span></label>
+                                <label class="form-label" for="Fname">Prénom / Nom d'entreprise <span class="text-danger">*</span></label>
                                 <InputText class="form-control" id="Fanme" @bind-Value="managerClientViewModel.Client.Fname" required />
                             </div>
                         </div>
@@ -184,13 +184,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="Lname" class="form-label">Nom <span class="text-danger">*</span></label>
+                                <label for="Lname" class="form-label">Nom / N° Siret <span class="text-danger">*</span></label>
                                 <InputText class="form-control" id="Lname" @bind-Value="managerClientViewModel.Client.Lname" required />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="Fname">Prénom <span class="text-danger">*</span></label>
+                                <label class="form-label" for="Fname">Prénom / Nom d'entreprise <span class="text-danger">*</span></label>
                                 <InputText class="form-control" id="Fanme" @bind-Value="managerClientViewModel.Client.Fname" required />
                             </div>
                         </div>
@@ -318,7 +318,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title m-0" id="OpenModalLargeAddVehicleLabel">Ajouter un véhicule client</h6>
+                <h6 class="modal-title m-0" id="OpenModalLargeAddVehicleLabel">Ajouter un véhicule au client</h6>
                 <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeAddVehicle"))"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
@@ -368,16 +368,6 @@
                             <div class="mb-3">
                                 <label class="form-label" for="KM">KM <span class="text-warning">*</span></label>
                                 <InputNumber class="form-control" id="VIN" @bind-Value="managerClientViewModel.VehicleClient.KM" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="Clients">Propriétaire <span class="text-danger">*</span></label>
-                                <InputSelect class="form-select" id="Clients" @bind-Value="selectClient">
-                                    <option value="@managerClientViewModel.Client.Id" selected>@managerClientViewModel.Client.Lname @managerClientViewModel.Client.Fname</option>
-                                </InputSelect>
                             </div>
                         </div>
                     </div>

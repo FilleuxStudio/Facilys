@@ -15,6 +15,7 @@
                         <h4 class="card-title">Liste des véhicules client</h4>
                     </div><!--end col-->
                     <div class="col-auto">
+                        <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddOtherVehicle"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajouter un type d'engin non immatriculé</button>
                         <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddVehicle"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un véhicule</button>
                     </div><!--end col-->
                 </div><!--end row-->
@@ -24,7 +25,7 @@
                     <table class="table mb-0" id="datatable_1">
                         <thead class="table-light">
                             <tr>
-                                <th>Immatriculatuion</th>
+                                <th>Immatriculatuion / N° Serie</th>
                                 <th>Marque</th>
                                 <th>Modèle</th>
                                 <th>Propriétaire</th>
@@ -51,6 +52,27 @@
                                     <td class="text-end">
                                         <button type="button" @onclick="@(() => OpenModalData("OpenModalLargeEditVehicle", vehicle.Vehicle.Id))" class="btn btn-sm bg-warning-subtle text-warning"><i class="las la-pen text-warning fs-18"></i></button>
                                         <button type="button" @onclick="@(() => OpenModalData("OpenModalLargeDeleteVehicle", vehicle.Vehicle.Id))" class="btn btn-sm bg-danger-subtle text-danger"><i class="las la-trash-alt text-danger fs-18"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                            
+                            @foreach (var vehicleOther in managerOtherVehicleViewLists)
+                            {
+                                <tr>
+                                    <td class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 text-truncate">
+                                                <h6 class="m-0">@vehicleOther.OtherVehicle.SerialNumber</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@vehicleOther.OtherVehicle.Mark</td>
+                                    <td>@vehicleOther.OtherVehicle.Model</td>
+                                    <td>@vehicleOther.OtherVehicle.Client.Lname @vehicleOther.OtherVehicle.Client.Fname</td>
+                                    <td><span class="badge rounded text-success bg-success-subtle">Historique facture : @((vehicleOther?.Invoices?.Count ?? 0) > 0 ? vehicleOther.Invoices.Count.ToString() : "aucune") </span></td>
+                                    <td class="text-end">
+                                        <button type="button" @onclick="@(() => OpenModalData("OpenModalLargeEditOtherVehicle", vehicleOther.OtherVehicle.Id))" class="btn btn-sm bg-warning-subtle text-warning"><i class="las la-pen text-warning fs-18"></i></button>
+                                        <button type="button" @onclick="@(() => OpenModalData("OpenModalLargeDeleteOtherVehicle", vehicleOther.OtherVehicle.Id))" class="btn btn-sm bg-danger-subtle text-danger"><i class="las la-trash-alt text-danger fs-18"></i></button>
                                     </td>
                                 </tr>
                             }
@@ -181,7 +203,6 @@
     </div>
 </div><!--end modal-->
 
-
 <div class="@modalManager.GetModal("OpenModalLargeEditVehicle")?.ModalClass" id="OpenModalLargeEditVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeEditVehicleLabel" style="@modalManager.GetModal("OpenModalLargeEditVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeEditVehicle")?.AriaHidden">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -290,6 +311,176 @@
                 <br />
                 <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitDeleteVehicle" FormName="DeleteVehicleForm">
                     <p class="text-center">Si vous cliquez ici, seul le véhicule aura l'attribution supprimée, mais ses données relatives au client et à la facture seront conservées.</p>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-danger px-4">Supprimer</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div><!--end modal-body-->
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->
+
+<div class="@modalManager.GetModal("OpenModalLargeAddOtherVehicle")?.ModalClass" id="OpenModalLargeAddOtherVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeAddOtherVehicleLabel" style="@modalManager.GetModal("OpenModalLargeAddOtherVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeAddOtherVehicle")?.AriaHidden">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalLargeAddOtherVehicleLabel">Ajouter un engin à moteur</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeAddOtherVehicle"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerVehicleViewModel.OtherVehicle" OnValidSubmit="SubmitAddOtherVehicle" FormName="AddVehicleOtherForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="SerialNumber" class="form-label">Numéro de serie <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="SerialNumber" @bind-Value="managerVehicleViewModel.OtherVehicle.SerialNumber" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Mark" class="form-label">Marque <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Mark" @bind-Value="managerVehicleViewModel.OtherVehicle.Mark" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Type">Type <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Type" @bind-Value="managerVehicleViewModel.OtherVehicle.Type" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Model">Modèle <span class="text-warning">*</span></label>
+                                <InputText class="form-control" id="Model" @bind-Value="managerVehicleViewModel.OtherVehicle.Model" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="Clients">Propriétaire <span class="text-danger">*</span></label>
+                                <InputSelect class="form-select" id="Clients" @bind-Value="selectClient">
+                                    <option value="">Sélectionnez un Propiétaire</option>
+                                    @foreach (var client in managerVehicleViewModel.Clients)
+                                    {
+                                        <option value="@client.Id">@client.Lname @client.Fname</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="AdditionalInformation">Informations complémentaires</label>
+                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerVehicleViewModel.OtherVehicle.AdditionalInformation"></InputTextArea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-primary px-4">Ajouter</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div><!--end modal-->
+
+<div class="@modalManager.GetModal("OpenModalLargeEditOtherVehicle")?.ModalClass" id="OpenModalLargeEditOtherVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeEditOtherVehicleLabel" style="@modalManager.GetModal("OpenModalLargeEditOtherVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeEditOtherVehicle")?.AriaHidden">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalLargeEditOtherVehicleLabel">Ajouter un engin à moteur</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeEditOtherVehicle"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerVehicleViewModel.OtherVehicle" OnValidSubmit="SubmitEditOtherVehicle" FormName="EditVehicleOtherForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="SerialNumber" class="form-label">Numéro de serie <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="SerialNumber" @bind-Value="managerVehicleViewModel.OtherVehicle.SerialNumber" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Mark" class="form-label">Marque <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Mark" @bind-Value="managerVehicleViewModel.OtherVehicle.Mark" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Type">Type <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Type" @bind-Value="managerVehicleViewModel.OtherVehicle.Type" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Model">Modèle <span class="text-warning">*</span></label>
+                                <InputText class="form-control" id="Model" @bind-Value="managerVehicleViewModel.OtherVehicle.Model" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="Clients">Propriétaire <span class="text-danger">*</span></label>
+                                <InputSelect class="form-select" id="Clients" @bind-Value="selectClient">
+                                    <option value="">Sélectionnez un Propiétaire</option>
+                                    @foreach (var client in managerVehicleViewModel.Clients)
+                                    {
+                                        <option value="@client.Id">@client.Lname @client.Fname</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="AdditionalInformation">Informations complémentaires</label>
+                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerVehicleViewModel.OtherVehicle.AdditionalInformation"></InputTextArea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-warning px-4">Modifier</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div><!--end modal-->
+
+<div class="@modalManager.GetModal("OpenModalLargeDeleteOtherVehicle")?.ModalClass" id="OpenModalLargeDeleteOtherVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeDeleteOtherVehicleLabel" style="@modalManager.GetModal("OpenModalLargeDeleteOtherVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeDeleteOtherVehicle")?.AriaHidden">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalLargeDeleteOtherVehicleLabel">Supprimer un véhicule : @managerVehicleViewModel.Vehicle.Mark @managerVehicleViewModel.Vehicle.Immatriculation</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeDeleteOtherVehicle"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerVehicleViewModel.OtherVehicle" OnValidSubmit="SubmitDeleteOtherVehicleAllData" FormName="DeleteOtherVehicleAllDataForm">
+                    <p class="text-center">Si vous cliquez ici, toutes les données appartenant à cette engin seront effacées de manière irréversible.</p>
+                    <div class="row mb-3">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-danger px-4">Supprimer complètement</button>
+                        </div>
+                    </div>
+                </EditForm>
+                <br />
+                <EditForm class="" Model="@managerVehicleViewModel.OtherVehicle" OnValidSubmit="SubmitDeleteOtherVehicle" FormName="DeleteOtherVehicleForm">
+                    <p class="text-center">Si vous cliquez ici, seul l'engin aura l'attribution supprimée, mais ses données relatives au client et à la facture seront conservées.</p>
                     <div class="row">
                         <div class="col-sm-12 text-end">
                             <button type="submit" class="btn btn-danger px-4">Supprimer</button>

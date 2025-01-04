@@ -20,8 +20,16 @@
     {
         public Clients Client { get; set; }
         public Vehicles Vehicle { get; set; }
+        public List<HistoryPart> HistoryParts { get; set; }
+        public List<Invoices> Invoices { get; set; }
+    }
+
+    public class ManagerOtherVehicleViewList
+    {
+        public Clients Client { get; set; }
         public OtherVehicles OtherVehicle { get; set; }
         public List<HistoryPart> HistoryParts { get; set; }
         public List<Invoices> Invoices { get; set; }
     }
-}
+   
+    }
