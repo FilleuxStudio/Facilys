@@ -14,6 +14,7 @@ namespace Facilys.Components.Pages
         List<ManagerClienViewtList> managerClienViewtLists = new();
         ManagerClientViewModel managerClientViewModel = new();
         ModalManagerId modalManager = new();
+        Guid selectClient = Guid.Empty;
 
         private string currentPhone = string.Empty, currentEmail = string.Empty;
 
@@ -40,6 +41,7 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalLargeAddClient");
             modalManager.RegisterModal("OpenModalLargeEditClient");
             modalManager.RegisterModal("OpenModalLargeDeleteClient");
+            modalManager.RegisterModal("OpenModalLargeAddVehicle");
         }
 
         private async Task LoadDataHeader()
@@ -184,45 +186,57 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitAddClient()
         {
-            try
+            if(managerClientViewModel.Client.Fname != "" && managerClientViewModel.Client.Lname != "" && managerClientViewModel.Client.Address != "")
             {
-                managerClientViewModel.Client.Id = Guid.NewGuid();
-                managerClientViewModel.Client.DateCreated = DateTime.Now;
-                await DbContext.Clients.AddAsync(managerClientViewModel.Client);
-                await DbContext.SaveChangesAsync();
-
-                if (managerClientViewModel.PhonesClients.Count != 0)
+                try
                 {
-                    for (int i = 0; i < managerClientViewModel.PhonesClients.Count; i++)
+                    managerClientViewModel.Client.Id = Guid.NewGuid();
+                    managerClientViewModel.Client.DateCreated = DateTime.Now;
+                    await DbContext.Clients.AddAsync(managerClientViewModel.Client);
+                    await DbContext.SaveChangesAsync();
+
+                    if (managerClientViewModel.PhonesClients.Count != 0)
                     {
-                        managerClientViewModel.PhonesClients[i].Client = managerClientViewModel.Client;
+                        for (int i = 0; i < managerClientViewModel.PhonesClients.Count; i++)
+                        {
+                            managerClientViewModel.PhonesClients[i].Client = managerClientViewModel.Client;
+                        }
+
+                        await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
                     }
 
-                    await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
-                }
-
-                if (managerClientViewModel.EmailsClients.Count != 0)
-                {
-                    for (int i = 0; i < managerClientViewModel.EmailsClients.Count; i++)
+                    if (managerClientViewModel.EmailsClients.Count != 0)
                     {
-                        managerClientViewModel.EmailsClients[i].Client = managerClientViewModel.Client;
+                        for (int i = 0; i < managerClientViewModel.EmailsClients.Count; i++)
+                        {
+                            managerClientViewModel.EmailsClients[i].Client = managerClientViewModel.Client;
+                        }
+                        await DbContext.Emails.AddRangeAsync(managerClientViewModel.EmailsClients);
                     }
-                    await DbContext.Emails.AddRangeAsync(managerClientViewModel.EmailsClients);
+
+                    await DbContext.SaveChangesAsync();
+                    ResetForm();
+
+                    CloseModal("OpenModalLargeAddClient");
+
+                    await RefreshClientList();
                 }
-
-                await DbContext.SaveChangesAsync();
-                ResetForm();
-
-                CloseModal("OpenModalLargeAddClient");
-
-                await RefreshClientList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
+                }
             }
         }
 
+        private async void AddCustomerAndVehicle()
+        {
+            await SubmitAddClient();
+
+            managerClientViewModel.VehicleClient = new();
+            managerClientViewModel.Client = await DbContext.Clients.LastOrDefaultAsync();
+            selectClient = managerClientViewModel.Client.Id;
+            OpenModal("OpenModalLargeAddVehicle");
+        }
         private async Task SubmitEditClient()
         {
             using var transaction = await DbContext.Database.BeginTransactionAsync();
@@ -381,6 +395,11 @@ namespace Facilys.Components.Pages
                 // Gérer l'exception (par exemple, journalisation, affichage d'un message d'erreur)
                 Console.WriteLine($"Une erreur s'est produite lors du remplacement du client : {ex.Message}");
             }
+        }
+
+        private async Task SubmitAddVehicleStepTow()
+        {
+
         }
 
 

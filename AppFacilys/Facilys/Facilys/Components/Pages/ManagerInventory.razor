@@ -15,7 +15,7 @@
                         <h4 class="card-title">Liste de l'inventaire</h4>
                     </div><!--end col-->
                     <div class="col-auto">
-                        <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddInventory"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un client</button>
+                        <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddInventory"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un article</button>
                     </div><!--end col-->
                 </div><!--end row-->
             </div><!--end card-header-->
@@ -37,7 +37,7 @@
                             {
                                 <tr>
                                     <td class="ps-0">
-                                        <img src="assets/images/products/04.png" alt="product" height="40">
+                                        <img src="@inventory.Picture" alt="product" height="40">
                                         <p class="d-inline-block align-middle mb-0">
                                             <h6 class="d-inline-block align-middle mb-0 product-name">@inventory.PartName</h6>
                                             <br>
@@ -70,7 +70,7 @@
                 <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeAddInventory"))"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
-                <EditForm class="" Model="@inventory" OnValidSubmit="SubmitAddInventory" FormName="addInventoryForm">
+                <EditForm class="" Model="@inventory" OnValidSubmit="SubmitAddInventory" FormName="AddInventoryForm">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -115,7 +115,7 @@
                     </div>
                     <div class="row">
                         <div class="input-group mb-3">
-                            <InputFile class="form-control" id="Picture" @bind-Value="inventory.Picture" />
+                            <InputFile class="form-control" id="Picture" @bind-Value="inventory.Picture" OnChange="@OnFileChangeUpload" />
                             <label class="input-group-text" for="Picture">Photo</label>
                         </div>
                     </div>
@@ -130,6 +130,85 @@
                     <div class="row">
                         <div class="col-sm-12 text-end">
                             <button type="submit" class="btn btn-primary px-4">Ajouter</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div><!--end modal-body-->
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->
+
+<div class="@modalManager.GetModal("OpenModalLargeEditInventory")?.ModalClass" id="OpenModalLargeEditInventory" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeEditInventoryLabel" style="@modalManager.GetModal("OpenModalLargeEditInventory")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeEditInventory")?.AriaHidden">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalLargeEditInventoryLabel">Modifier un article</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeEditInventory"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@inventory" OnValidSubmit="SubmitEditInventory" FormName="EditInventoryForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="PartName" class="form-label">Nom du produit <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="PartName" @bind-Value="inventory.PartName" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Mark">Marque <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Mark" @bind-Value="inventory.Mark" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Type" class="form-label">Type</label>
+                                <InputText class="form-control" id="Type" @bind-Value="inventory.Type" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Reference">Référence <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Reference" @bind-Value="inventory.Reference" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Price">Prix</label>
+                                <InputNumber class="form-control" id="Price" @bind-Value="inventory.Price" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Quantity" class="form-label">Quantité</label>
+                                <InputNumber class="form-control" id="Quantity" @bind-Value="inventory.Quantity" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <img src="@inventory.Picture" alt="" class="img-fluid rounded mx-auto d-block" style="width: 30%;">
+                    </div>
+                    <div class="row">
+                        <div class="input-group mb-3">
+                            <InputFile class="form-control" id="Picture" @bind-Value="inventory.Picture" OnChange="@OnFileChangeUpload" />
+                            <label class="input-group-text" for="Picture">Photo</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="Details">Informations complémentaires</label>
+                                <InputTextArea class="form-control" rows="5" id="Details" @bind-Value="inventory.Details"></InputTextArea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-warning px-4">Modifier</button>
                         </div>
                     </div>
                 </EditForm>

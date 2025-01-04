@@ -70,7 +70,7 @@
                 <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeAddVehicle"))"></button>
             </div><!--end modal-header-->
             <div class="modal-body">
-                <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitAddVehicle" FormName="addVehicleForm">
+                <EditForm class="" Model="@managerVehicleViewModel.Vehicle" OnValidSubmit="SubmitAddVehicle" FormName="AddVehicleForm">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -262,7 +262,7 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-12 text-end">
-                            <button type="submit" class="btn btn-primary px-4">Modifier</button>
+                            <button type="submit" class="btn btn-warning px-4">Modifier</button>
                         </div>
                     </div>
                 </EditForm>
