@@ -141,6 +141,7 @@ router.get("/account", accountController.account);
 router.post("/accountDetails", accountController.accountDetails);
 router.post("/accountUpdate", accountController.accoutUpdate);
 router.post("/accountAddTeam", accountController.accountAddTeam);
+router.get("/accountDeleteTeam/:id", accountController.accountDeleteMember);
 
 // Route pour le manager
 router.post("/managerAddProduct", managerController.managerAddProduct);

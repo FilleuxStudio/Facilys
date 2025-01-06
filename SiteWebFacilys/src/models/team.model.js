@@ -94,10 +94,10 @@ class Team {
 
    // Méthode pour supprimer un produit de Firestore
    static async delete(id) {
-    const productRef = db.collection('teams').doc(id);
+    const teamRef = db.collection('teams').doc(id);
 
     try {
-      await productRef.delete();
+      await teamRef.delete();
       console.log("Document successfully deleted");
       return true;
     } catch (error) {

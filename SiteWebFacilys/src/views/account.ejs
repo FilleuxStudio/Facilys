@@ -593,7 +593,7 @@
                                                                         <td><%= Order.type %></td>
                                                                         <td class="text-center">
                                                                             <a data-id="<%= Orders.id %>" class="btn-small d-block text-danger"><i class="fi-rs-trash"></i></a>
-                                                                            <a data-id="<%= Orders.id %>" class="btn-small d-block text-warning ml-2"><i class="fi-rs-edit"></i></a>
+                                                                            <a data-id="<%= Orders.id %>" class="btn-small d-block text-secondary ml-2"><i class="fi-rs-eye"></i></a>
                                                                         </td>
                                                                     </tr>
                                                                     <% }); %>
@@ -673,7 +673,7 @@
                                                                                 Nom : <%= team.lname %><br/>
                                                                                 Type : <%= team.type %><br/>
                                                                             </p>
-                                                                            <a href="#" data-id="<%= team.id %>"  class="btn btn-small btn-danger">Supprimer</a>
+                                                                            <a href="/accountDeleteTeam/<%= team.id %>" data-id="<%= team.id %>"  class="btn btn-small btn-danger">Supprimer</a>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -687,7 +687,6 @@
                                                                 </div>
                                                             </div>
                                                         <% } %>
-                                                        
                                                     </div>
                                                 </div>
                                             </div>

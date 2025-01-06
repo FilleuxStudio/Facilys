@@ -132,6 +132,20 @@ exports.accountAddTeam = async (req, res) => {
   }
 };
 
+exports.accountDeleteMember = async (req, res) => {
+  try {
+    console.log("Suppression de l'équipe avec l'ID:", req.params.id);
+    const deleteResult = await Team.delete(req.params.id);
+    if (deleteResult === true) {
+      res.redirect('/account');
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression', error);
+    req.flash('error', 'Erreur lors de la suppression');
+    res.redirect('/account');
+  }
+};
+
 async function convertToBase64Html(file) {
   if (!file) {
     throw new Error("Aucun fichier n'a été fourni");
