@@ -14,6 +14,7 @@ namespace Facilys.Components.Services
     {
         private const string CookieFileName = "cookieConnect.json";
         private const int CookieValidityDays = 30;
+        private CookieData cookieUserConnect;
         private readonly ApplicationDbContext _context;
 
         public AuthService(ApplicationDbContext context)
@@ -62,8 +63,14 @@ namespace Facilys.Components.Services
                 ExpirationDate = DateTime.UtcNow.AddDays(CookieValidityDays),
                 Key = GenerateSha256(user.Email + DateTime.UtcNow.Ticks)
             };
-
+            cookieUserConnect = cookieData;
             await SaveCookieDataAsync(cookieData);
+        }
+
+        public async Task<CookieData> GetAuthenticatedAsync()
+        {
+            cookieUserConnect = await LoadCookieDataAsync();
+            return cookieUserConnect;
         }
 
         /// <summary>
@@ -82,8 +89,10 @@ namespace Facilys.Components.Services
         private async Task<CookieData> LoadCookieDataAsync()
         {
             var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
-
+        
             var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
+
+            Console.WriteLine(filePath);
 
             if (!File.Exists(filePath)) return null;
 

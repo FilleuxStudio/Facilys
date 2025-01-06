@@ -25,6 +25,7 @@ namespace Facilys.Components.Data
         public DbSet<Inventorys> Inventorys { get; set; }
         public DbSet<Quotes> Quotes { get; set; }
         public DbSet<QuotesItems> QuotesItems { get; set; }
+        public DbSet<CompanySettings> CompanySettings { get; set; }
 
         //Commande
         /*

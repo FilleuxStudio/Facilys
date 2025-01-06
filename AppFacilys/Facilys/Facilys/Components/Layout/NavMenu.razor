@@ -1,32 +1,35 @@
 ﻿@inject PageTitleService PageTitleService
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
 <!--<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Facilys</a>
-    </div>
+<div class="container-fluid">
+<a class="navbar-brand" href="">Facilys</a>
+</div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+<nav class="flex-column">
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+<span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+</NavLink>
+</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="counter">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+</NavLink>
+</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="weather">
+<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+</NavLink>
+</div>
+</nav>
 </div>-->
 <div class="topbar d-print-none">
     <div class="container-xxl">
@@ -46,7 +49,7 @@
             <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
                 <li class="dropdown">
                     <a class="nav-link dropdown-toggle arrow-none nav-icon" data-bs-toggle="dropdown" href="#" role="button"
-                       aria-haspopup="false" aria-expanded="false">
+                    aria-haspopup="false" aria-expanded="false">
                         <img src="/assets/images/flags/french_flag.jpg" alt="flag france" class="thumb-sm rounded-circle">
                     </a>
                     <div class="dropdown-menu">
@@ -59,13 +62,13 @@
 
                 <li class="dropdown topbar-item">
                     <a class="nav-link dropdown-toggle arrow-none nav-icon" data-bs-toggle="dropdown" href="#" role="button"
-                       aria-haspopup="false" aria-expanded="false">
-                        <img src="/assets/images/users/avatar-1.jpg" alt="" class="thumb-lg rounded-circle">
+                    aria-haspopup="false" aria-expanded="false">
+                        <img src="/assets/images/users/avatar-demo.png" alt="" class="thumb-lg rounded-circle">
                     </a>
                     <div class="dropdown-menu dropdown-menu-end py-0">
                         <div class="d-flex align-items-center dropdown-item py-2 bg-secondary-subtle">
                             <div class="flex-shrink-0">
-                                <img src="/assets/images/users/avatar-1.jpg" alt="" class="thumb-md rounded-circle">
+                                <img src="/assets/images/users/avatar-demo.png" alt="" class="thumb-md rounded-circle">
                             </div>
                             <div class="flex-grow-1 ms-2 text-truncate align-self-center">
                                 <h6 class="my-0 fw-medium text-dark fs-13">William Martin</h6>
@@ -74,7 +77,7 @@
                         </div>
                         <div class="dropdown-divider mt-0"></div>
                         <small class="text-muted px-2 pb-1 d-block">Compte</small>
-                        <a class="dropdown-item" href="pages-faq.html"><i class="las la-wallet fs-18 me-1 align-text-bottom"></i> Mon compte</a>
+                        <NavLink class="dropdown-item" href="@($"/profile/{cookieData.Id}")"><i class="las la-wallet fs-18 me-1 align-text-bottom"></i> Mon compte</NavLink>
                         <small class="text-muted px-2 py-1 d-block">Paramètre</small>
                         <a class="dropdown-item" href="pages-profile.html"><i class="las la-cog fs-18 me-1 align-text-bottom"></i>Paramètres de sociète</a>
                         <a class="dropdown-item" href="pages-profile.html"><i class="las la-lock fs-18 me-1 align-text-bottom"></i> Sécurité</a>
@@ -108,8 +111,8 @@
                 <ul class="navbar-nav mb-auto w-100">
                     <li class="menu-label pt-0 mt-0">
                         <!-- <small class="label-border">
-                            <div class="border_left hidden-xs"></div>
-                            <div class="border_right"></div>
+                        <div class="border_left hidden-xs"></div>
+                        <div class="border_right"></div>
                         </small> -->
                         <span>Composantes</span>
                     </li>
@@ -121,7 +124,7 @@
                     </li><!--end nav-item-->
                     <li class="nav-item">
                         <NavLink class="nav-link" href="/managerClients" title="Gestion des clients">
-                           <i class="iconoir-group menu-icon"></i>
+                            <i class="iconoir-group menu-icon"></i>
                             <span>Clients</span>
                         </NavLink>
                     </li>
@@ -143,7 +146,7 @@
                             <span>Factures <br>Ordre de réparation</span>
                         </NavLink>
                     </li>
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <NavLink class="nav-link" href="/managerInventory" title="Gestion des stocks">
                             <i class="iconoir-packages menu-icon"></i>
                             <span>Stocks</span>
@@ -156,13 +159,13 @@
                         </small>
                         <span>Analyses</span>
                     </li>
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <NavLink class="nav-link" href="/statistique" title="Statistique">
                             <i class="iconoir-stats-up-square menu-icon"></i>
                             <span>Analyses<br>Statistique</span>
                         </NavLink>
                     </li>
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <NavLink class="nav-link" href="/exports" title="Exportation">
                             <i class="iconoir-database-export menu-icon"></i>
                             <span>Exportation des données</span>
@@ -183,10 +186,20 @@
 <!-- end leftbar-tab-menu-->
 @code {
     private string Title => PageTitleService.CurrentTitle;
+    private CookieData cookieData = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         PageTitleService.TitleChanged += OnTitleChanged;
+
+        if (await AuthService.IsAuthenticatedAsync() == true){
+            cookieData = await AuthService.GetAuthenticatedAsync();
+            if (cookieData == null){
+                NavigationManager.NavigateTo("/login", forceLoad: true);
+            }
+        }else{
+            NavigationManager.NavigateTo("/login", forceLoad: true);
+        }
     }
 
     private void OnTitleChanged()

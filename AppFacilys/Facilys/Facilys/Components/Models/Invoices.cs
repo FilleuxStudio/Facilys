@@ -21,6 +21,7 @@ namespace Facilys.Components.Models
         public string? Observations { get; set; } = string.Empty;
         public string? RepairType { get; set; } = string.Empty;
         public string Status { get; set; }
+        public Users? User { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.Now;
     }
 

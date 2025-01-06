@@ -10,7 +10,7 @@
   "build": {
     "appId": "com.Facilys.app",
     "productName": "Facilys",
-    "copyright": "Copyright © 2020",
+    "copyright": "Copyright © 2025",
     "buildVersion": "1.0.0",
     "compression": "maximum",
     "directories": {
@@ -32,7 +32,7 @@
       "**/*"
     ],
     "win": {
-      "icon": "../../../wwwroot/favicon.ico"
+      "icon": "wwwroot/assets/images/favicon.ico"
     },
     "mac": {
       "icon": "../../../Assets/app-icon.icns"
