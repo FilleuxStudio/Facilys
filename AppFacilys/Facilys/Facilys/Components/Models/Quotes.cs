@@ -14,6 +14,7 @@ namespace Facilys.Components.Models
         public string QuoteNumber { get; set; } = string.Empty;
         public float? TotalAmount { get; set; } = 0.00f;
         public StatusQuote Status { get; set; } = StatusQuote.waiting;
+        public Users? User { get; set; }
         public DateTime? DateAccepted { get; set; } = DateTime.Now;
         [Required]
         public DateTime DateAdded { get; set; } = DateTime.Now;
