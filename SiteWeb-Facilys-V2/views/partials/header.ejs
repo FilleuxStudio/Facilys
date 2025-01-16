@@ -1,0 +1,71 @@
+<header id="header" class="header-default header-style-3">
+    <div class="container">
+        <div class="row wrapper-header align-items-center">
+            <div class="col-md-4 col-3 d-xl-none">
+                <a href="#mobileMenu" class="mobile-menu" data-bs-toggle="offcanvas" aria-controls="mobileMenu">
+                    <i class="icon icon-categories"></i>
+                </a>
+            </div>
+            <div class="col-xl-9 col-md-4 col-6">
+                <div class="wrapper-header-left">
+                    <a href="/" class="logo-header">
+                        <img src="/images/logo/logo.svg" alt="logo" class="logo" style="width: 48px;">
+                    </a>
+                    <nav class="box-navigation text-center">
+                        <ul class="box-nav-ul d-flex align-items-center">
+                            <li class="menu-item <%= currentRoute === '/' ? 'active' : '' %>">
+                                <a href="/" class="item-link">Boutique<i class="icon icon-arrow-down"></i></a>
+                            </li>
+                            <li class="menu-item <%= currentRoute === '/about' ? 'active' : '' %>">
+                                <a href="/about" class="item-link">À propos de nous<i
+                                        class="icon icon-arrow-down"></i></a>
+                            </li>
+                            <li class="menu-item <%= currentRoute === '/contact' ? 'active' : '' %>">
+                                <a href="/contact" class="item-link">Contact<i class="icon icon-arrow-down"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-3">
+                <ul class="nav-icon d-flex justify-content-end align-items-center">
+                    <li class="nav-account">
+                        <a href="#" class="nav-icon-item">
+                            <svg class="icon" width="24" height="24" viewbox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
+                                    stroke="#181818" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"></path>
+                                <path
+                                    d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+                                    stroke="#181818" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"></path>
+                            </svg>
+                        </a>
+                        <div class="dropdown-account dropdown-login">
+                            <div class="sub-top">
+                                <a href="/login" class="tf-btn btn-reset">se connecter</a>
+                                <p class="text-center text-secondary-2">Vous n'avez pas de compte ? <a
+                                        href="/register">Créer un compte</a></p>
+                            </div>
+                            <div class="sub-bot">
+                                <span class="body-text-">Support</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-cart"><a href="#shoppingCart" data-bs-toggle="modal" class="nav-icon-item">
+                            <svg class="icon" width="24" height="24" viewbox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M16.5078 10.8734V6.36686C16.5078 5.17166 16.033 4.02541 15.1879 3.18028C14.3428 2.33514 13.1965 1.86035 12.0013 1.86035C10.8061 1.86035 9.65985 2.33514 8.81472 3.18028C7.96958 4.02541 7.49479 5.17166 7.49479 6.36686V10.8734M4.11491 8.62012H19.8877L21.0143 22.1396H2.98828L4.11491 8.62012Z"
+                                    stroke="#181818" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"></path>
+                            </svg>
+                            <span class="count-box">1</span></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>

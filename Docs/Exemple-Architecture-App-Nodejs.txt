@@ -1,0 +1,38 @@
+ecommerce-site/
+├── node_modules/
+├── src/
+│   ├── config/
+│   │   └── firestore.js
+│   ├── controllers/
+│   │   ├── productController.js
+│   │   ├── orderController.js
+│   │   └── userController.js
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   └── errorHandler.js
+│   ├── models/
+│   │   ├── Product.js
+│   │   ├── Order.js
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── productRoutes.js
+│   │   ├── orderRoutes.js
+│   │   └── userRoutes.js
+│   ├── services/
+│   │   └── firestoreService.js
+│   ├── utils/
+│   │   └── helpers.js
+│   └── app.js
+├── public/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── views/
+│   ├── products/
+│   ├── orders/
+│   └── users/
+├── tests/
+├── .env
+├── .gitignore
+├── package.json
+└── README.md

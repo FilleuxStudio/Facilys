@@ -1,6 +1,6 @@
 const express = require("express");
 const session = require("express-session");
-const cookieParser = require("cookie-parser");
+const cookieParser = require('cookie-parser');
 const path = require("path");
 const bodyParser = require("body-parser");
 const csrf = require("csurf");

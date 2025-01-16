@@ -4,6 +4,10 @@
 /AppFacilys/Facilys/obj/
 /AppFacilys/Facilys/Facilys/bin/
 
+/SiteWeb-Facilys-V2/src/config
+/SiteWeb-Facilys-V2/.env
+
 node_modules/
 **/node_modules/
 **/obj/
+
