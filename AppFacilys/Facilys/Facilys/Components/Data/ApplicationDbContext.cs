@@ -20,6 +20,7 @@ namespace Facilys.Components.Data
         public DbSet<ProfessionalCustomer> ProfessionalClient { get; set; }
         public DbSet<Vehicles> Vehicles { get; set; }
         public DbSet<OtherVehicles> OtherVehicles { get; set; }
+        public DbSet<MaintenanceAlert> MaintenanceAlerts { get; set; }
         public DbSet<Invoices> Invoices { get; set; }
         public DbSet<HistoryPart> HistoryParts { get; set; }
         public DbSet<Inventorys> Inventorys { get; set; }

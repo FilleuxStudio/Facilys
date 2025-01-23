@@ -88,8 +88,10 @@ namespace Facilys.Components.Services
         /// </summary>
         private async Task<CookieData> LoadCookieDataAsync()
         {
-            var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
-        
+            //var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
+
+           var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
             var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
 
             Console.WriteLine(filePath);

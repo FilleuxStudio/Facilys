@@ -337,10 +337,12 @@ namespace Facilys.Components.Pages
             if (isOtherVehicle)
             {
                 await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Invoices WHERE IdOtherVehicle = {0}", vehicleId);
+                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM MaintenanceAlerts WHERE IdOtherVehicle = {0}", vehicleId);
             }
             else
             {
                 await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Invoices WHERE IdVehicle = {0}", vehicleId);
+                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM MaintenanceAlerts WHERE IdVehicle = {0}", vehicleId);
             }
         }
     }
