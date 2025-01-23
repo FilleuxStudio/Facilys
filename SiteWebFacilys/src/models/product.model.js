@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase-config'); // Assurez-vous que ce chemin est correct
+const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
 const { v4: uuidv4 } = require('uuid');
 
 class Product {
@@ -11,7 +11,7 @@ class Product {
     this.oldPrice = data.oldPrice;
     this.advice = data.advice;
     this.type = data.type;
-    this.colorBagde = data.colorBagde;
+    this.colorBadge = data.colorBadge;
     this.dateAdded = data.dateAdded;
   }
 
@@ -27,7 +27,7 @@ class Product {
       oldPrice: this.oldPrice,
       advice: this.advice,
       type: this.type,
-      colorBagde: this.colorBagde,
+      colorBadge: this.colorBadge,
       dateAdded: new Date().toISOString(),
     });
   }

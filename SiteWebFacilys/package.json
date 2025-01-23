@@ -1,31 +1,27 @@
 {
-  "name": "sitewebfacilys",
+  "name": "siteweb-facilys",
   "version": "1.0.0",
-  "main": "/src/app.js",
+  "description": "website and API for the blazor Facylis web application",
+  "main": "./src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Filleux Dimitri (FilleuxStudio)",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "argon2": "^0.41.1",
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.3",
-    "cookie-parser": "^1.4.6",
-    "csurf": "^1.2.2",
-    "dotenv": "^16.4.5",
+    "@node-rs/argon2": "^2.0.2",
+    "canvas": "^3.1.0",
+    "compression": "^1.7.5",
+    "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^3.1.0",
+    "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
-    "express": "^4.21.1",
+    "express": "^4.21.2",
     "express-fileupload": "^1.5.1",
-    "express-rate-limit": "^7.4.0",
-    "express-session": "^1.18.0",
-    "express-validator": "^7.2.0",
-    "firebase": "^10.13.2",
-    "firebase-admin": "^12.5.0",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.15",
-    "uuid": "^10.0.0"
+    "express-session": "^1.18.1",
+    "firebase-admin": "^13.0.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.9"
   }
 }

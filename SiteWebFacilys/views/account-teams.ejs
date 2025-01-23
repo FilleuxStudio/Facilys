@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="no-js" lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Boutique Facilys | Equipes</title>
+    <meta name="author" content="FilleuxStudio">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="mon compte, mon équipes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- font -->
+    <link rel="stylesheet" href="/fonts/fonts.css">
+    <link rel="stylesheet" href="/fonts/font-icons.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/swiper-bundle.min.css">
+    <link rel="stylesheet" href="/css/animate.css">
+    <link rel="stylesheet" href="/css/sib-styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- Favicon and Touch Icons  -->
+    <!-- Favicon and Touch Icons  -->
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.png">
+    <link rel="apple-touch-icon-precomposed" href="/favicon.png">
+
+</head>
+
+<body class="preload-wrapper">
+
+    <!-- RTL -->
+    <a href="javascript:void(0);" id="toggle-rtl" class="btn-style-2 radius-3"><span>RTL</span></a>
+    <!-- /RTL  -->
+
+    <!-- Scroll Top -->
+    <button id="scroll-top">
+        <svg width="24" height="25" viewbox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_15741_24194)">
+                <path
+                    d="M3 11.9175L12 2.91748L21 11.9175H16.5V20.1675C16.5 20.3664 16.421 20.5572 16.2803 20.6978C16.1397 20.8385 15.9489 20.9175 15.75 20.9175H8.25C8.05109 20.9175 7.86032 20.8385 7.71967 20.6978C7.57902 20.5572 7.5 20.3664 7.5 20.1675V11.9175H3Z"
+                    stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </g>
+            <defs>
+                <clippath id="clip0_15741_24194">
+                    <rect width="24" height="24" fill="white" transform="translate(0 0.66748)"></rect>
+                </clippath>
+            </defs>
+        </svg>
+    </button>
+
+    <!-- preload -->
+    <div class="preload preload-container">
+        <div class="preload-logo">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    <!-- /preload -->
+
+    <!-- #wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <%- include('partials/header') %>
+            <!-- /Header -->
+
+
+            <!-- page-title -->
+            <div class="page-title" style="background-image: url(images/section/page-title.jpg);">
+                <div class="container-full">
+                    <div class="row">
+                        <div class="col-12">
+                            <h3 class="heading text-center">Mon compte Facylis</h3>
+                            <ul class="breadcrumbs d-flex align-items-center justify-content-center">
+                                <li>
+                                    <a class="link" href="/">Boutique</a>
+                                </li>
+                                <li>
+                                    <i class="icon-arrRight"></i>
+                                </li>
+                                <li>
+                                    Mon équipes
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /page-title -->
+
+            <div class="btn-sidebar-account">
+                <button data-bs-toggle="offcanvas" data-bs-target="#mbAccount"><i
+                        class="icon icon-squares-four"></i></button>
+            </div>
+
+            <!-- my-account -->
+            <section class="flat-spacing">
+                <div class="container">
+                    <div class="my-account-wrap">
+                        <div class="wrap-sidebar-account">
+                            <%- include('partials/account-menu') %>
+                        </div>
+                        <div class="my-account-content">
+                            <div class="card">
+                                <div class="card-header">
+                                    <button class="btn btn-success" data-bs-toggle="modal"  data-bs-target="#AddTeamModal">Ajouter</button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <% if (Teams && Teams.length> 0) { %>
+                                            <% Teams.forEach(function(team) { %>
+                                                <div class="col-lg-4">
+                                                    <div class="card mb-3 mb-lg-0">
+                                                        <div class="card-header bg-white">
+                                                            <h5 class="mb-0">
+                                                                <%= team.lname %>
+                                                            </h5>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p> Prénom : <%= team.fname %><br />
+                                                                    Nom : <%= team.lname %><br />
+                                                                        Type : <%= team.type %><br />
+                                                            </p>
+                                                            <a href="/account-deleteteam/<%= team.id %>" data-id="<%= team.id %>"
+                                                                class="btn btn-small btn-danger mt-2">Supprimer</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <div class="col-lg-12">
+                                                            <div class="card mb-3 mb-lg-0">
+                                                                <div class="card-header bg-white">
+                                                                    <h5 class="mb-0">Aucun</h5>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /my-account -->
+
+            <!-- Modal Add -->
+            <div class="modal fade modal-quick-add" id="AddTeamModal" tabindex="-1" aria-labelledby="AddTeamModal"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Ajouter un collaborateur</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" id="formAddTeam" action="/account-addteam">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <fieldset>
+                                            <label>Nom <span class="required text-danger">*</span></label>
+                                            <input class="form-control" name="tlname" id="tlname" type="text" required>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <fieldset>
+                                            <label>Prénom <span class="required text-danger">*</span></label>
+                                            <input required class="form-control" name="tfname" id="tfname" type="text">
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-group col-md-12 mt-2">
+                                        <fieldset>
+                                            <label for="tpassword" class="form-label">Mot de passe</label>
+                                            <div class="input-group">
+                                                <input class="form-control input-password" type="password" name="tpassword" id="tpassword" tabindex="2" required>
+                                                <button class="btn btn-outline-secondary" type="button" id="generatePassword">Générer</button>
+                                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                    <i class="icon-eye-hide-line"></i>
+                                                </button>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-group col-md-12 mt-2">
+                                        <fieldset>
+                                            <label>Type (Rôle) <span class="required text-danger">*</span></label>
+                                            <select class="form-select" aria-label="Default select example" id="ttype"
+                                                name="ttype">
+                                                <option value="user">Utilisateur</option>
+                                                <option value="manager">Responsable</option>
+                                                <option value="administrator">Administrateur</option>
+                                                <option value="master">Maitre</option>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-group col-md-12 mt-2">
+                                        <fieldset>
+                                            <label>Email <span class="required text-danger">*</span></label>
+                                            <input required class="form-control square" name="temail" id="temail"
+                                                type="email">
+                                        </fieldset>
+                                    </div>
+                                    <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                    <input type="hidden" name="emailmanager" id="emailmanager"
+                                        value="<%= user.email %>" />
+                                    <div class="col-md-12 mt-3">
+                                        <button type="submit" class="btn btn-success" name="submit"
+                                            value="Submit">Valider</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <%- include('partials/footer') %>
+                <!-- /Footer -->
+    </div>
+
+    <!-- mobile menu -->
+    <%- include('partials/mobile-menu') %>
+        <!-- /mobile menu -->
+
+        <!-- Javascript -->
+        <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/swiper-bundle.min.js"></script>
+        <script type="text/javascript" src="/js/carousel.js"></script>
+        <script type="text/javascript" src="/js/bootstrap-select.min.js"></script>
+        <script type="text/javascript" src="/js/lazysize.min.js"></script>
+        <script type="text/javascript" src="/js/count-down.js"></script>
+        <script type="text/javascript" src="/js/wow.min.js"></script>
+        <script type="text/javascript" src="/js/multiple-modal.js"></script>
+        <script type="text/javascript" src="/js/main.js"></script>
+        <script type="text/javascript" src="/js/generate-password.js"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-const { db } = require("../config/firebase-config"); // Assurez-vous que ce chemin est correct
+const { db } = require("../config/firestore"); // Assurez-vous que ce chemin est correct
 
 class User {
   constructor(data) {

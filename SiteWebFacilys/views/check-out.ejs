@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Boutique Facilys | Procédure de paiements</title>
+    <meta name="author" content="FilleuxStudio">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="contact">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- font -->
+    <link rel="stylesheet" href="/fonts/fonts.css">
+    <link rel="stylesheet" href="/fonts/font-icons.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/swiper-bundle.min.css">
+    <link rel="stylesheet" href="/css/animate.css">
+    <link rel="stylesheet" href="/css/sib-styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- Favicon and Touch Icons  -->
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.png">
+    <link rel="apple-touch-icon-precomposed" href="/favicon.png">
+
+</head>
+
+<body class="preload-wrapper">
+
+    <!-- RTL -->
+    <a href="javascript:void(0);" id="toggle-rtl" class="btn-style-2 radius-3"><span>RTL</span></a>
+    <!-- /RTL  -->
+
+    <!-- Scroll Top -->
+    <button id="scroll-top">
+        <svg width="24" height="25" viewbox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_15741_24194)">
+                <path
+                    d="M3 11.9175L12 2.91748L21 11.9175H16.5V20.1675C16.5 20.3664 16.421 20.5572 16.2803 20.6978C16.1397 20.8385 15.9489 20.9175 15.75 20.9175H8.25C8.05109 20.9175 7.86032 20.8385 7.71967 20.6978C7.57902 20.5572 7.5 20.3664 7.5 20.1675V11.9175H3Z"
+                    stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </g>
+            <defs>
+                <clippath id="clip0_15741_24194">
+                    <rect width="24" height="24" fill="white" transform="translate(0 0.66748)"></rect>
+                </clippath>
+            </defs>
+        </svg>
+    </button>
+
+    <!-- preload -->
+    <div class="preload preload-container">
+        <div class="preload-logo">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    <!-- /preload -->
+
+    <!-- #wrapper -->
+    <div id="wrapper">
+        <!-- header -->
+        <%- include('partials/header') %>
+            <!-- header -->
+        
+        <!-- page-title -->
+        <div class="page-title" style="background-image: url(images/section/page-title.jpg);">
+            <div class="container">
+                <h3 class="heading text-center">Voir le panier</h3>
+                <ul class="breadcrumbs d-flex align-items-center justify-content-center">
+                    <li><a class="link" href="/">Boutique</a></li>
+                    <li><i class="icon-arrRight"></i></li>
+                    <li>Voir le panier</li>
+                </ul>
+            </div>
+        </div>
+        <!-- /page-title -->
+        <!-- Section checkout -->
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="flat-spacing tf-page-checkout">
+                            <p class="text-success text-center"><%= message %></p>
+                            <% if(typeof session.user === 'undefined') { %>
+                            <div class="wrap">
+                                <div class="title-login">
+                                    <p>Vous avez déjà un compte ?</p>
+                                    <a href="/login?link=checkout" class="text-button">Connectez-vous ici</a>
+                                </div>
+                                <form method="POST" action="/login?link=checkout" class="login-box">
+                                    <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>">
+                                    <input type="hidden" name="idProduct" id="idProduct" value="<%= product.id %>">
+                                    <div class="grid-2">
+                                        <input class="" type="email" placeholder="Email *"
+                                        name="email" id="email" tabindex="2" aria-required="true" required="">
+                                        <input class="input-password" type="password" placeholder="Mot de passe *"
+                                        name="password" id="password" tabindex="2" aria-required="true" required="" >
+                                    </div>
+                                    <button class="tf-btn" type="submit"><span class="text">Se connecter</span></button>
+                                </form>
+                            </div>
+                            <div class="wrap">
+                                <h5 class="title">Information (création compte rapide)</h5>
+                                <form  method="POST" action="/register?link=checkout" class="info-box">
+                                    <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>">
+                                    <input type="hidden" name="idProduct" id="idProduct" value="<%= product.id %>">
+                                    <div class="grid-2">
+                                        <input class="" type="text" placeholder="Dénomination Société *" name="companyName" id="companyName" tabindex="2" aria-required="true" required>
+                                        <input class="" type="text" placeholder="Prénom *" name="firstName" id="firstName" tabindex="2" aria-required="true" required>
+                                    </div>
+                                    <div class="grid-2">
+                                        <input class="" type="email" placeholder="email *" name="email"  id="email"tabindex="2" aria-required="true" required>
+                                        <input class="" type="text" placeholder="Nom *" name="lastName" id="lastName" tabindex="2" aria-required="true" required>
+                                    </div>
+                                    <div class="grid-2">
+                                            <input class="input-password" type="password" placeholder="Mot de passe *" name="password" id="password" tabindex="2" aria-required="true" required>
+                                            <input class="input-password" type="password" placeholder="Confirmer le mot de passe *" name="passwordControl" id="passwordControl" tabindex="2" aria-required="true" required>
+                                    </div>
+                                    <div class="grid-2">
+                                            <div class="tf-cart-checkbox">
+                                                <div class="tf-checkbox-wrapp">
+                                                    <input checked="" class="" type="checkbox" id="checkTerm" name="checkTerm">
+                                                    <div>
+                                                        <i class="icon-check"></i>
+                                                    </div>
+                                                </div>
+                                                <label class="text-secondary-2" for="checkTerm">
+                                                    j'accepte les conditions &amp; Politique. &nbsp;
+                                                </label>
+                                            </div>
+                                            <a href="/term-of-use" title="Terms of Service"> en savoir plus</a>
+                                    </div>
+                                        <button class="tf-btn"type="submit">
+                                            <span class="text text-button">Créer</span>
+                                        </button>
+                                </form>
+                            </div>
+                            <% } %>
+                            <div class="wrap">
+                                <h5 class="title">Choisissez l'option de paiements :</h5>
+                                <form class="form-payment" method="POST" action="/check-out-payment">
+                                    <div class="payment-box" id="payment-box">
+                                        <div class="payment-item payment-choose-card active">
+                                            <label for="credit-card-method" class="payment-header" data-bs-toggle="collapse" data-bs-target="#credit-card-payment" aria-controls="credit-card-payment">
+                                                <input type="radio" name="payment-method" class="tf-check-rounded" id="credit-card-method" checked="">
+                                                <span class="text-title">Carte de crédit</span>
+                                            </label>
+                                            <div id="credit-card-payment" class="collapse show" data-bs-parent="#payment-box">
+                                                <div class="payment-body">
+                                                    <div class="input-payment-box">
+                                                        <input type="text" placeholder="Propriétaire de la carte *">
+                                                        <div class="ip-card">
+                                                            <input type="text" placeholder="Numéro de carte *">
+                                                            <div class="list-card">
+                                                                <img src="images/payment/img-7.png" width="48" height="16" alt="card">
+                                                                <img src="images/payment/img-8.png" width="21" height="16" alt="card">
+                                                            </div>
+                                                        </div>
+                                                        <div class="grid-2">
+                                                            <input type="date">
+                                                            <input type="text" placeholder="CVV*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="check-save">
+                                                        <input type="checkbox" class="tf-check" id="check-card" checked="">
+                                                        <label for="check-card">Valider</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="payment-item paypal-item">
+                                            <label for="paypal-method" class="payment-header collapsed" data-bs-toggle="collapse" data-bs-target="#paypal-method-payment" aria-controls="paypal-method-payment">
+                                                <input type="radio" name="payment-method" class="tf-check-rounded" id="paypal-method">
+                                                <span class="paypal-title"><img src="images/payment/paypal.png" alt="apple"></span>
+                                            </label>
+                                            <div id="paypal-method-payment" class="collapse" data-bs-parent="#payment-box"></div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>">
+                                    <input type="hidden" name="idProduct" id="idProduct" value="<%= product.id %>">
+                                    <button class="tf-btn btn-reset">Paiement</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-1">
+                        <div class="line-separation"></div>
+                    </div>
+                    <div class="col-xl-5">
+                        <div class="flat-spacing flat-sidebar-checkout">
+                            <div class="sidebar-checkout-content">
+                                <h5 class="title">Panier</h5>
+                                <div class="list-product">
+                                    <div class="item-product">
+                                        <a href="product-detail.html" class="img-product">
+                                            <img src="<%= product.picture %>" alt="img-product">
+                                        </a>
+                                        <div class="content-box">
+                                            <div class="info">
+                                                <a href="product-detail.html" class="name-product link text-title"><%= product.title %></a>
+                                                <div class="variant text-caption-1 text-secondary"><span class="size"><%= product.subtitle %></span></div>
+                                            </div>
+                                            <div class="total-price text-button"><span class="count">1</span>X<span class="price"><%= product.oldPrice %></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sec-total-price">
+                                    <div class="top">
+                                        <div class="item d-flex align-items-center justify-content-between text-button">
+                                            <span>Expédition</span>
+                                            <span>Gratuite</span>
+                                        </div>
+                                        <div class="item d-flex align-items-center justify-content-between text-button">
+                                            <span>Réductions</span>
+                                            <span><%= product.oldPrice - product.price %> €</span>
+                                        </div>
+                                    </div>
+                                    <div class="bottom">
+                                        <h5 class="d-flex justify-content-between">
+                                            <span>Total</span>
+                                            <span class="total-price-checkout"><%= product.price %> €</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /Section checkout -->
+
+             <!-- Footer -->
+             <%- include('partials/footer') %>
+             <!-- /Footer -->
+         </div>
+         <!-- /wrapper -->
+     
+         <!-- mobile menu -->
+         <%- include('partials/mobile-menu') %>
+             <!-- /mobile menu -->
+     
+             <!-- Javascript -->
+             <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+             <script type="text/javascript" src="/js/jquery.min.js"></script>
+             <script type="text/javascript" src="/js/swiper-bundle.min.js"></script>
+             <script type="text/javascript" src="/js/carousel.js"></script>
+             <script type="text/javascript" src="/js/bootstrap-select.min.js"></script>
+             <script type="text/javascript" src="/js/lazysize.min.js"></script>
+             <script type="text/javascript" src="/js/count-down.js"></script>
+             <script type="text/javascript" src="/js/wow.min.js"></script>
+             <script type="text/javascript" src="/js/multiple-modal.js"></script>
+             <script type="text/javascript" src="/js/main.js"></script>
+     </body>
+     
+     </html>

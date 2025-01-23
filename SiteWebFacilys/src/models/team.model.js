@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase-config'); // Assurez-vous que ce chemin est correct
+const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
 const { v4: uuidv4 } = require('uuid');
 
 class Team {
