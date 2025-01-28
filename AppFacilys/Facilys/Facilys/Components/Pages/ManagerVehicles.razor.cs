@@ -366,6 +366,17 @@ namespace Facilys.Components.Pages
 
                    var extractedText = await documentAnalyzer.AnalyzeDocument(memoryStream);
 
+                    managerVehicleViewModel.Vehicle = new()
+                    {
+                        VIN = extractedText.VIN,
+                        Immatriculation = extractedText.Registration,
+                        Model = extractedText.Model,
+                        Mark = extractedText.Mark,
+                        Type = extractedText.Type,
+                        CirculationDate = DateTime.Parse(extractedText.ReleaseDate),
+                        Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync()
+                    };
+
                 }
                 catch (Exception ex)
                 {
