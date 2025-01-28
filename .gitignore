@@ -1,11 +1,11 @@
 /SiteWebFacilys/src/config/
 /SiteWebFacilys/node_modules/
+/SiteWebFacilys/.env
 /AppFacilys/Facilys/.vs
 /AppFacilys/Facilys/obj/
 /AppFacilys/Facilys/Facilys/bin/
 
-/SiteWeb-Facilys-V2/src/config
-/SiteWeb-Facilys-V2/.env
+./SiteWebFacilys.7z
 
 node_modules/
 **/node_modules/

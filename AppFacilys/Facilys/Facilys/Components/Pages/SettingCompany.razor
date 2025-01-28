@@ -3,3 +3,213 @@
 @inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
 @inject ILogger<SettingCompany> Logger
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4 align-self-center mb-3 mb-lg-0">
+                        <div class="d-flex align-items-center flex-row flex-wrap">
+                            <div class="">
+                                @if (CompanySettings.Logo == string.Empty || CompanySettings.Logo == "")
+                                {
+                                    <h5 class="fw-semibold fs-22 mb-1">@CompanySettings.NameCompany</h5>
+                                }
+                                else
+                                {
+                                    <img src="@CompanySettings.Logo" alt="photo" height="120" class="rounded-circle">
+                                }
+                                <p class="mb-0 text-muted fw-medium text-center">France</p>
+                            </div>
+                        </div>
+                    </div><!--end col-->
+
+                    <div class="col-lg-4 ms-auto align-self-center">
+                        <div class="d-flex justify-content-center">
+                            <div class="border-dashed rounded border-theme-color p-2 me-2 flex-grow-1 flex-basis-0">
+                                <h5 class="fw-semibold fs-22 mb-1">01/01/2000</h5>
+                                <p class="text-muted mb-0 fw-medium">Derniére synchronisation</p>
+                            </div>
+                            <div class="border-dashed rounded border-theme-color p-2 me-2 flex-grow-1 flex-basis-0">
+                                <h5 class="fw-semibold fs-22 mb-1">@UserCount</h5>
+                                <p class="text-muted mb-0 fw-medium">Total utilisateurs</p>
+                            </div>
+                        </div>
+                    </div><!--end col-->
+                    <div class="col-lg-4 align-self-center">
+                        <div class="row row-cols-2">
+                            <div class="col text-end">
+                                <div id="complete" class="apex-charts"></div>
+                            </div>
+                            <div class="col align-self-center">
+                                <button type="button" class="btn btn-primary d-inline-block">Synchroniser</button>
+                            </div>
+                        </div>
+                    </div><!--end col-->
+                </div><!--end row-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+</div><!--end row-->
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Information</h4>
+                    </div><!--end col-->
+                </div>  <!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body pt-0">
+                <ul class="list-unstyled mb-0">
+                    <li class=""><i class="las la-birthday-cake me-2 text-secondary fs-22 align-middle"></i> <b> Société </b> : @CompanySettings.NameCompany</li>
+                    <li class="mt-2"><i class="las la-briefcase me-2 text-secondary fs-22 align-middle"></i> <b> Adresse </b> : @CompanySettings.HeadOfficeAddress</li>
+                    <li class="mt-2"><i class="las la-university me-2 text-secondary fs-22 align-middle"></i> <b> TVA </b> : @CompanySettings.TVA</li>
+                    <li class="mt-2"><i class="las la-language me-2 text-secondary fs-22 align-middle"></i> <b> SIRET </b> : @CompanySettings.Siret</li>
+                    <li class="mt-2"><i class="las la-phone me-2 text-secondary fs-22 align-middle"></i> <b> Téképhone </b> : @CompanySettings.Phone</li>
+                    <li class="mt-2"><i class="las la-envelope text-secondary fs-22 align-middle me-2"></i> <b> Email </b> : @CompanySettings.Email</li>
+                </ul>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+    <div class="col-md-8">
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link fw-medium" data-bs-toggle="tab" href="#settings" role="tab" aria-selected="false">Mettre a jour les informations</a>
+            </li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div class="tab-pane p-3 active" id="settings" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="card-title">Information société</h4>
+                            </div><!--end col-->
+                        </div>  <!--end row-->
+                    </div><!--end card-header-->
+                    <div class="card-body pt-0">
+                        <EditForm Model="@CompanySettings" OnValidSubmit="SubmitUpdateOrAddCompany">
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Dénomination <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="NameCompany" @bind-Value="CompanySettings.NameCompany" required />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Logo</label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputFile id="Logo" class="form-control" OnChange="OnInputFileChange" accept="image/png, image/jpeg" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Code TVA <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="TVA" @bind-Value="CompanySettings.TVA" required />
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Siret <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <div class="input-group">
+                                        <InputText class="form-control" id="Siret" @bind-Value="CompanySettings.Siret" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">RIB <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="RIB" @bind-Value="CompanySettings.RIB" required />
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Adresse siége social <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="HeadOfficeAddress" @bind-Value="CompanySettings.HeadOfficeAddress" required />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Adresse de facturation</label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="BillingAddress" @bind-Value="CompanySettings.BillingAddress" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Statut juridique <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="LegalStatus" @bind-Value="CompanySettings.LegalStatus" required />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Numéro RM (code unique) <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="RMNumber" @bind-Value="CompanySettings.RMNumber" required />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">RCS</label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="RCS" @bind-Value="CompanySettings.RCS" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Capital social</label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputNumber class="form-control" id="RegisteredCapital" @bind-Value="CompanySettings.RegisteredCapital" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Code NAF</label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="CodeNAF" @bind-Value="CompanySettings.CodeNAF" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Nom du gérant</label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="ManagerName" @bind-Value="CompanySettings.ManagerName" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Téléphone  <span class="text-danger">*</span></label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="Phone" @bind-Value="CompanySettings.Phone" required />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <label class="col-xl-3 col-lg-3 text-end mb-lg-0 align-self-center form-label">Email </label>
+                                <div class="col-lg-9 col-xl-8">
+                                    <InputText class="form-control" id="Email" @bind-Value="CompanySettings.Email" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-lg-9 col-xl-8 offset-lg-3">
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div><!--end card-body-->
+                </div><!--end card-->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Autre paramètres</h4>
+                    </div><!--end card-header-->
+                    <div class="card-body pt-0">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="syncrho" checked>
+                            <label class="form-check-label" for="syncrho">
+                                Activer la synchronisation automatique
+                            </label>
+                        </div>
+                    </div><!--end card-body-->
+                </div><!--end card-->
+            </div>
+        </div>
+    </div> <!--end col-->
+</div><!--end row-->

@@ -2,9 +2,12 @@
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using System.Runtime;
+using Tesseract;
+using Facilys.Components.Constants;
+using PdfSharp.Pdf.IO;
 
 namespace Facilys.Components.Pages
 {
@@ -16,6 +19,7 @@ namespace Facilys.Components.Pages
         ModalManagerId modalManager = new();
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
+        private VehicleRegistrationDocumentAnalyzer documentAnalyzer;
 
         protected override async Task OnInitializedAsync()
         {
@@ -39,6 +43,8 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalLargeAddOtherVehicle");
             modalManager.RegisterModal("OpenModalLargeEditOtherVehicle");
             modalManager.RegisterModal("OpenModalLargeDeleteOtherVehicle");
+
+            documentAnalyzer = new VehicleRegistrationDocumentAnalyzer();
         }
 
         private async Task LoadDataHeader()
@@ -94,7 +100,7 @@ namespace Facilys.Components.Pages
                 managerVehicleViewModel.Client = await DbContext.Clients.FindAsync(managerVehicleViewModel.OtherVehicle.Client.Id);
                 managerVehicleViewModel.Vehicle = new();
             }
-                
+
             selectClient = managerVehicleViewModel.Client.Id;
             StateHasChanged();
         }
@@ -343,6 +349,28 @@ namespace Facilys.Components.Pages
             {
                 await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Invoices WHERE IdVehicle = {0}", vehicleId);
                 await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM MaintenanceAlerts WHERE IdVehicle = {0}", vehicleId);
+            }
+        }
+
+        private async Task OnFileReadOcr(InputFileChangeEventArgs e)
+        {
+            var file = e.File;
+           // string extractedText = string.Empty;
+            if (file != null)
+            {
+                try
+                {
+                    using var memoryStream = new MemoryStream();
+                    await file.OpenReadStream(maxAllowedSize: 8_500_000).CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+
+                   var extractedText = await documentAnalyzer.AnalyzeDocument(memoryStream);
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de récupération de l'image");
+                }
             }
         }
     }
