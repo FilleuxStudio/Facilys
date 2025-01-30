@@ -1,0 +1,33 @@
+﻿@page "/settingInvoices"
+@rendermode InteractiveServer
+@inject PageTitleService PageTitleService
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
+@inject ILogger<ManagerInvoices> Logger
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Paramètres de facturation</h4>
+                    </div><!--end col-->
+                </div><!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body pt-0">
+                <ul class="nav nav-pills nav-justified">
+                    <li class="nav-item waves-effect waves-light">
+                        <NavLink class="nav-link" href="/editionInvoices">Edition</NavLink>
+                    </li>
+                    <li class="nav-item waves-effect waves-light">
+                        <NavLink class="nav-link" href="/managerInvoices">Gestion des factures</NavLink>
+                    </li>
+                    <li class="nav-item waves-effect waves-light">
+                        <NavLink class="nav-link active" href="/settingInvoices">Paramètres</NavLink>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div> <!-- end col -->
+</div> <!-- end row -->
