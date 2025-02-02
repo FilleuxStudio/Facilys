@@ -7,13 +7,15 @@
         public OtherVehicles OtherVehicle { get; set; }
         public HistoryPart HistoryPart { get; set; }
         public Invoices Invoices { get; set; }
-       
+
 
         public List<Clients> Clients { get; set; }
         public List<Vehicles> Vehicles { get; set; }
         public List<OtherVehicles> OtherVehicles { get; set; }
         public List<HistoryPart> HistoryParts { get; set; }
         public List<Invoices> ListInvoices { get; set; }
+
+        public string DataOCR { get; set; }
     }
 
     public class ManagerVehicleViewList
@@ -31,5 +33,5 @@
         public List<HistoryPart> HistoryParts { get; set; }
         public List<Invoices> Invoices { get; set; }
     }
-   
-    }
+
+}

@@ -3,11 +3,12 @@
     public class ManagerInvoiceViewModel
     {
         public Invoices Invoice { get; set; }
+        public EditionSetting Edition { get; set; }
+        public ReferencesIgnored ReferencesIgnored { get; set; }
+        public InterestingReferences InterestingReference { get; set; }
+        public CompanySettings CompanySettings { get; set; }
         public List<Invoices> Invoices { get; set; }
-    }
-
-    public class ManagerInvoiceViewList
-    { 
-       
+        public List<ReferencesIgnored> ReferencesIgnoreds { get; set; }
+        public List<InterestingReferences> InterestingReferences { get; set; }
     }
 }

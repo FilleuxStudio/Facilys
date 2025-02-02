@@ -8,6 +8,7 @@ using Microsoft.JSInterop;
 using Tesseract;
 using Facilys.Components.Constants;
 using PdfSharp.Pdf.IO;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Facilys.Components.Pages
 {
@@ -19,7 +20,8 @@ namespace Facilys.Components.Pages
         ModalManagerId modalManager = new();
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
-        private VehicleRegistrationDocumentAnalyzer documentAnalyzer;
+        VehicleRegistrationDocumentAnalyzer documentAnalyzer;
+        bool ViewRawOCRData = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -43,7 +45,8 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalLargeAddOtherVehicle");
             modalManager.RegisterModal("OpenModalLargeEditOtherVehicle");
             modalManager.RegisterModal("OpenModalLargeDeleteOtherVehicle");
-
+            modalManager.RegisterModal("OpenModalDataOCR");
+            
             documentAnalyzer = new VehicleRegistrationDocumentAnalyzer();
         }
 
@@ -129,6 +132,7 @@ namespace Facilys.Components.Pages
             managerVehicleViewModel.Vehicle = new();
             managerVehicleViewModel.OtherVehicle = new();
             managerVehicleViewModel.HistoryPart = new();
+            ViewRawOCRData = false;
         }
 
         private async Task RefreshVehicleList()
@@ -374,8 +378,10 @@ namespace Facilys.Components.Pages
                         Mark = extractedText.Mark,
                         Type = extractedText.Type,
                         CirculationDate = DateTime.Parse(extractedText.ReleaseDate),
-                        Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync()
+                        Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync(),
                     };
+                    managerVehicleViewModel.DataOCR = extractedText.Data;
+                    ViewRawOCRData = true;
 
                 }
                 catch (Exception ex)

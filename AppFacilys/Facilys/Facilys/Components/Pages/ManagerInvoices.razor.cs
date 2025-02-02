@@ -11,7 +11,6 @@ namespace Facilys.Components.Pages
 {
     public partial class ManagerInvoices
     {
-        List<ManagerInvoiceViewList> managerInvoiceViewLists = new();
         ManagerInvoiceViewModel managerInvoiceViewModel = new();
         ModalManagerId modalManager = new();
         Guid selectInvoice = Guid.Empty;

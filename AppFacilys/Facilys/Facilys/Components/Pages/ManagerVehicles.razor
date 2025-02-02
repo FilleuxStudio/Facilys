@@ -164,6 +164,11 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-12 text-end">
+                            @if (ViewRawOCRData == true)
+                            {
+                                <button type="button" @onclick="@(() => OpenModal("OpenModalDataOCR"))" class="btn btn-secondary me-2"><i class="fas fa-edit"></i></button>
+                            }
+
                             <InputFile OnChange="@OnFileReadOcr" hidden id="fileInputOcr" accept="image/*" />
                             <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInputOcr').click(); return false;">Lecture OCR carte grise</button>
 
@@ -490,6 +495,28 @@
                         </div>
                     </div>
                 </EditForm>
+            </div><!--end modal-body-->
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->
+
+
+<div class="@modalManager.GetModal("OpenModalDataOCR")?.ModalClass" id="OpenModalDataOCR" tabindex="-1" role="dialog" aria-labelledby="OpenModalDataOCR" style="@modalManager.GetModal("OpenModalDataOCR")?.ModalDisplay; background-color: rgba(0,0,0,0.5);" aria-hidden="@modalManager.GetModal("OpenModalDataOCR")?.AriaHidden">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalDataOCR">Donnée récupérée de la lecture OCR.</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalDataOCR"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="dataOCR">Données</label>
+                            <textarea class="form-control" rows="25" id="dataOCR">@managerVehicleViewModel.DataOCR</textarea>
+                        </div>
+                    </div>
+                </div>
             </div><!--end modal-body-->
         </div><!--end modal-content-->
     </div><!--end modal-dialog-->
