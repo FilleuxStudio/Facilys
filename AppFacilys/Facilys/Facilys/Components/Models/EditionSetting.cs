@@ -6,7 +6,7 @@ namespace Facilys.Components.Models
     public class EditionSetting
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.Empty;
         [Required]
         public string StartNumberInvoice { get; set; } = string.Empty;
         [Required]

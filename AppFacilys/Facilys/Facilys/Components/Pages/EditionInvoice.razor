@@ -3,7 +3,7 @@
 @inject PageTitleService PageTitleService
 @inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
-@inject ILogger<ManagerInvoices> Logger
+@inject ILogger<EditionInvoice> Logger
 
 <div class="row">
     <div class="col-12">
@@ -16,7 +16,7 @@
                 </div><!--end row-->
             </div><!--end card-header-->
             <div class="card-body pt-0">
-                <ul class="nav nav-pills nav-justified">
+                <ul class="nav nav-pills nav-justified mb-1 pb-1 border-dashed-bottom">
                     <li class="nav-item waves-effect waves-light">
                         <NavLink class="nav-link active" href="/editionInvoices">Edition</NavLink>
                     </li>
@@ -29,5 +29,71 @@
                 </ul>
             </div>
         </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card">
+                <div class="card-body pt-0">
+                <div class="row mt-3">
+                    <div class="col-4 align-self-center">
+                        <img src="@managerInvoiceViewModel.CompanySettings.Logo" alt="logo company" class="logo-sm me-1" height="70">
+                    </div><!--end col-->
+                    <div class="col-8 text-end align-self-center">
+                        <h5 class="mb-1 fw-semibold text-black"><span class="text-muted">Facture N° :</span> @invoiceNumber</h5>
+                        <h5 class="mb-0 fw-semibold text-black"><span class="text-muted">Date :</span> @DateTime.Now.Date.ToShortDateString()</h5>
+                    </div><!--end col-->
+                </div>
+                </div>
+                </div>
+            </div> <!--end col-->
+        </div><!--end row-->
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="card-title">Huebee Color</h4>
+                            </div><!--end col-->
+                        </div>  <!--end row-->
+                    </div><!--end card-header-->
+                    <div class="card-body pt-0">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <InputText @bind-value="SearchClient" @bind-value:event="oninput" placeholder="Rechercher..." class="form-control" />
+                                <InputSelect @bind-Value="selectedValueClient" class="form-select">
+                                    @foreach (var item in managerInvoiceViewModel.ClientItems)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </InputSelect>
+                            </div><!-- end col -->
+                        </div><!-- end row -->
+                    </div><!--end card-body-->
+                </div><!--end card-->
+            </div> <!--end col-->
+            <div class="col-md-6 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="card-title">Custom Touch Spin</h4>
+                            </div><!--end col-->
+                        </div>  <!--end row-->
+                    </div><!--end card-header-->
+                    <div class="card-body pt-0">
+                        <div class="col-md-4">
+                            <label class="mb-2">Default Select</label>
+                            <select id="defaulte">
+                                <option value="value-1">Value 1</option>
+                                <option value="value-2">Value 2</option>
+                                <option value="value-3">Value 3</option>
+                            </select>
+                        </div><!-- end col -->
+                    </div><!--end card-body-->
+                </div><!--end card-->
+            </div> <!--end col-->
+        </div><!--end row-->
     </div> <!-- end col -->
 </div> <!-- end row -->

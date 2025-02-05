@@ -1,4 +1,6 @@
-﻿namespace Facilys.Components.Models.ViewModels
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace Facilys.Components.Models.ViewModels
 {
     public class ManagerInvoiceViewModel
     {
@@ -10,5 +12,6 @@
         public List<Invoices> Invoices { get; set; }
         public List<ReferencesIgnored> ReferencesIgnoreds { get; set; }
         public List<InterestingReferences> InterestingReferences { get; set; }
+        public List<SelectListItem> ClientItems { get; set; }
     }
 }

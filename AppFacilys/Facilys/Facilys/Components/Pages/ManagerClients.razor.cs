@@ -31,13 +31,12 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Gestion clients";
             });
 
-            await LoadDataHeader();
-
             managerClientViewModel.Client = new();
             managerClientViewModel.VehicleClient = new();
             managerClientViewModel.PhonesClients = new();
             managerClientViewModel.EmailsClients = new();
 
+            await LoadDataHeader();
 
             modalManager.RegisterModal("OpenModalLargeAddClient");
             modalManager.RegisterModal("OpenModalLargeEditClient");
@@ -65,6 +64,10 @@ namespace Facilys.Components.Pages
 
         }
 
+        /// <summary>
+        /// Ouvre un modal sans données supplémentaires.
+        /// </summary>
+        /// <param name="id">L'identifiant du modal à ouvrir.</param>
         private async void OpenModal(string id)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
@@ -72,6 +75,11 @@ namespace Facilys.Components.Pages
             StateHasChanged();
         }
 
+        /// <summary>
+        /// Ouvre un modal avec des données spécifiques à un utilisateur.
+        /// </summary>
+        /// <param name="idModal">L'identifiant du modal à ouvrir.</param>
+        /// <param name="idUser">L'identifiant de l'utilisateur dont les données doivent être chargées.</param>
         private async void OpenModalData(string idModal, Guid idUser)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
@@ -82,6 +90,10 @@ namespace Facilys.Components.Pages
             StateHasChanged();
         }
 
+        /// <summary>
+        /// Fermeture du modal
+        /// </summary>
+        /// <param name="idModal"></param>
         private async void CloseModal(string idModal)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", false);

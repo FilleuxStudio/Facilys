@@ -30,13 +30,13 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Gestion vehicules";
             });
 
-            await LoadDataHeader();
-
             managerVehicleViewModel.Client = new();
             managerVehicleViewModel.Vehicle = new();
             managerVehicleViewModel.OtherVehicle = new();
             managerVehicleViewModel.Invoices = new();
             managerVehicleViewModel.HistoryPart = new();
+
+            await LoadDataHeader();
 
             modalManager.RegisterModal("OpenModalLargeAddVehicle");
             modalManager.RegisterModal("OpenModaSmallInfoVin");

@@ -66,9 +66,13 @@
     </div><!--end row-->
 </div><!-- container -->
 @code {
-   private LoginModel loginModel = new();
+    private LoginModel loginModel = new();
     private string errorMessage;
 
+    /// <summary>
+    /// Cette méthode est liée à l'événement OnValidSubmit du formulaire EditForm.
+    /// </summary>
+    /// <returns></returns>
     private async Task HandleValidSubmit()
     {
         errorMessage = string.Empty;

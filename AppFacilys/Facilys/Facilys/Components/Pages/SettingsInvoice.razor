@@ -3,7 +3,7 @@
 @inject PageTitleService PageTitleService
 @inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
-@inject ILogger<ManagerInvoices> Logger
+@inject ILogger<SettingsInvoice> Logger
 
 <div class="row">
     <div class="col-12">
@@ -16,7 +16,7 @@
                 </div><!--end row-->
             </div><!--end card-header-->
             <div class="card-body pt-0">
-                <ul class="nav nav-pills nav-justified mb-1">
+                <ul class="nav nav-pills nav-justified mb-1 pb-1 border-dashed-bottom">
                     <li class="nav-item waves-effect waves-light">
                         <NavLink class="nav-link" href="/editionInvoices">Edition</NavLink>
                     </li>
@@ -28,80 +28,86 @@
                     </li>
                 </ul>
 
-                <div class="row mt-3 mb-3">
-                    <div class="col-mb-6">
-                        <label for="example-text-input" class="col-sm-2 col-form-label text-end">Numéro de démarrage de la facturation</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" type="text" value="Artisanal kale" id="example-text-input">
+                <EditForm Model="managerInvoiceViewModel.Edition" OnValidSubmit="SubmitSaveSettingInvoice">
+                    <div class="row mt-3 mb-3">
+                        <div class="col-6">
+                            <label for="StartNumberInvoice" class="form-label">Numéro de démarrage de la facturation <span class="text-danger">*</span></label>
+                            <InputText class="form-control" type="text" @bind-Value="managerInvoiceViewModel.Edition.StartNumberInvoice" id="StartNumberInvoice" required />
+                        </div>
+                        <div class="col-6">
+                            <label for="TVA" class="form-label">TVA pourcentage <span class="text-warning">*</span></label>
+                            <InputNumber class="form-control" type="text" @bind-Value="managerInvoiceViewModel.Edition.TVA" id="TVA" />
                         </div>
                     </div>
-                    <div class="col-mb-6">
-                        <label for="example-text-input" class="col-sm-2 col-form-label text-end">Text</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" type="text" value="Artisanal kale" id="example-text-input">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label for="PathSaveFile" class="form-label">Chemin d’enregistrement des factures et des ordres de réparation <span class="text-danger">*</span></label>
+                        <InputText class="form-control" type="text" @bind-Value="managerInvoiceViewModel.Edition.PathSaveFile" id="PathSaveFile" required />
                         </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-email-input" class="col-sm-2 col-form-label text-end">Email</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="email" value="bootstrap@example.com" id="example-email-input">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label for="PathSaveInvociePrepare" class="form-label">Chemin d’enregistrement des factures préparées <span class="text-danger">*</span></label>
+                        <InputText class="form-control" type="text" @bind-Value="managerInvoiceViewModel.Edition.PathSaveInvociePrepare" id="PathSaveInvociePrepare" required />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-tel-input" class="col-sm-2 col-form-label text-end">Telephone</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="tel" value="1-(555)-555-5555" id="example-tel-input">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label class="col-md-3 my-1 control-label">Modèle de facture <span class="text-danger">*</span></label>
+                        <InputRadioGroup @bind-Value="managerInvoiceViewModel.Edition.TypeDesign" id="TypeDesign" required>
+                            <div class="col-md-9 text-center">
+                                <div class="form-check form-check-inline">
+                                    <InputRadio class="form-check-input" type="radio" id="TypeA" value="InvoiceTypeDesign.TypeA" />
+                                    <label class="form-check-label" for="TypeA">Style 1</label>
+                                    <img src="assets/images/products/t1.png" alt="type facture 1" class="rounded d-block mx-auto border" style="width:150px">
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <InputRadio class="form-check-input" type="radio" id="TypeB" value="InvoiceTypeDesign.TypeB" />
+                                    <label class="form-check-label" for="TypeB">Style 2</label>
+                                    <img src="assets/images/products/t2.png" alt="type facture 2" class="rounded d-block mx-auto border" style="width:150px">
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <InputRadio class="form-check-input" type="radio" id="TypeC" value="InvoiceTypeDesign.TypeC" />
+                                    <label class="form-check-label" for="TypeC">Style 3</label>
+                                    <img src="assets/images/products/t3.png" alt="type facture 3" class="rounded d-block mx-auto border" style="width:150px">
+                                </div>
+                            </div>
+                        </InputRadioGroup>
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-password-input" class="col-sm-2 col-form-label text-end">Password</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="password" value="hunter2" id="example-password-input">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label class="form-label" for="SentenceInformationTop">Phrase d’information pour l’en-tête de la facture</label>
+                        <InputTextArea class="form-control" rows="5" id="SentenceInformationTop" style="height: 143px; " @bind-Value="managerInvoiceViewModel.Edition.SentenceInformationTop" />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-number-input" class="col-sm-2 col-form-label text-end">Number</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="number" value="42" id="example-number-input">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label class="form-label" for="SentenceInformationBottom">Phrase d’information pour le pied de page de la facture</label>
+                        <InputTextArea class="form-control" rows="5" id="SentenceInformationBottom" style="height: 143px; " @bind-Value="managerInvoiceViewModel.Edition.SentenceInformationBottom" />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-datetime-local-input" class="col-sm-2 col-form-label text-end">Date and time</label>
-                    <div class="col-sm-10">
-                        <input class="form-control" type="datetime-local" value="2011-08-19T13:45:00" id="example-datetime-local-input">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label class="form-label" for="SentenceBottom">Phrase d’information pour le bas de la facture</label>
+                        <InputTextArea class="form-control" rows="5" id="SentenceBottom" style="height: 143px; " @bind-Value="managerInvoiceViewModel.Edition.SentenceBottom" />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="exampleColorInput" class="col-sm-2 col-form-label text-end">Color</label>
-                    <div class="col-sm-10">
-                        <input type="color" class="form-control form-control-color" id="exampleColorInput" value="#0b51b7" title="Choose your color">
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label class="form-label" for="RepairOrderSentenceTop">Phrase d’information pour l’en-tête de l'ordre de réparation</label>
+                        <InputTextArea class="form-control" rows="5" id="RepairOrderSentenceTop" style="height: 143px; " @bind-Value="managerInvoiceViewModel.Edition.RepairOrderSentenceTop" />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label class="col-sm-2 col-form-label text-end">Select</label>
-                    <div class="col-sm-10">
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected="">Open this select menu</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
-                        </select>
+                    <div class="mb-3 row">
+                        <div class="col-12">
+                        <label class="form-label" for="RepairOrderSentenceBottom">Phrase d’information pour le pied de page de l'ordre de réparation</label>
+                        <InputTextArea class="form-control" rows="5" id="RepairOrderSentenceBottom" style="height: 143px; " @bind-Value="managerInvoiceViewModel.Edition.RepairOrderSentenceBottom" />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-text-input-lg" class="col-sm-2 col-form-label text-end">Large</label>
-                    <div class="col-sm-10">
-                        <input class="form-control form-control-lg" type="text" placeholder=".form-control-lg" id="example-text-input-lg">
-                    </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="example-text-input-sm" class="col-sm-2 col-form-label text-end">Small</label>
-                    <div class="col-sm-10">
-                        <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" id="example-text-input-sm">
-                    </div>
-                </div>
-
+                    <input type="hidden" value="@managerInvoiceViewModel.Edition.Id" id="Id" />
+                    <button type="submit" class="btn btn-primary px-4">Enregistrer les modifications</button>
+                </EditForm>
             </div>
         </div>
     </div> <!-- end col -->
