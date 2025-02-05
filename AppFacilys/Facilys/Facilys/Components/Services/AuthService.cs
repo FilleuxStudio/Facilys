@@ -110,8 +110,8 @@ namespace Facilys.Components.Services
         private async Task SaveCookieDataAsync(CookieData cookieData)
         {
             // Récupère le chemin "Documents"
-            var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
-            //Console.WriteLine(appDataPath);
+            //var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             // Combine le chemin pour le dossier de l'application et le fichier cookie
             var directoryPath = Path.Combine(appDataPath, EnvironmentApp.FolderData);

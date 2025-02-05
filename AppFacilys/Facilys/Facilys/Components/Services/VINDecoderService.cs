@@ -90,7 +90,7 @@ namespace Facilys.Components.Services
                 ValidVIN = ValidateVIN(vin),
             };
 
-            return info; 
+            return info;
         }
 
         private static string GetCountry(string vin)
@@ -136,10 +136,10 @@ namespace Facilys.Components.Services
     {
         public string VIN { get; set; } = string.Empty;
         public string Manufacturer { get; set; } = string.Empty;
-            public string Country { get; set; } = string.Empty;
+        public string Country { get; set; } = string.Empty;
         public int Year { get; set; } = 0;
-            public char AssemblyPlant { get; set; } = ' ';
-            public string SerialNumber { get; set; } = string.Empty;
-            public bool ValidVIN { get; set; } = false;
+        public char AssemblyPlant { get; set; } = ' ';
+        public string SerialNumber { get; set; } = string.Empty;
+        public bool ValidVIN { get; set; } = false;
     }
 }

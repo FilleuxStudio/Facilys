@@ -30,6 +30,13 @@
             </div>
         </div>
 
+        <div class="alert alert-warning shadow-sm border-theme-white-2" role="alert">
+            <div class="d-inline-flex justify-content-center align-items-center thumb-xs bg-warning rounded-circle mx-auto me-1">
+                <i class="fas fa-exclamation align-self-center mb-0 text-white "></i>
+            </div>
+            <strong>Well done!</strong> An example warning alert with an icon.
+        </div>
+
         <div class="row justify-content-center">
             <div class="col-12">
                 <div class="card">
@@ -61,7 +68,7 @@
                     <div class="card-body pt-0">
                         <div class="row">
                             <div class="col-md-4">
-                                <InputText @bind-value="SearchClient" @bind-value:event="oninput" placeholder="Rechercher..." class="form-control" />
+                                <InputText @bind-value="searchClient" placeholder="Rechercher..." class="form-control" />
                                 <InputSelect @bind-Value="selectedValueClient" class="form-select">
                                     @foreach (var item in managerInvoiceViewModel.ClientItems)
                                     {
@@ -84,12 +91,13 @@
                     </div><!--end card-header-->
                     <div class="card-body pt-0">
                         <div class="col-md-4">
-                            <label class="mb-2">Default Select</label>
-                            <select id="defaulte">
-                                <option value="value-1">Value 1</option>
-                                <option value="value-2">Value 2</option>
-                                <option value="value-3">Value 3</option>
-                            </select>
+                            <InputText @bind-value="searchVehicle" placeholder="Rechercher..." class="form-control" />
+                            <InputSelect @bind-Value="selectedValueVehicle" class="form-select">
+                                @foreach (var item in managerInvoiceViewModel.VehicleItems)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </InputSelect>
                         </div><!-- end col -->
                     </div><!--end card-body-->
                 </div><!--end card-->

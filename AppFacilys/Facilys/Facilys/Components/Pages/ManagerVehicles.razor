@@ -41,7 +41,7 @@
                                         <div class="d-flex align-items-center">
                                             <div class="flex-grow-1 text-truncate">
                                                 <h6 class="m-0">@vehicle.Vehicle.Immatriculation</h6>
-                                                <a href="#" @onclick="@(() => OpenModalData("OpenModaSmallInfoVin", vehicle.Vehicle.VIN))" class="fs-12 text-primary">@vehicle.Vehicle.VIN</a>
+                                                <a @onclick="@(() => OpenModalData("OpenModaSmallInfoVin", vehicle.Vehicle.VIN))" class="fs-12 text-primary" style="cursor: pointer;">@vehicle.Vehicle.VIN</a>
                                             </div>
                                         </div>
                                     </td>

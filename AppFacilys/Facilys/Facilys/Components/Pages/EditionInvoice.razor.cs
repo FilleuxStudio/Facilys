@@ -1,4 +1,5 @@
 ﻿using Facilys.Components.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
@@ -8,8 +9,10 @@ namespace Facilys.Components.Pages
     {
         ManagerInvoiceViewModel managerInvoiceViewModel = new();
         string invoiceNumber = string.Empty;
-        string selectedValueClient { get; set; }
-        string SearchClient = "";
+        string selectedValueClient = string.Empty;
+        string selectedValueVehicle = string.Empty;
+        string searchClient = string.Empty;
+        string searchVehicle = string.Empty;
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
@@ -20,9 +23,10 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.Edition = new();
             managerInvoiceViewModel.Invoice = new();
             managerInvoiceViewModel.CompanySettings = new();
+            managerInvoiceViewModel.ClientItems = new();
+            managerInvoiceViewModel.VehicleItems = new();
 
             await LoadDataHeader();
-
         }
 
         private async Task LoadDataHeader()
@@ -30,10 +34,14 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync();
             managerInvoiceViewModel.Invoice = await DbContext.Invoices.OrderByDescending(d => d.InvoiceNumber).LastOrDefaultAsync();
             managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
+            managerInvoiceViewModel.Clients = await DbContext.Clients.ToListAsync();
 
             if (managerInvoiceViewModel.Invoice == null)
             {
-                invoiceNumber = managerInvoiceViewModel.Edition.StartNumberInvoice;
+                if (managerInvoiceViewModel.Edition != null)
+                    invoiceNumber = managerInvoiceViewModel.Edition.StartNumberInvoice;
+                else
+                    invoiceNumber = "######";
             }
             else
             {
@@ -43,6 +51,12 @@ namespace Facilys.Components.Pages
                 else
                     invoiceNumber = IncrementInvoiceNumber(Number);
             }
+
+            foreach(var client in managerInvoiceViewModel.Clients)
+            {
+                managerInvoiceViewModel.ClientItems.Add(new SelectListItem(client.Lname + " " + client.Fname, client.Id.ToString()));
+            }
+            
         }
 
         /// <summary>
@@ -123,14 +137,6 @@ namespace Facilys.Components.Pages
             }
 
             return "A" + new string(chars);
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("loadScript", "assets/libs/mobius1-selectr/selectr.min.js");
-            }
         }
 
     }
