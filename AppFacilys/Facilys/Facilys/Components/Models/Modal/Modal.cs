@@ -2,7 +2,7 @@
 {
     public class ModalManagerId
     {
-        private readonly Dictionary<string, Modal> modals = new();
+        private readonly Dictionary<string, Modal> modals = [];
         public bool IsBackdropVisible { get; private set; } = false;
 
         public void RegisterModal(string id)

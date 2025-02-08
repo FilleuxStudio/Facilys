@@ -8,7 +8,7 @@ namespace Facilys.Components.Pages
     public partial class SettingCompany
     {
         CompanySettings CompanySettings;
-        ModalManagerId modalManager = new();
+        readonly ModalManagerId modalManager = new();
         private string? PreviewImageBase64 { get; set; }
         private int? UserCount { get; set; }
         protected override async Task OnInitializedAsync()
@@ -19,8 +19,7 @@ namespace Facilys.Components.Pages
         private async Task LoadDataHeader()
         {
             CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
-            if (CompanySettings == null)
-                CompanySettings = new();
+            CompanySettings ??= new();
 
             UserCount = await DbContext.Users.CountAsync();
         }

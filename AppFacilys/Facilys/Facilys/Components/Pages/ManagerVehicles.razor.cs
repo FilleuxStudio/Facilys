@@ -14,10 +14,10 @@ namespace Facilys.Components.Pages
 {
     public partial class ManagerVehicles
     {
-        List<ManagerVehicleViewList> managerVehicleViewLists = new();
-        List<ManagerOtherVehicleViewList> managerOtherVehicleViewLists = new();
-        ManagerVehicleViewModel managerVehicleViewModel = new();
-        ModalManagerId modalManager = new();
+        readonly List<ManagerVehicleViewList> managerVehicleViewLists = [];
+        readonly List<ManagerOtherVehicleViewList> managerOtherVehicleViewLists = [];
+        readonly ManagerVehicleViewModel managerVehicleViewModel = new();
+        readonly ModalManagerId modalManager = new();
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
         VehicleRegistrationDocumentAnalyzer documentAnalyzer;

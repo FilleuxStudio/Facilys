@@ -17,7 +17,7 @@ namespace Facilys.Components.Pages
         public string PasswordA = string.Empty, PasswordB = string.Empty;
 
         Users User = new();
-        ModalManagerId modalManager = new();
+        readonly ModalManagerId modalManager = new();
         EditContext editContext;
 
         protected override async Task OnInitializedAsync()

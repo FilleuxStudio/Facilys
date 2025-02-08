@@ -28,15 +28,11 @@ namespace Facilys.Components.Models
 
             try
             {
-                using (var sourceConnection = new SqliteConnection(connectionString))
-                {
-                    sourceConnection.Open();
-                    using (var backupConnection = new SqliteConnection($"Data Source={backupFilePath}"))
-                    {
-                        backupConnection.Open();
-                        sourceConnection.BackupDatabase(backupConnection);
-                    }
-                }
+                using var sourceConnection = new SqliteConnection(connectionString);
+                sourceConnection.Open();
+                using var backupConnection = new SqliteConnection($"Data Source={backupFilePath}");
+                backupConnection.Open();
+                sourceConnection.BackupDatabase(backupConnection);
 
                 return true;
             }

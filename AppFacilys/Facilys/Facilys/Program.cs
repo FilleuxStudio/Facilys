@@ -96,10 +96,7 @@ async Task CreateElectronWindow()
 
 void ReloadWindow(BrowserWindow? mainWindow)
 {
-    if (mainWindow != null)
-    {
-        mainWindow.Reload();
-    }
+    mainWindow?.Reload();
 }
 
 async Task ClearCache()

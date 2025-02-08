@@ -11,9 +11,9 @@ namespace Facilys.Components.Pages
 {
     public partial class ManagerClients
     {
-        List<ManagerClienViewtList> managerClienViewtLists = new();
-        ManagerClientViewModel managerClientViewModel = new();
-        ModalManagerId modalManager = new();
+        readonly List<ManagerClienViewtList> managerClienViewtLists = [];
+        readonly ManagerClientViewModel managerClientViewModel = new();
+        readonly ModalManagerId modalManager = new();
         Guid selectClient = Guid.Empty;
 
         private string currentPhone = string.Empty, currentEmail = string.Empty;
@@ -33,8 +33,8 @@ namespace Facilys.Components.Pages
 
             managerClientViewModel.Client = new();
             managerClientViewModel.VehicleClient = new();
-            managerClientViewModel.PhonesClients = new();
-            managerClientViewModel.EmailsClients = new();
+            managerClientViewModel.PhonesClients = [];
+            managerClientViewModel.EmailsClients = [];
 
             await LoadDataHeader();
 
@@ -245,8 +245,10 @@ namespace Facilys.Components.Pages
         {
             await SubmitAddClient();
 
-            managerClientViewModel.VehicleClient = new();
-            managerClientViewModel.VehicleClient.Client = await DbContext.Clients.OrderByDescending(c => c.DateCreated).FirstOrDefaultAsync();
+            managerClientViewModel.VehicleClient = new()
+            {
+                Client = await DbContext.Clients.OrderByDescending(c => c.DateCreated).FirstOrDefaultAsync()
+            };
             selectClient = managerClientViewModel.VehicleClient.Client.Id;
             OpenModal("OpenModalLargeAddVehicle");
         }
@@ -460,9 +462,9 @@ namespace Facilys.Components.Pages
         {
             managerClientViewModel.Client = new(); // Réinitialisez avec un nouvel objet Client
             managerClientViewModel.PhonesClients.Clear();
-            managerClientViewModel.PhonesClients = new();
+            managerClientViewModel.PhonesClients = [];
             managerClientViewModel.EmailsClients.Clear();
-            managerClientViewModel.EmailsClients = new();
+            managerClientViewModel.EmailsClients = [];
             currentPhone = string.Empty;
             currentEmail = string.Empty;
         }

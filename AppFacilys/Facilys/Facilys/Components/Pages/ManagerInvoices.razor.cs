@@ -11,9 +11,9 @@ namespace Facilys.Components.Pages
 {
     public partial class ManagerInvoices
     {
-        ManagerInvoiceViewModel managerInvoiceViewModel = new();
-        ModalManagerId modalManager = new();
-        Guid selectInvoice = Guid.Empty;
+        readonly ManagerInvoiceViewModel managerInvoiceViewModel = new();
+        readonly ModalManagerId modalManager = new();
+        readonly Guid selectInvoice = Guid.Empty;
 
         protected override async Task OnInitializedAsync()
         {
@@ -24,7 +24,7 @@ namespace Facilys.Components.Pages
 
             await LoadDataHeader();
 
-            managerInvoiceViewModel.Invoices = new();
+            managerInvoiceViewModel.Invoices = [];
         }
 
         private async Task LoadDataHeader()
@@ -61,7 +61,7 @@ namespace Facilys.Components.Pages
         {
             managerInvoiceViewModel.Invoice = new(); // Réinitialisez avec un nouvel objet Client
             managerInvoiceViewModel.Invoices.Clear();
-            managerInvoiceViewModel.Invoices = new();
+            managerInvoiceViewModel.Invoices = [];
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

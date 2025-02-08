@@ -4,13 +4,16 @@
 @inject ApplicationDbContext DbContext
 <PageTitle>Dashboard</PageTitle>
 
-<!--Alerte-->
-<div class="alert alert-danger shadow-sm border-theme-white-2" role="alert">
-    <div class="d-inline-flex justify-content-center align-items-center thumb-xs bg-danger rounded-circle mx-auto me-1">
-        <i class="fas fa-xmark align-self-center mb-0 text-white "></i>
+@if(settingEmpty == false){
+    <!--Alerte-->
+    <div class="alert alert-danger shadow-sm border-theme-white-2" role="alert">
+        <div class="d-inline-flex justify-content-center align-items-center thumb-xs bg-danger rounded-circle mx-auto me-1">
+            <i class="fas fa-xmark align-self-center mb-0 text-white "></i>
+        </div>
+        <strong>Oh !</strong> Les paramètres de l'entreprise n'ont pas été renseignés. Veuillez les compléter.
     </div>
-    <strong>Oh snap!</strong> Change a few things up and try submitting again.
-</div>
+}
+
 
 <!--header-->
 <div class="row justify-content-center">
@@ -164,6 +167,8 @@
     int vehicle = 0;
     int invoice = 0;
 
+    bool settingEmpty = false;
+
     List<TopVehicle> TopVehicleData = new();
     List<TopClient> TopClientData = new();
 
@@ -177,7 +182,7 @@
         });
 
         await LoadDataHeader();
-        
+
         StateHasChanged();
     }
 
@@ -246,6 +251,7 @@
                 });
         }
 
+        settingEmpty = await DbContext.CompanySettings.AnyAsync();
     }
 
     public class TopVehicle

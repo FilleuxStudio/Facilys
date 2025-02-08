@@ -14,7 +14,7 @@ namespace Facilys.Components.Services
 {
     public class VehicleRegistrationDocumentAnalyzer
     {
-        private VehicleRegistrationExtractor _extractor;
+        private readonly VehicleRegistrationExtractor _extractor;
 
         public VehicleRegistrationDocumentAnalyzer()
         {
@@ -217,40 +217,40 @@ namespace Facilys.Components.Services
 
         public VehicleRegistrationExtractor()
         {
-            _fieldPatterns = new List<FieldPattern>
-            {
-                new FieldPattern("Registration",  new[] { "A"}, @"\b[A-Za-z]{2}-\d{3}-[A-Za-z]{2}\b",
+            _fieldPatterns =
+            [
+                new("Registration",  ["A"], @"\b[A-Za-z]{2}-\d{3}-[A-Za-z]{2}\b",
     transform: v => v.Replace(" ", "-").Replace(".", "-")),
 
-                  new FieldPattern("ReleaseDate", new[] { "B"},
+                  new("ReleaseDate", ["B"],
                 @"B\.?\s*(\d{2}/\d{2}/\d{4})", validate: IsValidDate),
 
-              new FieldPattern("VIN", new[] { "E" },
+              new("VIN", ["E"],
     @"E\.?\s*([A-HJ-NPR-Z0-9]{17})",
     validate: IsValidVin,
     transform: v => v.Replace(" ", "").Replace(".", "").ToUpper()),
 
             
 
-           new FieldPattern("Name", new[] { "C1" },
+           new("Name", ["C1"],
     @"C\.?1\s+([\w\s]+(?:\n[\w\s]+)?)",
     multiLine: true,
     transform: v => v.Replace("\n", " ").Trim()),
 
-            new FieldPattern("Mark", new[] { "D1" },
+            new("Mark", ["D1"],
                 @"D\.?1\s+(\w+)"),
 
-            new FieldPattern("Model", new[] { "D3" },
+            new("Model", ["D3"],
                 @"D\.?3\s+([\w\s]+)"),
 
-            new FieldPattern("Address", new[] { "C4.1", "C.4.1" },
+            new("Address", ["C4.1", "C.4.1"],
                 @"C4\.1\s*([\s\S]+?)(?=\n\s*\w|\Z)", multiLine: true),
 
-            new FieldPattern("Type", new[] { "J1" },
+            new("Type", ["J1"],
                 @"J1\s+(\w+)"),
 
           
-            };
+            ];
         }
 
         public VehicleRegisterData ExtractDocumentInfo(string text)
@@ -289,7 +289,7 @@ namespace Facilys.Components.Services
 
 
         private static bool IsValidDate(string date) =>
-            DateTime.TryParseExact(date, new[] { "dd/MM/yyyy", "dd-MM-yyyy" },
+            DateTime.TryParseExact(date, ["dd/MM/yyyy", "dd-MM-yyyy"],
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None, out _);
     }
@@ -370,7 +370,7 @@ namespace Facilys.Components.Services
 
     public class VehicleRegisterData
     {
-        private readonly Dictionary<string, string> _data = new();
+        private readonly Dictionary<string, string> _data = [];
 
         public string VIN => _data.GetValueOrDefault("VIN");
         public string Registration => _data.GetValueOrDefault("Registration");

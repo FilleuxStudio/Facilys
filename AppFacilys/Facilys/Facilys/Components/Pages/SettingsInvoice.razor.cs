@@ -6,7 +6,7 @@ namespace Facilys.Components.Pages
 {
     public partial class SettingsInvoice
     {
-        ManagerInvoiceViewModel managerInvoiceViewModel = new();
+        readonly ManagerInvoiceViewModel managerInvoiceViewModel = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -15,10 +15,9 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Paramétrages de Facturation";
             });
 
-            managerInvoiceViewModel.Edition = new();
-
             await LoadDataHeader();
 
+            managerInvoiceViewModel.Edition ??= new();
         }
 
         private async Task LoadDataHeader()

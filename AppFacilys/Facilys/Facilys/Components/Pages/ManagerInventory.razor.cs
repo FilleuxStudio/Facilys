@@ -10,9 +10,9 @@ namespace Facilys.Components.Pages
 {
     public partial class ManagerInventory
     {
-        List<Inventorys> InventorysLists = new();
+        List<Inventorys> InventorysLists = [];
         Inventorys inventory = new();
-        ModalManagerId modalManager = new();
+        readonly ModalManagerId modalManager = new();
         private IBrowserFile selectedFile;
 
         protected override async Task OnInitializedAsync()

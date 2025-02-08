@@ -5,8 +5,8 @@ namespace Facilys.Components.Services
 {
     public class VINDecoderService
     {
-        private static readonly Dictionary<string, string> manufacturers = new Dictionary<string, string>
-{
+        private static readonly Dictionary<string, string> manufacturers = new()
+        {
     {"WMI", "Constructeur"},
     {"WBA", "BMW"},
     {"WBS", "BMW M GmbH"},
@@ -48,8 +48,8 @@ namespace Facilys.Components.Services
     {"UU1", "Dacia"}
 };
 
-        private static readonly Dictionary<char, string> countries = new Dictionary<char, string>
-{
+        private static readonly Dictionary<char, string> countries = new()
+        {
     {'1', "États-Unis"},
     {'2', "Canada"},
     {'3', "Mexique"},
@@ -86,7 +86,7 @@ namespace Facilys.Components.Services
                 Country = GetCountry(vin),
                 Year = GetYear(vin),
                 AssemblyPlant = vin[10],
-                SerialNumber = vin.Substring(11),
+                SerialNumber = vin[11..],
                 ValidVIN = ValidateVIN(vin),
             };
 
@@ -100,7 +100,7 @@ namespace Facilys.Components.Services
 
         private static string GetManufacturer(string vin)
         {
-            string wmi = vin.Substring(0, 3);
+            string wmi = vin[..3];
             return manufacturers.TryGetValue(wmi, out string manufacturer) ? manufacturer : "Inconnu";
         }
 
@@ -115,7 +115,7 @@ namespace Facilys.Components.Services
         private static bool ValidateVIN(string vin)
         {
             string validChars = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
-            int[] weights = { 8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int[] weights = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
             int sum = 0;
 
             for (int i = 0; i < 17; i++)
