@@ -29,6 +29,8 @@ builder.Services.AddElectron();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {

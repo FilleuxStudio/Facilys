@@ -53,6 +53,12 @@
                     </div>
                     <div class="mb-3 row">
                         <div class="col-12">
+                            <label for="PreloadedLine" class="form-label">Ligne à précharger <span class="text-warning">*</span></label>
+                            <InputNumber class="form-control" type="text" @bind-Value="managerInvoiceViewModel.Edition.PreloadedLine" id="PreloadedLine" />
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-12">
                         <label class="col-md-3 my-1 control-label">Modèle de facture <span class="text-danger">*</span></label>
                         <InputRadioGroup @bind-Value="managerInvoiceViewModel.Edition.TypeDesign" id="TypeDesign" required>
                             <div class="col-md-9 text-center">

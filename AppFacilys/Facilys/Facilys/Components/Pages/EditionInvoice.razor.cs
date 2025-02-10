@@ -1,4 +1,7 @@
-﻿using Facilys.Components.Models.ViewModels;
+﻿using Facilys.Components.Models;
+using Facilys.Components.Models.ViewModels;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -13,6 +16,8 @@ namespace Facilys.Components.Pages
         string selectedValueVehicle = string.Empty;
         string searchClient = string.Empty;
         string searchVehicle = string.Empty;
+        private InvoiceData invoiceData = new();
+
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
@@ -56,7 +61,65 @@ namespace Facilys.Components.Pages
             {
                 managerInvoiceViewModel.ClientItems.Add(new SelectListItem(client.Lname + " " + client.Fname, client.Id.ToString()));
             }
-            
+        }
+
+        // Rechercher un client
+        private async Task HandleSearchClient(ChangeEventArgs e)
+        {
+            searchClient = e.Value?.ToString() ?? string.Empty;
+
+            if(searchClient != string.Empty)
+            {
+                managerInvoiceViewModel.ClientItems = managerInvoiceViewModel.ClientItems
+               .Where(c => c.Text.Contains(searchClient, StringComparison.OrdinalIgnoreCase))
+               .ToList();
+            }
+            else
+            {
+                managerInvoiceViewModel.ClientItems.Clear();
+                foreach (var client in await DbContext.Clients.ToListAsync())
+                {
+                    managerInvoiceViewModel.ClientItems.Add(new SelectListItem(client.Lname + " " + client.Fname, client.Id.ToString()));
+                }
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+
+        // selectionner un client
+        private async Task HandleSelectionChangedClient(ChangeEventArgs e)
+        {
+            selectedValueClient = e.Value?.ToString();
+            if (Guid.TryParse(selectedValueClient, out Guid clientId))
+            {
+                managerInvoiceViewModel.VehicleItems.Clear(); // Vider la liste existante
+                managerInvoiceViewModel.Client = null;
+
+                managerInvoiceViewModel.Client = await DbContext.Clients.FindAsync(clientId);
+
+                List<Vehicles> vehicles = DbContext.Vehicles
+                    .Include(c => c.Client)
+                    .Where(v => v.Client.Id == clientId)
+                    .ToList();
+
+                foreach (var vehicle in vehicles)
+                {
+                    managerInvoiceViewModel.VehicleItems.Add(new SelectListItem(vehicle.Immatriculation + " " + vehicle.Mark + " " + vehicle.Model, vehicle.Id.ToString()));
+                }
+
+                var otherVehicles = await DbContext.OtherVehicles
+                    .Include(v => v.Client)
+                    .Where(v => v.Client.Id == clientId)
+                    .ToListAsync();
+
+                foreach (var vehicleOther in otherVehicles)
+                {
+                    managerInvoiceViewModel.VehicleItems.Add(new SelectListItem(vehicleOther.Mark + " " + vehicleOther.Model, vehicleOther.Id.ToString()));
+                }
+
+                // Forcer la mise à jour de l'interface
+                StateHasChanged();
+            }
         }
 
         /// <summary>
@@ -139,5 +202,20 @@ namespace Facilys.Components.Pages
             return "A" + new string(chars);
         }
 
+        private async Task CreateInvoiceValidSubmit()
+        {
+           
+        }
+
+    }
+
+    public class InvoiceData()
+    {
+        public string[] LineRef { get; set; } = Array.Empty<string>();
+        public string[] LineDesc { get; set; } = Array.Empty<string>();
+        public decimal?[] LineQt { get; set; } = Array.Empty<decimal?>();
+        public decimal?[] LinePrice { get; set; } = Array.Empty<decimal?>();
+        public decimal?[] LineDisc { get; set; } = Array.Empty<decimal?>();
+        public decimal?[] LineMo { get; set; } = Array.Empty<decimal?>();
     }
 }

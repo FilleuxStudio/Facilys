@@ -41,6 +41,10 @@ namespace Facilys.Components.Data
 
             context.Users.Add(adminUser);
             context.SaveChanges();
+
+
+            /// Dev 
+            new DataSeeder(context).SeedDataAsync();
         }
     }
 }
