@@ -22,7 +22,8 @@ namespace Facilys.Components.Models
         public string? RepairOrderSentenceTop { get; set; } = string.Empty;
         public string? RepairOrderSentenceBottom { get; set; } = string.Empty;
         public float? TVA { get; set; } = 0.0f;
-        public int? PreloadedLine {  get; set; } = 2;
+        [Required]
+        public int PreloadedLine {  get; set; } = 2;
         public List<AssociationSettingReference>? AssociationSettingReferences { get; set; } = null;
     }
 

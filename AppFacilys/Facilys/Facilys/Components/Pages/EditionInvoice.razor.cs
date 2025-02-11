@@ -10,12 +10,12 @@ namespace Facilys.Components.Pages
 {
     public partial class EditionInvoice
     {
-        ManagerInvoiceViewModel managerInvoiceViewModel = new();
-        string invoiceNumber = string.Empty;
-        string selectedValueClient = string.Empty;
-        string selectedValueVehicle = string.Empty;
-        string searchClient = string.Empty;
-        string searchVehicle = string.Empty;
+        private ManagerInvoiceViewModel managerInvoiceViewModel = new();
+        private string invoiceNumber = string.Empty;
+        private string selectedValueClient = string.Empty;
+        private string selectedValueVehicle = string.Empty;
+        private string searchClient = string.Empty;
+        private string km = string.Empty;
         private InvoiceData invoiceData = new();
 
         protected override async Task OnInitializedAsync()
@@ -61,6 +61,13 @@ namespace Facilys.Components.Pages
             {
                 managerInvoiceViewModel.ClientItems.Add(new SelectListItem(client.Lname + " " + client.Fname, client.Id.ToString()));
             }
+
+            invoiceData.LineRef = Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine).ToList();
+            invoiceData.LineDesc = Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine).ToList();
+            invoiceData.LineQt = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
+            invoiceData.LinePrice = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
+            invoiceData.LineDisc = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
+            invoiceData.LineMo = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
         }
 
         // Rechercher un client
@@ -202,6 +209,24 @@ namespace Facilys.Components.Pages
             return "A" + new string(chars);
         }
 
+
+        private async Task UpdateLineAmount(int index)
+        {
+            // Assurez-vous que LineQt[index] existe et n'est pas nul
+            if (invoiceData.LineQt.Count > index && invoiceData.LineQt[index] != null)
+            {
+                float price = invoiceData.LinePrice[index] ?? 0.0f;
+                float discount = invoiceData.LineDisc[index] ?? 0.0f;
+                float quantity = invoiceData.LineQt[index].Value;
+
+                // Calculez le montant HT
+                float amount = price * quantity * (1 - discount / 100);
+
+                // Mettez à jour LineMo
+                invoiceData.LineMo[index] = (float?)Math.Round(amount, 2); // Arrondi à 2 décimales
+            }
+        }
+
         private async Task CreateInvoiceValidSubmit()
         {
            
@@ -211,11 +236,11 @@ namespace Facilys.Components.Pages
 
     public class InvoiceData()
     {
-        public string[] LineRef { get; set; } = Array.Empty<string>();
-        public string[] LineDesc { get; set; } = Array.Empty<string>();
-        public decimal?[] LineQt { get; set; } = Array.Empty<decimal?>();
-        public decimal?[] LinePrice { get; set; } = Array.Empty<decimal?>();
-        public decimal?[] LineDisc { get; set; } = Array.Empty<decimal?>();
-        public decimal?[] LineMo { get; set; } = Array.Empty<decimal?>();
+        public List<string> LineRef { get; set; } = new();
+        public List<string> LineDesc { get; set; } = new();
+        public List<float?> LineQt { get; set; } = new();
+        public List<float?> LinePrice { get; set; } = new();
+        public List<float?> LineDisc { get; set; } = new();
+        public List<float?> LineMo { get; set; } = new();
     }
 }
