@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+using static Facilys.Components.Models.PdfModels.InvoicePDF;
 
 namespace Facilys.Components.Pages
 {
@@ -16,6 +17,7 @@ namespace Facilys.Components.Pages
         private string selectedValueVehicle = string.Empty;
         private string searchClient = string.Empty;
         private string km = string.Empty;
+        private short actionType;
         private InvoiceData invoiceData = new();
 
         protected override async Task OnInitializedAsync()
@@ -210,6 +212,28 @@ namespace Facilys.Components.Pages
         }
 
 
+        private async Task OnLinePriceChanged(object value, int index)
+        {
+            value = value.ToString();
+            if(value != string.Empty)
+                invoiceData.LinePrice[index] = float.Parse(value.ToString());
+
+            await UpdateLineAmount(index); // Appelle votre méthode pour mettre à jour le montant
+        }
+
+        private async Task OnLineDiscChanged(object value, int index)
+        {
+            value = value.ToString();
+            if (value != string.Empty)
+                invoiceData.LineDisc[index] = float.Parse(value.ToString());
+
+            await UpdateLineAmount(index); // Appelle votre méthode pour mettre à jour le montant
+        }
+        /// <summary>
+        /// Méthode pour calcul le montant HT
+        /// </summary>
+        /// <param name="index">id ligne</param>
+        /// <returns>calcul</returns>
         private async Task UpdateLineAmount(int index)
         {
             // Assurez-vous que LineQt[index] existe et n'est pas nul
@@ -229,7 +253,19 @@ namespace Facilys.Components.Pages
 
         private async Task CreateInvoiceValidSubmit()
         {
-           
+            if (actionType == 1)
+            {
+                
+            }
+            else if (actionType == 2)
+            {
+                var pdfBytes = PdfService.GenerateInvoicePdf(invoice);
+                await FileService.SaveAsAsync("facture.pdf", pdfBytes, "application/pdf");
+                //ou
+                var pdfService = new PdfInvoiceService();
+                var pdfBytes = pdfService.GenerateInvoicePdf(invoice);
+                File.WriteAllBytes("Facture-L0280-AMADOMARIA-2025-02-05.pdf", pdfBytes);
+            }
         }
 
     }
@@ -242,5 +278,9 @@ namespace Facilys.Components.Pages
         public List<float?> LinePrice { get; set; } = new();
         public List<float?> LineDisc { get; set; } = new();
         public List<float?> LineMo { get; set; } = new();
+        public string GeneralConditionInvoice { get; set; } = string.Empty;
+        public string GeneralConditionOrder { get; set; } = string.Empty;
+        public bool PartReturnedCustomer { get; set; } = false;
+        public bool CustomerSuppliedPart { get; set; } = false;
     }
 }

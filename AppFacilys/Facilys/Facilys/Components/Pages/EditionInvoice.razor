@@ -112,7 +112,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="table-responsive">
+                            <div class="">
                                 <table class="table table-bordered mb-0 table-centered">
                                     <thead class="table-light">
                                         <tr>
@@ -122,7 +122,6 @@
                                             <th style="width:10%">Prix unitaire</th>
                                             <th style="width:9%">Remise</th>
                                             <th style="width:9%">Montant HT</th>
-                                            <th style="width:9%" class="text-end">Action</th>
                                         </tr>
                                     </thead>
 
@@ -141,23 +140,43 @@
                                                     <InputNumber @bind-Value="invoiceData.LineQt[index]" class="form-control" id="@($"invoiceData-LineQt-{index}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LinePrice[index]" @oninput="() => UpdateLineAmount(index)" class=" form-control" id="@($"invoiceData-LinePrice-{index}")" />
+                                                    <InputNumber @bind-Value="invoiceData.LinePrice[index]" @oninput="(e) => OnLinePriceChanged(e.Value, index)" class="form-control" id="@($"invoiceData-LinePrice-{index}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineDisc[index]" @oninput="() => UpdateLineAmount(index)" class="form-control" id="@($"invoiceData-LineDisc-{index}")" />
+                                                    <InputNumber @bind-Value="invoiceData.LineDisc[index]" @oninput="(e) => OnLineDiscChanged(e.Value, index)" class="form-control" id="@($"invoiceData-LineDisc-{index}")" />
                                                 </td>
                                                 <td>
                                                     <InputNumber @bind-Value="invoiceData.LineMo[index]" class="form-control" id="@($"invoiceData-LineMo-{index}")" readonly />
-                                                </td>
-                                                <td class="text-end">
-                                                    <!-- Actions -->
                                                 </td>
                                             </tr>
                                         }
                                     </tbody>
                                 </table><!--end /table-->
+                                <div class="row mt-1">
+                                    <div class="col-6">
+                                        <div class="form-check form-switch form-switch-info">
+                                            <InputCheckbox @bind-Value="invoiceData.PartReturnedCustomer" class="form-check-input" id="PartReturnedCustomer" />
+                                            <label class="form-check-label" for="PartReturnedCustomer">Pièces remplacées à remettre au client</label>
+                                        </div>
+                                    </div><!-- end col -->
+                                    <div class="col-6">
+                                        <div class="form-check form-switch form-switch-info">
+                                            <InputCheckbox @bind-Value="invoiceData.CustomerSuppliedPart" class="form-check-input" id="CustomerSuppliedPart" />
+                                            <label class="form-check-label" for="CustomerSuppliedPart">Pièces fournies par le client </label>
+                                        </div>
+                                    </div><!-- end col -->
+                                </div>
+                                <div class="row mt-1 mb-3">
+                                    <div class="col-6">
+                                        <InputTextArea @bind-value="invoiceData.GeneralConditionInvoice" placeholder="Détails supplémentaires côté facturation…" class="form-control" rows="5" />
+                                    </div><!-- end col -->
+                                    <div class="col-6">
+                                        <InputTextArea @bind-value="invoiceData.GeneralConditionOrder" placeholder="Éléments additionnels relatifs à l’ordre de réparation…" class="form-control" rows="5" />
+                                    </div><!-- end col -->
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            <button type="submit" class="btn btn-success" @onclick="() => actionType = 1">Sauvegarder comme facture préparée</button>
+                            <button type="submit" class="btn btn-primary" @onclick="() => actionType = 2">Générer les PDF</button>
                         </div>
                     </div>
                 </div> <!--end col-->
