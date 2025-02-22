@@ -27,7 +27,65 @@
                         <NavLink class="nav-link" href="/settingInvoices">Paramètres</NavLink>
                     </li>
                 </ul>
+
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="input-group mb-3">
+                            <InputText @bind-Value="searchInvoice" class="form-control" placeholder="Entrez le numéro de facture..." />
+                            <button class="btn btn-primary" @onclick="SearchInvoiceByNumber">
+                                <i class="fas fa-search me-1"></i> Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Vehicule</th>
+                                <th>Date</th>
+                                <th>Paiement</th>
+                                <th>Status</th>
+                                <th>Montant</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in managerInvoiceViewModel.Invoices)
+                            {
+                                <tr>
+                                    <td>@invoice.InvoiceNumber</td>
+                                    <td>
+                                        <p class="d-inline-block align-middle mb-0">
+                                            @if(invoice.Vehicle != null){
+                                                <span class="d-block align-middle mb-0 product-name text-body">@invoice.Vehicle.Immatriculation</span>
+                                                <span class="text-muted font-13">@invoice.Vehicle.Mark</span>
+                                            }else{
+                                                <span class="d-block align-middle mb-0 product-name text-body">@invoice.OtherVehicle.Mark</span>
+                                                <span class="text-muted font-13">@invoice.OtherVehicle.SerialNumber</span>
+                                            }
+                                            
+                                        </p>
+                                    </td>
+                                    <td>@invoice.DateAdded</td>
+                                    <td>@invoice.Payment</td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success"><i class="fas fa-check me-1"></i> @invoice.Status</span>
+                                    </td>
+                                    <td>@invoice.TotalAmount €</td>
+                                    <td class="text-end">
+                                        <a href="#"><i class="fas fa-print text-secondary fs-18"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-danger fs-18"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div> <!-- end col -->
-</div> <!-- end row -->
+    </div>
+</div> <!-- end col -->

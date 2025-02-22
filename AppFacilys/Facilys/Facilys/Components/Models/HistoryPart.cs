@@ -18,10 +18,11 @@ namespace Facilys.Components.Models
         public string? PartName { get; set; } = string.Empty;
         public string? PartBrand { get; set; } = string.Empty;
         public string? Description { get; set; } = string.Empty;
+        public float Discount { get; set; } = 0.0f;
         [Required]
         public float Price { get; set; } = 0.00f;
         [Required]
-        public int Quantity { get; set; } = 0;
+        public float Quantity { get; set; } = 0.0f;
         public int? KMMounted { get; set; } = 0;
     }
 }

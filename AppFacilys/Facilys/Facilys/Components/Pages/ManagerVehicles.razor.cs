@@ -380,7 +380,7 @@ namespace Facilys.Components.Pages
                         CirculationDate = DateTime.Parse(extractedText.ReleaseDate),
                         Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync(),
                     };
-                    managerVehicleViewModel.DataOCR = extractedText.Data;
+                    //managerVehicleViewModel.DataOCR = extractedText;
                     ViewRawOCRData = true;
 
                 }

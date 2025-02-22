@@ -14,6 +14,7 @@ namespace Facilys.Components.Pages
         readonly ManagerInvoiceViewModel managerInvoiceViewModel = new();
         readonly ModalManagerId modalManager = new();
         readonly Guid selectInvoice = Guid.Empty;
+        private string searchInvoice = string.Empty;
 
         protected override async Task OnInitializedAsync()
         {
@@ -24,12 +25,11 @@ namespace Facilys.Components.Pages
 
             await LoadDataHeader();
 
-            managerInvoiceViewModel.Invoices = [];
         }
 
         private async Task LoadDataHeader()
         {
-            managerInvoiceViewModel.Invoices = await DbContext.Invoices.ToListAsync();
+            managerInvoiceViewModel.Invoices = await DbContext.Invoices.Include(v => v.Vehicle).Include(ov => ov.OtherVehicle).ToListAsync();
             
         }
 
@@ -62,6 +62,12 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.Invoice = new(); // Réinitialisez avec un nouvel objet Client
             managerInvoiceViewModel.Invoices.Clear();
             managerInvoiceViewModel.Invoices = [];
+        }
+
+        private async Task SearchInvoiceByNumber()
+        {
+            managerInvoiceViewModel.Invoices = await DbContext.Invoices.Where(i => i.InvoiceNumber.StartsWith(searchInvoice)).ToListAsync();
+            StateHasChanged();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

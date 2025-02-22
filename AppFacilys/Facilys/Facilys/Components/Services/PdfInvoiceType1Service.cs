@@ -1,7 +1,9 @@
 ﻿using Facilys.Components.Models;
-using Facilys.Components.Models.PdfModels;
+using Facilys.Components.Models.ViewModels;
+using Facilys.Components.Pages;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.UniversalAccessibility.Drawing;
 
 namespace Facilys.Components.Services
 {
@@ -13,7 +15,7 @@ namespace Facilys.Components.Services
         private const double Margin = 40; // Marge de 40 points (environ 1,4 cm)
         private const double LineHeight = 20; // Hauteur de ligne en points
 
-        public byte[] GenerateInvoicePdf(InvoicePDF invoice)
+        public byte[] GenerateInvoicePdf(ManagerInvoiceViewModel managerInvoiceView, Invoices invoice, int km, PhonesClients phones, EmailsClients emails )
         {
             var document = new PdfDocument();
             var page = document.AddPage();
@@ -25,22 +27,22 @@ namespace Facilys.Components.Services
             // Configuration des polices
             var titleFont = new XFont("Arial", 16, XFontStyleEx.Bold);
             var headerFont = new XFont("Arial", 12, XFontStyleEx.Bold);
-            var normalFont = new XFont("Arial", 10);
+            var normalFont = new XFont("Arial", 10, XFontStyleEx.Regular);
 
             // Dessiner l'en-tête de la facture
-            yPosition = DrawHeader(gfx, invoice, titleFont, normalFont, yPosition);
+            yPosition = DrawHeader(gfx, invoice, managerInvoiceView, km, titleFont, normalFont, yPosition);
 
             // Informations client
-            yPosition = DrawCustomerInfo(gfx, invoice, normalFont, yPosition);
+            yPosition = DrawCustomerInfo(gfx, managerInvoiceView, phones, normalFont, yPosition);
 
             // Informations véhicule
-            yPosition = DrawVehicleInfo(gfx, invoice, normalFont, yPosition);
+            yPosition = DrawVehicleInfo(gfx, managerInvoiceView, normalFont, yPosition);
 
             // Tableau des services
-            yPosition = DrawServiceTable(gfx, invoice, headerFont, normalFont, yPosition);
+            yPosition = DrawServiceTable(gfx, managerInvoiceView, headerFont, normalFont, yPosition);
 
             // Total et mentions légales
-            yPosition = DrawTotalAndLegalMentions(gfx, invoice, headerFont, normalFont, yPosition);
+            yPosition = DrawTotalAndLegalMentions(gfx, managerInvoiceView, headerFont, normalFont, yPosition);
 
             // Sauvegarde en mémoire
             using var stream = new MemoryStream();
@@ -48,8 +50,31 @@ namespace Facilys.Components.Services
             return stream.ToArray();
         }
 
-        private double DrawHeader(XGraphics gfx, InvoicePDF invoice, XFont titleFont, XFont normalFont, double yPosition)
+
+        private byte[] PictureToStream(string logo)
         {
+            // Convertir la chaîne base64 en tableau de bytes
+            byte[] imageBytes = Convert.FromBase64String(logo);
+
+            return imageBytes;
+                     
+        }
+
+        private double DrawHeader(XGraphics gfx, Invoices invoice, ManagerInvoiceViewModel company, int km, XFont titleFont, XFont normalFont, double yPosition)
+        {
+
+
+          
+            using (MemoryStream ms = new MemoryStream(PictureToStream(company.CompanySettings.Logo)))
+            {
+                // Créer l'XImage à partir du MemoryStream
+                XImage logo = XImage.FromStream(ms);
+
+                // Utiliser l'image comme avant
+                gfx.DrawImage(logo, Margin, yPosition, 100, 100);
+            }
+            yPosition += LineHeight;
+
             // Nom du garage
             gfx.DrawString("GP AUTO", titleFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
@@ -67,74 +92,78 @@ namespace Facilys.Components.Services
             yPosition += LineHeight * 2;
 
             // Date et numéro de facture
-            gfx.DrawString($"Date : {invoice.Date:dd-MM-yyyy}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Date : {invoice.DateAdded:dd-MM-yyyy}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
             gfx.DrawString($"N° Facture : {invoice.InvoiceNumber}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Km : {invoice.Kilometers}", normalFont, XBrushes.Black, Margin, yPosition);
+            if(invoice.Vehicle != null)
+                gfx.DrawString($"Km : {km}", normalFont, XBrushes.Black, Margin, yPosition);
+
             yPosition += LineHeight * 2;
 
             return yPosition;
         }
 
-        private double DrawCustomerInfo(XGraphics gfx, InvoicePDF invoice, XFont normalFont, double yPosition)
+        private double DrawCustomerInfo(XGraphics gfx, ManagerInvoiceViewModel client, PhonesClients phones, XFont normalFont, double yPosition)
         {
             gfx.DrawString("CLIENT", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
 
-            gfx.DrawString($"Nom: {invoice.Customer.LastName}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Nom: {client.Client.Lname}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Prénom: {invoice.Customer.FirstName}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Prénom: {client.Client.Fname}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Rue: {invoice.Customer.Address}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Rue: {client.Client.Address}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Code postal: {invoice.Customer.PostalCode}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Code postal: {client.Client.PostalCode}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Ville: {invoice.Customer.City}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Ville: {client.Client.City}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Téléphone: {invoice.Customer.Phone}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Téléphone: {phones.Phone}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight * 2;
 
             return yPosition;
         }
 
-        private double DrawVehicleInfo(XGraphics gfx, InvoicePDF invoice, XFont normalFont, double yPosition)
+        private double DrawVehicleInfo(XGraphics gfx, ManagerInvoiceViewModel vehicle, XFont normalFont, double yPosition)
         {
             gfx.DrawString("VEHICULE", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
 
-            gfx.DrawString($"Marque : {invoice.Vehicle.Brand}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Marque : {vehicle.Vehicle.Mark}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Modèle : {invoice.Vehicle.Model}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Modèle : {vehicle.Vehicle.Model}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Immatriculation : {invoice.Vehicle.Registration}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Immatriculation : {vehicle.Vehicle.Immatriculation}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"VIN : {invoice.Vehicle.VIN}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"VIN : {vehicle.Vehicle.VIN}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Type : {invoice.Vehicle.Type}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Type : {vehicle.Vehicle.Type}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"Mise en circulation : {invoice.Vehicle.ReleaseDate:dd/MM/yyyy}", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString($"Mise en circulation : {vehicle.Vehicle.CirculationDate:dd/MM/yyyy}", normalFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight * 2;
 
             return yPosition;
         }
 
-        private double DrawServiceTable(XGraphics gfx, InvoicePDF invoice, XFont headerFont, XFont normalFont, double yPosition)
+        private double DrawServiceTable(XGraphics gfx, ManagerInvoiceViewModel historyParts, XFont headerFont, XFont normalFont, double yPosition)
         {
             // En-tête du tableau
             gfx.DrawString("Description", headerFont, XBrushes.Black, Margin, yPosition);
             gfx.DrawString("Quantité", headerFont, XBrushes.Black, Margin + 200, yPosition);
             gfx.DrawString("Prix Unitaire", headerFont, XBrushes.Black, Margin + 300, yPosition);
-            gfx.DrawString("Montant HT", headerFont, XBrushes.Black, Margin + 400, yPosition);
+            gfx.DrawString("Remise", headerFont, XBrushes.Black, Margin + 400, yPosition);
+            gfx.DrawString("Montant HT", headerFont, XBrushes.Black, Margin + 500, yPosition);
             yPosition += LineHeight;
 
             // Lignes du tableau
-            foreach (var item in invoice.Services)
+            foreach (var item in historyParts.HistoryParts)
             {
                 gfx.DrawString(item.Description, normalFont, XBrushes.Black, Margin, yPosition);
                 gfx.DrawString(item.Quantity.ToString(), normalFont, XBrushes.Black, Margin + 200, yPosition);
-                gfx.DrawString(item.UnitPrice.ToString("C"), normalFont, XBrushes.Black, Margin + 300, yPosition);
-                gfx.DrawString(item.Total.ToString("C"), normalFont, XBrushes.Black, Margin + 400, yPosition);
+                gfx.DrawString(item.Price.ToString("C"), normalFont, XBrushes.Black, Margin + 300, yPosition);
+                gfx.DrawString(item.Discount.ToString("C"), normalFont, XBrushes.Black, Margin + 400, yPosition);
+                gfx.DrawString(((item.Quantity * item.Price) * (1 - item.Discount / 100)).ToString("C"), normalFont, XBrushes.Black, Margin + 500, yPosition);
                 yPosition += LineHeight;
             }
 
@@ -143,20 +172,20 @@ namespace Facilys.Components.Services
             return yPosition;
         }
 
-        private double DrawTotalAndLegalMentions(XGraphics gfx, InvoicePDF invoice, XFont headerFont, XFont normalFont, double yPosition)
+        private double DrawTotalAndLegalMentions(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
         {
             // Sous-total HT
-            gfx.DrawString($"SOUS-TOTAL HT : {invoice.SubTotal:C}", headerFont, XBrushes.Black, Margin + 300, yPosition);
+            gfx.DrawString($"SOUS-TOTAL HT : {invoiceData.InvoiceData.HT:C}", headerFont, XBrushes.Black, Margin + 300, yPosition);
             yPosition += LineHeight;
 
             // TVA
-            gfx.DrawString($"TAUX DE T.V.A : {invoice.TaxRate}%", normalFont, XBrushes.Black, Margin + 300, yPosition);
+            gfx.DrawString($"TAUX DE T.V.A : {invoiceData.Edition.TVA}%", normalFont, XBrushes.Black, Margin + 300, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString($"T.V.A : {invoice.TaxAmount:C}", normalFont, XBrushes.Black, Margin + 300, yPosition);
+            gfx.DrawString($"T.V.A : {invoiceData.InvoiceData.TVA:C}", normalFont, XBrushes.Black, Margin + 300, yPosition);
             yPosition += LineHeight;
 
             // Total TTC
-            gfx.DrawString($"TOTAL TTC : {invoice.TotalAmount:C}", headerFont, XBrushes.Black, Margin + 300, yPosition);
+            gfx.DrawString($"TOTAL TTC : {invoiceData.InvoiceData.TTC:C}", headerFont, XBrushes.Black, Margin + 300, yPosition);
             yPosition += LineHeight * 2;
 
             // Mentions légales

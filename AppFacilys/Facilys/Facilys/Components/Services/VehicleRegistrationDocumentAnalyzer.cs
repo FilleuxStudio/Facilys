@@ -1,262 +1,183 @@
 ﻿using Facilys.Components.Constants;
 using Microsoft.AspNetCore.Components.Forms;
+using OpenCvSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tesseract;
-using OpenCvSharp;
 
 namespace Facilys.Components.Services
 {
     public class VehicleRegistrationDocumentAnalyzer
     {
         private readonly VehicleRegistrationExtractor _extractor;
+        private readonly OcrPerformanceMonitor _performanceMonitor;
 
         public VehicleRegistrationDocumentAnalyzer()
         {
             _extractor = new VehicleRegistrationExtractor();
+            _performanceMonitor = new OcrPerformanceMonitor();
         }
-
-        public async Task CopyTessdataFiles()
-        {
-            var sourceDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Tessdata");
-            var destDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Facylis", "tessdata");
-
-            Directory.CreateDirectory(destDir);
-
-            foreach (var file in Directory.GetFiles(sourceDir))
-            {
-                var destFile = Path.Combine(destDir, Path.GetFileName(file));
-                File.Copy(file, destFile, true);
-            }
-        }
-
-        //public async Task<VehicleRegisterData> AnalyzeDocument(MemoryStream imageStream)
-        //{
-        //    var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        //    var directoryPathTessdata = Path.Combine(appDataPath, EnvironmentApp.FolderData, "tessdata");
-
-        //    if (!Directory.Exists(directoryPathTessdata))
-        //    {
-        //        // Assurez-vous que le dossier existe
-        //        Directory.CreateDirectory(directoryPathTessdata);
-        //        await CopyTessdataFiles();
-        //    }
-
-        //    List<VehicleRegisterData> listData = new();
-        //    int[] setting_pageseg = { 0, 3, 4, 6 };
-        //    for (int i = 0; i < 4; i++)
-        //    {
-        //        // Utilisez le chemin absolu pour initialiser TesseractEngine
-        //        using var engine = new TesseractEngine(directoryPathTessdata, "fra", EngineMode.Default);
-        //        //Tu utilises le mode 3(PSM_AUTO), ce qui est une bonne idée pour les documents semi-structurés.Mais pour des cartes grises où les champs sont bien délimités, le mode 6(PSM_SINGLE_BLOCK) ou 4(PSM_SINGLE_COLUMN) peut donner de meilleurs résultats:
-        //        //3 4 6
-        //        engine.SetVariable("tessedit_pageseg_mode", setting_pageseg[i]); // PSM_SINGLE_BLOCK
-        //        engine.SetVariable("load_system_dawg", "0"); // Désactive le dictionnaire par défaut
-        //        engine.SetVariable("load_freq_dawg", "0"); // Désactive le dictionnaire de fréquence
-        //        engine.SetVariable("user_words_suffix", "carte_grise.user-words"); // Ajoute un fichier de mots spécifiques
-
-        //        using var img = Pix.LoadFromMemory(imageStream.ToArray());
-        //        using var page = engine.Process(img);
-        //        var text = page.GetText();
-        //        listData.Add(ExtractDocumentInfo(text));
-        //    }
-
-        //    // Analyse du texte extrait
-        //    return FindBestModel(listData);
-        //}
-
-        //public VehicleRegisterData ExtractDocumentInfo(string text)
-        //{
-        //    var data = new VehicleRegisterData();
-        //    text = text.ToUpper().Replace(".", "");
-
-        //    data.Registration = Regex.Match(text, @"\b[A-Z]{2}[-\s]?\d{3}[-\s]?[A-Z]{2}\b").Value;
-        //    data.ReleaseDate = Regex.Match(text, @"\b\d{2}[/-]\d{2}[/-]\d{4}\b").Value;
-        //    data.Name = Regex.Match(text, @"C\.?1\.?\s*(.*?)(?=\s*C\.?4|$)", RegexOptions.Singleline).Groups[1].Value.Trim();
-        //    data.Mark = Regex.Match(text, @"D\.?1\.?\s*(.*?)(?=\s*D\.?2|$)", RegexOptions.Singleline).Groups[1].Value.Trim();
-        //    data.Model = Regex.Match(text, @"D\.?3\.?\s*(.*?)(?=\s*D\.?4|$)", RegexOptions.Singleline).Groups[1].Value.Trim();
-        //    data.SerieNumber = Regex.Match(text, @"D\.?2\.?\s*(\S+)").Groups[1].Value.Trim();
-        //    data.Address = Regex.Match(text, @"C\.?3\.?\s*(.*?)(?=\s*C\.?4|$)", RegexOptions.Singleline).Groups[1].Value.Trim();
-        //    data.Type = Regex.Match(text, @"J\.?\s*(\w+)").Groups[1].Value.Trim();
-        //    data.VIN = Regex.Match(text, @"E\s*([A-HJ-NPR-Z0-9]{17})", RegexOptions.IgnoreCase).Groups[1].Value;
-
-        //    return data;
-        //}
 
         public async Task<VehicleRegisterData> AnalyzeDocument(MemoryStream imageStream)
         {
-
             try
             {
-                var results = new List<VehicleRegisterData>();
-                foreach (var pageSegMode in new[] { 3, 4, 6, 11 })
+                var rawImage = imageStream.ToArray();
+                var processedImages = ImagePreprocessor.ProcessImage(rawImage);
+                var results = new ConcurrentBag<VehicleRegisterData>();
+
+                await Parallel.ForEachAsync(processedImages, async (image, _) =>
                 {
-                    var text = await PerformOcrAsync(imageStream.ToArray(), pageSegMode);
-                    var data = _extractor.ExtractDocumentInfo(text);
-                    results.Add(data);
-                }
-                return FindBestResult(results);
+                    foreach (var mode in new[] { 3, 4, 6, 11 })
+                    {
+                        var text = await PerformOcrAsync(image, mode);
+                        var data = _extractor.ExtractDocumentInfo(text);
+                        results.Add(data);
+                    }
+                });
 
-                //var processedImages = ImagePreprocessor.ProcessImage(imageStream.ToArray());
-                //var results = new List<VehicleRegisterData>();
-
-                //foreach (var image in processedImages)
-                //{
-                //    foreach (var pageSegMode in new[] { 3, 4, 6, 11 })
-                //    {
-                //        var text = await PerformOcrAsync(image, pageSegMode);
-                //        var data = _extractor.ExtractDocumentInfo(text);
-                //        results.Add(data);
-                //    }
-                //}
-                //return FindBestResult(results);
+                return _performanceMonitor.FindBestResult(results.ToList());
             }
             catch (Exception ex)
             {
+                // Logging des erreurs
+                return new VehicleRegisterData { Error = ex.Message };
             }
-
-
-            return new();
         }
 
         private async Task<string> PerformOcrAsync(byte[] imageData, int pageSegMode)
         {
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var directoryPathTessdata = Path.Combine(appDataPath, EnvironmentApp.FolderData, "tessdata");
+            var tessdataPath = await EnsureTessdataFiles();
 
-            if (!Directory.Exists(directoryPathTessdata))
-            {
-                // Assurez-vous que le dossier existe
-                Directory.CreateDirectory(directoryPathTessdata);
-                await CopyTessdataFiles();
-            }
-
-            using var engine = new TesseractEngine(directoryPathTessdata, "fra", EngineMode.LstmOnly);
-            engine.SetVariable("tessedit_pageseg_mode", pageSegMode.ToString());
-            engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/. ");
-            engine.SetVariable("tessedit_pageseg_mode", "1"); // Mode de segmentation automatique
-            engine.SetVariable("tessedit_ocr_engine_mode", "2"); // Mode LSTM uniquement
-            //engine.SetVariable("load_system_dawg", "0"); // Désactive le dictionnaire par défaut
-            //engine.SetVariable("load_freq_dawg", "0"); // Désactive le dictionnaire de fréquence
-            engine.SetVariable("user_words_suffix", "carte_grise.user-words"); // Ajoute un fichier de mots spécifiques
+            using var engine = new TesseractEngine(tessdataPath, "fra", EngineMode.LstmOnly);
+            ConfigureEngine(engine, pageSegMode);
 
             using var img = Pix.LoadFromMemory(imageData);
             using var page = engine.Process(img);
-            return page.GetText();
+
+            return PostProcessText(page.GetText());
         }
 
-        private VehicleRegisterData FindBestResult(List<VehicleRegisterData> results)
+        private void ConfigureEngine(TesseractEngine engine, int pageSegMode)
         {
-            return results.OrderByDescending(r => r.CalculateConfidenceScore()).First();
+            engine.SetVariable("tessedit_pageseg_mode", pageSegMode.ToString());
+            engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/. ");
+            engine.SetVariable("tessedit_ocr_engine_mode", "2"); // LSTM Only
+            engine.SetVariable("user_defined_dpi", "300"); // Résolution optimale
+            engine.SetVariable("debug_file", "/dev/null"); // Désactive les logs
         }
 
-        //public static VehicleRegisterData FindBestModel(List<VehicleRegisterData> listData)
-        //{
-        //    // Trouver l'objet avec le score maximum
-        //    return listData.OrderByDescending(data => data.CalculateScore()).First();
-        //}
+        private string PostProcessText(string text)
+        {
+            return text.Replace("\n\n", " ")
+                      .Replace("  ", " ")
+                      .Trim();
+        }
+
+        private async Task<string> EnsureTessdataFiles()
+        {
+            var destDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                EnvironmentApp.FolderData,
+                "tessdata");
+
+            if (!Directory.Exists(destDir) || !Directory.GetFiles(destDir).Any())
+            {
+                Directory.CreateDirectory(destDir);
+                var sourceDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Tessdata");
+                await CopyTessdataFiles(sourceDir, destDir);
+            }
+            return destDir;
+        }
+
+        private async Task CopyTessdataFiles(string sourceDir, string destDir)
+        {
+            foreach (var file in Directory.GetFiles(sourceDir))
+            {
+                using var sourceStream = File.OpenRead(file);
+                using var destStream = File.Create(Path.Combine(destDir, Path.GetFileName(file)));
+                await sourceStream.CopyToAsync(destStream);
+            }
+        }
     }
 
-    //public class VehicleRegisterData
-    //{
-    //    public string Registration { get; set; }
-    //    public string Name { get; set; }
-    //    public string Mark { get; set; }
-    //    public string Model { get; set; }
-    //    public string SerieNumber { get; set; }
-    //    public string Address { get; set; }
-    //    public string Type { get; set; }
-    //    public string ReleaseDate { get; set; }
-    //    public string VIN { get; set; }
+    public static class ImagePreprocessor
+    {
+        public static List<byte[]> ProcessImage(byte[] imageData)
+        {
+            using var src = Cv2.ImDecode(imageData, ImreadModes.Color);
+            var processed = new List<byte[]>
+            {
+                ApplyStandardProcessing(src),
+                ApplyAlternativeProcessing(src)
+            };
+            return processed;
+        }
 
-    //    // Méthode pour calculer le score avec validation de cohérence
-    //    public int CalculateScore()
-    //    {
-    //        int score = 0;
+        private static byte[] ApplyStandardProcessing(Mat image)
+        {
+            using var processed = image.Clone();
 
-    //        // Vérification de la cohérence et ajout de points
-    //        if (!string.IsNullOrEmpty(Registration) && IsValidRegistration(Registration)) score += 8;
-    //        if (!string.IsNullOrEmpty(Name)) score += 3; 
-    //        if (!string.IsNullOrEmpty(Mark)) score += 2;
-    //        if (!string.IsNullOrEmpty(Model)) score += 2;
-    //        if (!string.IsNullOrEmpty(SerieNumber)) score += 1; 
-    //        if (!string.IsNullOrEmpty(Address)) score += 1;
-    //        if (!string.IsNullOrEmpty(Type)) score += 1; 
-    //        if (!string.IsNullOrEmpty(ReleaseDate) && IsValidDate(ReleaseDate)) score += 4; // Date valide
-    //        if (!string.IsNullOrEmpty(VIN) && IsValidVIN(VIN)) score += 5; // VIN est critique
+            Cv2.CvtColor(processed, processed, ColorConversionCodes.BGR2GRAY);
+            Cv2.GaussianBlur(processed, processed, new Size(3, 3), 0);
+            Cv2.AdaptiveThreshold(processed, processed, 255,
+                AdaptiveThresholdTypes.GaussianC,
+                ThresholdTypes.Binary, 11, 2);
 
-    //        return score;
-    //    }
+            return processed.ToBytes(".png");
+        }
 
-    //    // Vérifie si l'immatriculation est dans un format valide (ex: "AA-123-BB")
-    //    private bool IsValidRegistration(string registration)
-    //    {
-    //        return Regex.IsMatch(registration, @"^[A-Z]{2}-\d{3}-[A-Z]{2}$");
-    //    }
+        private static byte[] ApplyAlternativeProcessing(Mat image)
+        {
+            using var processed = image.Clone();
 
-    //    // Vérifie si le VIN (Numéro d’identification du véhicule) est valide (17 caractères alphanumériques)
-    //    private bool IsValidVIN(string vin)
-    //    {
-    //        return vin.Length == 17 && Regex.IsMatch(vin, @"^[A-HJ-NPR-Z0-9]{17}$"); // VIN n'inclut pas les I, O, Q
-    //    }
+            Cv2.FastNlMeansDenoisingColored(processed, processed);
+            Cv2.Canny(processed, processed, 50, 200);
+            Cv2.Dilate(processed, processed, null);
 
-    //    // Vérifie si une date est valide (format DD/MM/YYYY)
-    //    private bool IsValidDate(string date)
-    //    {
-    //        return DateTime.TryParse(date, out _);
-    //    }
-    //}
+            return processed.ToBytes(".png");
+        }
+
+        private static byte[] ToBytes(this Mat image, string extension)
+        {
+            return Cv2.ImEncode(extension, image, out var ret) ? ret : Array.Empty<byte>();
+        }
+    }
+
     public class VehicleRegistrationExtractor
     {
-        private readonly List<FieldPattern> _fieldPatterns;
-
-        public VehicleRegistrationExtractor()
+        private readonly List<FieldPattern> _fieldPatterns = new()
         {
-            _fieldPatterns =
-            [
-                new("Registration",  ["A"], @"\b[A-Za-z]{2}-\d{3}-[A-Za-z]{2}\b",
-    transform: v => v.Replace(" ", "-").Replace(".", "-")),
+            new("VIN", ["E"], @"E\s*([A-HJ-NPR-Z0-9]{17})",
+                transform: v => v.Replace(" ", ""),
+                validate: IsValidVin),
 
-                  new("ReleaseDate", ["B"],
-                @"B\.?\s*(\d{2}/\d{2}/\d{4})", validate: IsValidDate),
+            new("Registration", ["A"], @"([A-Z]{2}[- ]?[0-9]{3}[- ]?[A-Z]{2})",
+                transform: v => Regex.Replace(v, @"\s", "-")),
 
-              new("VIN", ["E"],
-    @"E\.?\s*([A-HJ-NPR-Z0-9]{17})",
-    validate: IsValidVin,
-    transform: v => v.Replace(" ", "").Replace(".", "").ToUpper()),
+            new("ReleaseDate", ["B"], @"(\d{2}[/\-\.]\d{2}[/\-\.]\d{4})",
+                validate: IsValidDate),
 
-            
+            new("Name", ["C.1", "C1"], @"C\.?1\s*([\p{L}\s-]+)(?=\s*C\.?2)",
+                multiLine: true,
+                transform: CleanText),
 
-           new("Name", ["C1"],
-    @"C\.?1\s+([\w\s]+(?:\n[\w\s]+)?)",
-    multiLine: true,
-    transform: v => v.Replace("\n", " ").Trim()),
-
-            new("Mark", ["D1"],
-                @"D\.?1\s+(\w+)"),
-
-            new("Model", ["D3"],
-                @"D\.?3\s+([\w\s]+)"),
-
-            new("Address", ["C4.1", "C.4.1"],
-                @"C4\.1\s*([\s\S]+?)(?=\n\s*\w|\Z)", multiLine: true),
-
-            new("Type", ["J1"],
-                @"J1\s+(\w+)"),
-
-          
-            ];
-        }
+            new("Address", ["C.3", "C3"], @"C\.?3\s*([\p{L}0-9\s,.-]+)(?=\s*C\.?4)",
+                multiLine: true,
+                transform: CleanText)
+        };
 
         public VehicleRegisterData ExtractDocumentInfo(string text)
         {
             var data = new VehicleRegisterData();
-            var lines = text.ToUpper().Replace(".", "").Split('\n').Select(l => l.Trim()).ToList();
+            var lines = text.Split('\n').Select(l => l.Trim()).ToList();
 
             for (int i = 0; i < lines.Count; i++)
             {
@@ -266,33 +187,106 @@ namespace Facilys.Components.Services
                     if (found)
                     {
                         data.SetProperty(pattern.FieldName, value);
-                        if (newIndex > i)
-                        {
-                            i = newIndex - 1; // On soustrait 1 car la boucle for va incrémenter i
-                            break; // Sortir de la boucle foreach pour passer à la ligne suivante
-                        }
+                        i = newIndex - 1;
+                        break;
                     }
                 }
             }
-            data.Data = text;
             return data;
         }
 
-        private static bool IsValidVin(string vin)
-        {
-            if (string.IsNullOrEmpty(vin) || (vin.Length >= 17 && vin.Length <= 18))
-                return false;
+        private static string CleanText(string input) =>
+            Regex.Replace(input, @"\s+", " ").Trim();
 
-            // Vérification des caractères valides
-            return Regex.IsMatch(vin, @"^[A-HJ-NPR-Z0-9]{17}$");
-        }
-
+        private static bool IsValidVin(string vin) =>
+            vin.Length == 17 && Regex.IsMatch(vin, "^[A-HJ-NPR-Z0-9]{17}$");
 
         private static bool IsValidDate(string date) =>
+            DateTime.TryParseExact(date, ["dd/MM/yyyy", "dd-MM-yyyy"], null,
+                System.Globalization.DateTimeStyles.None, out _);
+    }
+
+    public class OcrPerformanceMonitor
+    {
+        private readonly ConcurrentDictionary<string, int> _fieldConfidence = new();
+
+        public VehicleRegisterData FindBestResult(List<VehicleRegisterData> results)
+        {
+            return results.OrderByDescending(r => r.ConfidenceScore)
+                          .FirstOrDefault() ?? new VehicleRegisterData();
+        }
+
+        private void UpdateConfidenceMetrics(VehicleRegisterData data)
+        {
+            foreach (var prop in data.GetProperties())
+            {
+                if (!string.IsNullOrEmpty(prop.Value))
+                {
+                    _fieldConfidence.AddOrUpdate(prop.Key, 1, (_, v) => v + 1);
+                }
+            }
+        }
+    }
+
+    public class VehicleRegisterData
+    {
+        private readonly Dictionary<string, string> _data = new();
+
+        public string VIN => _data.GetValueOrDefault(nameof(VIN));
+        public string Registration => _data.GetValueOrDefault(nameof(Registration));
+        public string ReleaseDate => _data.GetValueOrDefault(nameof(ReleaseDate));
+        public string Name => _data.GetValueOrDefault(nameof(Name));
+        public string Mark => _data.GetValueOrDefault(nameof(Mark));
+        public string Model => _data.GetValueOrDefault(nameof(Model));
+        public string SerieNumber => _data.GetValueOrDefault(nameof(SerieNumber));
+        public string Address => _data.GetValueOrDefault(nameof(Address));
+        public string Type => _data.GetValueOrDefault(nameof(Type));
+        public string Error { get; set; }
+
+        public int ConfidenceScore => CalculateConfidenceScore();
+
+        public void SetProperty(string fieldName, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                _data[fieldName] = value.Trim();
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> GetProperties()
+        {
+            return _data.Where(kv => !string.IsNullOrEmpty(kv.Value));
+        }
+
+        private int CalculateConfidenceScore()
+        {
+            int score = 0;
+
+            if (IsValidVin(VIN)) score += 30;
+            if (IsValidRegistration(Registration)) score += 25;
+            if (IsValidDate(ReleaseDate)) score += 20;
+            if (!string.IsNullOrEmpty(Name)) score += 5;
+            if (!string.IsNullOrEmpty(Address)) score += 5;
+            if (!string.IsNullOrEmpty(Mark)) score += 5;
+            if (!string.IsNullOrEmpty(Model)) score += 5;
+            if (!string.IsNullOrEmpty(Type)) score += 5;
+
+            return Math.Min(100, score);
+        }
+
+        private bool IsValidVin(string vin) =>
+            !string.IsNullOrEmpty(vin) &&
+            vin.Length == 17 &&
+            Regex.IsMatch(vin, @"^[A-HJ-NPR-Z0-9]{17}$");
+
+        private bool IsValidRegistration(string registration) =>
+            !string.IsNullOrEmpty(registration) &&
+            Regex.IsMatch(registration, @"^[A-Z]{2}-?\d{3}-?[A-Z]{2}$");
+
+        private bool IsValidDate(string date) =>
             DateTime.TryParseExact(date, ["dd/MM/yyyy", "dd-MM-yyyy"],
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None, out _);
     }
+
 
     public class FieldPattern
     {
@@ -304,7 +298,8 @@ namespace Facilys.Components.Services
         public bool MultiLine { get; }
 
         public FieldPattern(string fieldName, string[] triggers, string regexPattern,
-            Func<string, bool> validate = null, Func<string, string> transform = null,
+            Func<string, bool> validate = null,
+            Func<string, string> transform = null,
             bool multiLine = false)
         {
             FieldName = fieldName;
@@ -314,6 +309,7 @@ namespace Facilys.Components.Services
             Transform = transform ?? (v => v);
             MultiLine = multiLine;
         }
+
         public (bool found, string value, int newIndex) TryExtract(List<string> lines, int startIndex)
         {
             for (int offset = 0; offset <= 2; offset++)
@@ -321,19 +317,21 @@ namespace Facilys.Components.Services
                 var currentIndex = startIndex + offset;
                 if (currentIndex >= lines.Count) break;
 
-                if (Triggers.Any(t => lines[currentIndex].Contains(t, StringComparison.OrdinalIgnoreCase)))
+                foreach (var trigger in Triggers)
                 {
-                    return ExtractValue(lines, currentIndex);
+                    if (lines[currentIndex].Contains(trigger, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ExtractValue(lines, currentIndex);
+                    }
                 }
             }
-
             return (false, null, startIndex);
         }
 
         private (bool, string, int) ExtractValue(List<string> lines, int triggerIndex)
         {
             var sb = new StringBuilder();
-            int linesToCheck = MultiLine ? 5 : 1;
+            int linesToCheck = MultiLine ? 3 : 1;
 
             for (int i = 0; i < linesToCheck; i++)
             {
@@ -345,10 +343,11 @@ namespace Facilys.Components.Services
 
                 if (match.Success)
                 {
-                    var value = Transform(match.Groups[1].Value.Trim());
-                    if (Validate(value))
+                    var rawValue = match.Groups[1].Value.Trim();
+                    var transformed = Transform(rawValue);
+                    if (Validate(transformed))
                     {
-                        return (true, value, currentLineIndex + 1);
+                        return (true, transformed, currentLineIndex + 1);
                     }
                 }
 
@@ -358,109 +357,16 @@ namespace Facilys.Components.Services
                     if (line.Contains("  ") || line.Length == 0)
                     {
                         var fullValue = sb.ToString().Trim();
-                        if (!string.IsNullOrEmpty(fullValue) && Validate(fullValue))
+                        if (Validate(fullValue))
+                        {
                             return (true, fullValue, currentLineIndex + 1);
+                        }
                     }
                 }
             }
-
             return (false, null, triggerIndex);
         }
     }
 
-    public class VehicleRegisterData
-    {
-        private readonly Dictionary<string, string> _data = [];
 
-        public string VIN => _data.GetValueOrDefault("VIN");
-        public string Registration => _data.GetValueOrDefault("Registration");
-        public string Name => _data.GetValueOrDefault("Name");
-        public string Mark => _data.GetValueOrDefault("Mark");
-        public string Model => _data.GetValueOrDefault("Model");
-        public string SerieNumber => _data.GetValueOrDefault("SerieNumber");
-        public string Address => _data.GetValueOrDefault("Address");
-        public string Type => _data.GetValueOrDefault("Type");
-        public string ReleaseDate => _data.GetValueOrDefault("ReleaseDate");
-        public string Data {  get; set; } = string.Empty;
-
-        public bool IsFieldSet(string fieldName) => _data.ContainsKey(fieldName);
-
-        public void SetProperty(string fieldName, string value)
-        {
-            if (!string.IsNullOrEmpty(value) && !_data.ContainsKey(fieldName))
-            {
-                _data[fieldName] = value;
-            }
-        }
-
-        public int CalculateConfidenceScore()
-        {
-            int score = 0;
-            if (IsValidVin(VIN)) score += 30;
-            if (IsValidRegistration(Registration)) score += 25;
-            if (!string.IsNullOrEmpty(ReleaseDate)) score += 15;
-            if (!string.IsNullOrEmpty(Address)) score += 10;
-            if (!string.IsNullOrEmpty(Name)) score += 10;
-            if (!string.IsNullOrEmpty(Mark)) score += 5;
-            if (!string.IsNullOrEmpty(Model)) score += 5;
-            return score;
-        }
-
-        private static bool IsValidVin(string vin) =>
-            !string.IsNullOrEmpty(vin) && vin.Length == 17;
-
-        private static bool IsValidRegistration(string registration) =>
-            !string.IsNullOrEmpty(registration) && registration.Length >= 7;
-    }
-
-    public static class ImagePreprocessor
-    {
-        public static List<byte[]> ProcessImage(byte[] imageBytes)
-        {
-            var processedImages = new List<byte[]>();
-
-            using (var mat = Cv2.ImDecode(imageBytes, ImreadModes.Color))
-            {
-                var rotated = AutoRotate(mat);
-
-                processedImages.Add(ProcessVariant(rotated, ThresholdTypes.Binary));
-                //processedImages.Add(ProcessVariant(rotated, ThresholdTypes.Adaptive));
-                processedImages.Add(ProcessVariant(rotated.MedianBlur(3), ThresholdTypes.Binary));
-                processedImages.Add(ProcessVariant(rotated.GaussianBlur(new Size(3, 3), 0), ThresholdTypes.Otsu));
-            }
-
-            return processedImages;
-        }
-
-        private static byte[] ProcessVariant(Mat input, ThresholdTypes thresholdType)
-        {
-            using var gray = input.CvtColor(ColorConversionCodes.BGR2GRAY);
-            using var thresholded = new Mat();
-            Cv2.Threshold(gray, thresholded, 0, 255, thresholdType);
-            return thresholded.ImEncode(".png");
-        }
-
-        private static Mat AutoRotate(Mat input)
-        {
-            using var edges = new Mat();
-            Cv2.Canny(input, edges, 50, 200);
-            var lines = Cv2.HoughLinesP(edges, 1, Math.PI / 180, 50, 50, 10);
-
-            if (lines.Length > 0)
-            {
-                var angles = lines.Select(l => Math.Atan2(l.P2.Y - l.P1.Y, l.P2.X - l.P1.X))
-                                 .Where(a => Math.Abs(a) > 0.1)
-                                 .DefaultIfEmpty(0)
-                                 .Average();
-
-                if (Math.Abs(angles) > 0.1)
-                {
-                    var center = new Point2f(input.Width / 2f, input.Height / 2f);
-                    var rotationMatrix = Cv2.GetRotationMatrix2D(center, angles * 180 / Math.PI, 1.0);
-                    Cv2.WarpAffine(input, input, rotationMatrix, input.Size());
-                }
-            }
-            return input;
-        }
-    }
 }

@@ -1,22 +1,22 @@
-﻿using Facilys.Components.Models;
+﻿using ElectronNET.API.Entities;
+using Facilys.Components.Models;
 using Facilys.Components.Models.ViewModels;
+using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using static Facilys.Components.Models.PdfModels.InvoicePDF;
+using System.Globalization;
 
 namespace Facilys.Components.Pages
 {
     public partial class EditionInvoice
     {
         private ManagerInvoiceViewModel managerInvoiceViewModel = new();
-        private string invoiceNumber = string.Empty;
-        private string selectedValueClient = string.Empty;
-        private string selectedValueVehicle = string.Empty;
-        private string searchClient = string.Empty;
-        private string km = string.Empty;
+        private string invoiceNumber = string.Empty, selectedValueClient = string.Empty, selectedValueVehicle = string.Empty, searchClient = string.Empty;
+        private Guid IdUser = Guid.Empty;   
+        private int km = 0;
         private short actionType;
         private InvoiceData invoiceData = new();
 
@@ -53,10 +53,10 @@ namespace Facilys.Components.Pages
             else
             {
                 string Number = GetLargerInvoiceNumber(managerInvoiceViewModel.Invoice.InvoiceNumber, managerInvoiceViewModel.Edition.StartNumberInvoice);
-                if (Number == managerInvoiceViewModel.Edition.StartNumberInvoice)
-                    invoiceNumber = managerInvoiceViewModel.Edition.StartNumberInvoice;
-                else
+                if (Number == managerInvoiceViewModel.Invoice.InvoiceNumber)
                     invoiceNumber = IncrementInvoiceNumber(Number);
+                else
+                    invoiceNumber = managerInvoiceViewModel.Edition.StartNumberInvoice;
             }
 
             foreach(var client in managerInvoiceViewModel.Clients)
@@ -70,6 +70,9 @@ namespace Facilys.Components.Pages
             invoiceData.LinePrice = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
             invoiceData.LineDisc = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
             invoiceData.LineMo = Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine).ToList();
+
+            var user = await AuthService.GetAuthenticatedAsync();
+            IdUser = user.Id;
         }
 
         // Rechercher un client
@@ -181,31 +184,72 @@ namespace Facilys.Components.Pages
             if (string.IsNullOrEmpty(invoiceNumber))
                 return "0001";
 
-            char[] chars = invoiceNumber.ToCharArray();
-            int i = chars.Length - 1;
+            // Séparation préfixe alphabétique et suffixe numérique
+            int splitPos = 0;
+            while (splitPos < invoiceNumber.Length && char.IsLetter(invoiceNumber[splitPos]))
+                splitPos++;
 
-            while (i >= 0)
+            string prefix = invoiceNumber[..splitPos];
+            string suffix = invoiceNumber[splitPos..];
+
+            bool overflow = false;
+
+            // Gestion du suffixe numérique
+            if (suffix.Length == 0)
             {
-                if (char.IsDigit(chars[i]))
+                suffix = "0000";
+            }
+            else
+            {
+                try
                 {
-                    if (chars[i] < '9')
+                    long number = long.Parse(suffix) + 1;
+                    string newSuffix = number.ToString($"D{suffix.Length}");
+
+                    if (newSuffix.Length > suffix.Length)
                     {
-                        chars[i]++;
-                        return new string(chars);
+                        overflow = true;
+                        suffix = new string('0', suffix.Length);
                     }
-                    chars[i] = '0';
-                    i--;
+                    else
+                    {
+                        suffix = newSuffix;
+                    }
                 }
-                else if (char.IsLetter(chars[i]))
+                catch
                 {
-                    if (chars[i] < 'Z')
-                    {
-                        chars[i]++;
-                        return new string(chars);
-                    }
-                    chars[i] = 'A';
-                    i--;
+                    suffix = new string('0', suffix.Length);
+                    overflow = true;
                 }
+            }
+
+            // Gestion du préfixe alphabétique en cas de débordement
+            if (overflow)
+            {
+                prefix = IncrementPrefix(prefix);
+
+                if (prefix.Length == 1 && prefix[0] == 'A' && string.IsNullOrEmpty(invoiceNumber[..splitPos]))
+                    suffix = "0000";
+            }
+
+            return prefix + suffix;
+        }
+
+        private string IncrementPrefix(string prefix)
+        {
+            if (string.IsNullOrEmpty(prefix))
+                return "A";
+
+            char[] chars = prefix.ToCharArray();
+
+            for (int i = chars.Length - 1; i >= 0; i--)
+            {
+                if (chars[i] != 'Z')
+                {
+                    chars[i]++;
+                    return new string(chars);
+                }
+                chars[i] = 'A';
             }
 
             return "A" + new string(chars);
@@ -214,21 +258,29 @@ namespace Facilys.Components.Pages
 
         private async Task OnLinePriceChanged(object value, int index)
         {
-            value = value.ToString();
-            if(value != string.Empty)
-                invoiceData.LinePrice[index] = float.Parse(value.ToString());
+           if (value is string stringValue)
+           {
+                if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
+                {
+                    invoiceData.LinePrice[index] = result;
+                    await UpdateLineAmount(index);
+                }
+            }
 
-            await UpdateLineAmount(index); // Appelle votre méthode pour mettre à jour le montant
         }
 
         private async Task OnLineDiscChanged(object value, int index)
         {
-            value = value.ToString();
-            if (value != string.Empty)
-                invoiceData.LineDisc[index] = float.Parse(value.ToString());
-
-            await UpdateLineAmount(index); // Appelle votre méthode pour mettre à jour le montant
+            if (value is string stringValue)
+            {
+                if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
+                {
+                    invoiceData.LineDisc[index] = result;
+                    await UpdateLineAmount(index);
+                }
+            }
         }
+
         /// <summary>
         /// Méthode pour calcul le montant HT
         /// </summary>
@@ -248,24 +300,125 @@ namespace Facilys.Components.Pages
 
                 // Mettez à jour LineMo
                 invoiceData.LineMo[index] = (float?)Math.Round(amount, 2); // Arrondi à 2 décimales
+
+               CalculateTotals();
             }
+        }
+
+        private void CalculateTotals()
+        {
+            float totalHT = 0;
+            for (int i = 0; i < managerInvoiceViewModel.Edition.PreloadedLine; i++)
+            {
+                totalHT += invoiceData.LineMo[i] ?? 0.0f;
+            }
+            invoiceData.HT = totalHT;
+            invoiceData.TVA = ((totalHT * managerInvoiceViewModel.Edition.TVA ?? 0.0f) / 100); // Supposons un taux de TVA de 20%
+            invoiceData.TTC = invoiceData.HT + invoiceData.TVA;
         }
 
         private async Task CreateInvoiceValidSubmit()
         {
+            var otherVehicle = await DbContext.OtherVehicles.FindAsync(Guid.Parse(selectedValueVehicle));
+            var vehicle = await DbContext.Vehicles.FindAsync(Guid.Parse(selectedValueVehicle));
+            var user = await DbContext.Users.FindAsync(IdUser);
+
+            Invoices invoice = new()
+            {
+                InvoiceNumber = invoiceNumber,
+                OrderNumber = invoiceNumber,
+                OtherVehicle = otherVehicle,
+                Vehicle = vehicle,
+                Payment = PaymentMethod.NotInformed,
+                Status = StatusInvoice.OnHold,
+                TotalAmount = invoiceData.TTC,
+                Observations = invoiceData.GeneralConditionInvoice,
+                RepairType = invoiceData.GeneralConditionOrder,
+                User = user
+            };
+
+            List<HistoryPart> LineDataPart = new();
+
+            for (int i = 0; i < invoiceData.LineRef.Count; i++)
+            {
+                if (invoiceData.LineRef[i] != string.Empty || invoiceData.LineRef[i] != null)
+                {
+                    LineDataPart.Add(new HistoryPart()
+                    {
+                        Id = Guid.NewGuid(),
+                        Invoice = invoice,
+                        Vehicle = await DbContext.Vehicles.FindAsync(Guid.Parse(selectedValueVehicle)),
+                        OtherVehicle = await DbContext.OtherVehicles.FindAsync(Guid.Parse(selectedValueVehicle)),
+                        PartNumber = invoiceData.LineRef[i],
+                        Description = invoiceData.LineDesc[i],
+                        Discount = invoiceData.LineDisc[i] ?? 0.0f,
+                        Price = invoiceData.LinePrice[i] ?? 0.0f,
+                        Quantity = invoiceData.LineQt[i] ?? 0.0f,
+                        KMMounted = km
+                    });
+                }
+            }
+
+            managerInvoiceViewModel.HistoryParts = LineDataPart;
+
+            var Vehicle = await DbContext.Vehicles.FindAsync(Guid.Parse(selectedValueVehicle));
+            var OtherVehicle = await DbContext.OtherVehicles.FindAsync(Guid.Parse(selectedValueVehicle));
+
+            managerInvoiceViewModel.Vehicle = Vehicle;
+            managerInvoiceViewModel.OtherVehicle = OtherVehicle;
+
+            if (Vehicle != null)
+                Vehicle.KM = km;
+
+
             if (actionType == 1)
             {
-                
+
             }
             else if (actionType == 2)
             {
-                var pdfBytes = PdfService.GenerateInvoicePdf(invoice);
-                await FileService.SaveAsAsync("facture.pdf", pdfBytes, "application/pdf");
-                //ou
-                var pdfService = new PdfInvoiceService();
-                var pdfBytes = pdfService.GenerateInvoicePdf(invoice);
-                File.WriteAllBytes("Facture-L0280-AMADOMARIA-2025-02-05.pdf", pdfBytes);
+
+                managerInvoiceViewModel.InvoiceData = invoiceData;
+
+                /*using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
+
+                    await DbContext.Invoices.AddAsync(invoice);
+                    await DbContext.HistoryParts.AddRangeAsync(LineDataPart);
+                    DbContext.Vehicles.Update(Vehicle);
+
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                }*/
+
+                PhonesClients phonesClients = await DbContext.Phones.Where(c => c.Client.Id == Guid.Parse(selectedValueClient)).FirstOrDefaultAsync();
+                EmailsClients emailsClients = await DbContext.Emails.Where(m => m.Client.Id == Guid.Parse(selectedValueClient)).FirstOrDefaultAsync();
+
+                byte[] pdfBytes = null;
+                switch (managerInvoiceViewModel.Edition.TypeDesign)
+                {
+                    case InvoiceTypeDesign.TypeA:
+                        PdfInvoiceType1Service pdfInvoiceType1 = new();
+                        pdfBytes = pdfInvoiceType1.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        var fileName = $"\"Facture-L0280-AMADOMARIA-2025-02-05.pdf";
+                        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, pdfBytes);
+                        break;
+                }
+
+                //await FileService.SaveAsAsync("facture.pdf", pdfBytes, "application/pdf");
+                ////ou
+                //var pdfService = new PdfInvoiceService();
+                //var pdfBytes = pdfService.GenerateInvoicePdf(invoice);
+                //File.WriteAllBytes("Facture-L0280-AMADOMARIA-2025-02-05.pdf", pdfBytes);
             }
+
+            StateHasChanged();
         }
 
     }
@@ -282,5 +435,8 @@ namespace Facilys.Components.Pages
         public string GeneralConditionOrder { get; set; } = string.Empty;
         public bool PartReturnedCustomer { get; set; } = false;
         public bool CustomerSuppliedPart { get; set; } = false;
+        public float HT { get; set; } = 0.0f;
+        public float TVA { get; set; } = 0.0f;
+        public float TTC { get; set; } = 0.0f;
     }
 }

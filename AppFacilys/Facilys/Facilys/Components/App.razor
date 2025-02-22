@@ -31,5 +31,16 @@
     <script src="assets/libs/jsvectormap/js/jsvectormap.min.js"></script>
     <script src="assets/libs/jsvectormap/maps/world.js"></script>
     <script src="assets/js/app.js"></script>
+    <script>
+        window.downloadFile = function (fileName, byteArray) {
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
     </body>
 </html>

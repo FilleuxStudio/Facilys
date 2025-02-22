@@ -2,8 +2,10 @@
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
 @inject ApplicationDbContext DbContext
-@inject IJSRuntime JSRuntime
+@inject AuthService AuthService
 @inject ILogger<EditionInvoice> Logger
+@inject IJSRuntime JSRuntime
+
 
 <div class="row">
     <div class="col-12">
@@ -101,13 +103,13 @@
                                     <option value="@item.Value">@item.Text</option>
                                 }
                             </InputSelect>
-                            <InputText @bind-value="km" placeholder="kilometrage voiture..." class="form-control mt-1" />
+                            <InputNumber @bind-value="km" placeholder="kilometrage voiture..." class="form-control mt-1" />
                         </div><!-- end col -->
                     </div><!--end card-body-->
                 </div><!--end card-->
             </div> <!--end col-->
         </div><!--end row-->
-        <EditForm Model="@invoiceData" OnValidSubmit="@CreateInvoiceValidSubmit">
+        <EditForm Model="@invoiceData" OnSubmit="@CreateInvoiceValidSubmit">
             <div class="row justify-content-center">
                 <div class="col-12">
                     <div class="card">
@@ -152,7 +154,29 @@
                                         }
                                     </tbody>
                                 </table><!--end /table-->
-                                <div class="row mt-1">
+                                <div class="row mt-1 justify-content-end">
+                                    <div class="col-4 d-flex flex-column">
+                                        <div class="mb-2 row">
+                                            <label for="HT" class="col-sm-2 col-form-label text-end">HT</label>
+                                            <div class="col-sm-10">
+                                                <InputNumber @bind-Value="invoiceData.HT" id="HT" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                        <div class="mb-2 row">
+                                            <label for="TVA" class="col-sm-2 col-form-label text-end">TVA</label>
+                                            <div class="col-sm-10">
+                                                <InputNumber @bind-Value="invoiceData.TVA" id="TVA" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <label for="TTC" class="col-sm-2 col-form-label text-end"><strong>TTC</strong></label>
+                                            <div class="col-sm-10">
+                                                <InputNumber @bind-Value="invoiceData.TTC" id="TTC" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
                                     <div class="col-6">
                                         <div class="form-check form-switch form-switch-info">
                                             <InputCheckbox @bind-Value="invoiceData.PartReturnedCustomer" class="form-check-input" id="PartReturnedCustomer" />

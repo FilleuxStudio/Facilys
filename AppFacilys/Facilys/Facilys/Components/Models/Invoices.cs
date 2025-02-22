@@ -20,7 +20,9 @@ namespace Facilys.Components.Models
         public float TotalAmount { get; set; } = 0.00f;
         public string? Observations { get; set; } = string.Empty;
         public string? RepairType { get; set; } = string.Empty;
-        public string Status { get; set; }
+        public StatusInvoice Status { get; set; } = StatusInvoice.OnHold;
+        public bool PartReturnedCustomer { get; set; } = false;
+        public bool CustomerSuppliedPart {  get; set; } = false;
         public Users? User { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.Now;
     }
@@ -33,6 +35,16 @@ namespace Facilys.Components.Models
         OnlinePaymentSolutions = 3,
         MobilePayment = 4,
         PaymentByCheck = 5,
-        Cryptocurrencies = 6
+        Cryptocurrencies = 6,
+        NotInformed = 7,
+    }
+
+    public enum StatusInvoice
+    {
+        Validate = 0,
+        OnHold  = 1,
+        Canceled = 2,
+        Delete = 3,
+        Postponed = 4,
     }
 }
