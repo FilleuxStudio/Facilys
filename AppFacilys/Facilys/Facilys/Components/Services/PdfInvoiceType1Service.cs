@@ -35,6 +35,7 @@ namespace Facilys.Components.Services
             // Configuration des polices
             var titleFont = new XFont("Arial", 16, XFontStyleEx.Bold);
             var headerFont = new XFont("Arial", 12, XFontStyleEx.Bold);
+            var strongFont = new XFont("Arial", 10, XFontStyleEx.Bold);
             var normalFont = new XFont("Arial", 10, XFontStyleEx.Regular);
 
             // Dessiner l'en-tête de la facture
@@ -52,9 +53,11 @@ namespace Facilys.Components.Services
             // Informations a prévoir
             yPosition = DrawRequiredInformation(gfx, managerInvoiceView, normalFont, yPosition);
 
-            // Total et mentions légales
-            yPosition = DrawTotalAndLegalMentions(gfx, managerInvoiceView, headerFont, normalFont, yPosition);
+            // Total
+            yPosition = DrawTotal(gfx, managerInvoiceView, strongFont, normalFont, yPosition);
 
+            // mentions légales
+            yPosition = DrawLegalMentions(gfx, managerInvoiceView, headerFont, normalFont, yPosition);
             // Sauvegarde en mémoire
             using var stream = new MemoryStream();
             document.Save(stream);
@@ -212,17 +215,17 @@ namespace Facilys.Components.Services
 
         private double DrawVehicleInfo(XGraphics gfx, ManagerInvoiceViewModel vehicle, XFont normalFont, double yPosition)
         {
-            // Sauvegardez la position verticale initiale (utilisez la même que pour le rectangle client)
+            // Sauvegardez la position verticale initiale
             double initialYPosition = yPosition;
 
             // Calculez la largeur du rectangle (moitié de la largeur disponible)
             double rectWidth = (PageWidth - LeftMargin - RightMargin) / 2;
             double rectHeight = LineHeight * 7; // Ajustez selon le nombre de lignes
 
-            // Créez le rectangle pour le véhicule (à droite du rectangle client)
-            XRect rect = new XRect(LeftMargin + rectWidth, yPosition, rectWidth, rectHeight);
+            // Créez le rectangle pour le véhicule (à droite)
+            XRect rect = new XRect(PageWidth - RightMargin - rectWidth, yPosition, rectWidth, rectHeight);
 
-            // Dessinez le rectangle avec une bordure noire de 2px
+            // Dessinez le rectangle avec une bordure noire de 1px
             XPen pen = new XPen(XColors.Black, 1);
             gfx.DrawRectangle(pen, rect);
 
@@ -231,28 +234,56 @@ namespace Facilys.Components.Services
             gfx.DrawString("VEHICULE", normalFont, XBrushes.Black, titleRect, XStringFormats.Center);
             yPosition += LineHeight * 1.5; // Espace après le titre
 
-            // Dessinez les informations du véhicule
+            // Préparez les informations du véhicule
+            string[][] vehicleInfo;
+
+            if (vehicle.Vehicle != null)
+            {
+                vehicleInfo = new string[][]{
+                new[] { "Marque:", vehicle.Vehicle.Mark },
+        new[] { "Modèle:", vehicle.Vehicle.Model },
+        new[] { "Immatriculation:", vehicle.Vehicle.Immatriculation },
+        new[] { "VIN:", vehicle.Vehicle.VIN },
+        new[] { "Type:", vehicle.Vehicle.Type },
+        new[] { "Mise en circulation:", vehicle.Vehicle.CirculationDate.ToString("dd/MM/yyyy") }
+            };
+            }
+            else
+            {
+                vehicleInfo = new string[][]{
+                new[] { "Marque:", vehicle.OtherVehicle.Mark },
+        new[] { "Modèle:", vehicle.OtherVehicle.Model},
+        new[] { "Numéro :", vehicle.OtherVehicle.SerialNumber },
+        new[] { "Type:", vehicle.OtherVehicle.Type },
+            };
+            }
+
+            // Trouvez la largeur maximale des labels
+            double maxLabelWidth = 0;
+            foreach (var info in vehicleInfo)
+            {
+                XSize size = gfx.MeasureString(info[0], normalFont);
+                if (size.Width > maxLabelWidth)
+                    maxLabelWidth = size.Width;
+            }
+
+            // Ajoutez un petit espace après le label le plus long
+            maxLabelWidth += 5;
+
+            // Dessinez les informations alignées
             double textMargin = rect.Left + 5; // Marge intérieure pour le texte
-            gfx.DrawString($"Marque : {vehicle.Vehicle.Mark}", normalFont, XBrushes.Black, textMargin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString($"Modèle : {vehicle.Vehicle.Model}", normalFont, XBrushes.Black, textMargin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString($"Immatriculation : {vehicle.Vehicle.Immatriculation}", normalFont, XBrushes.Black, textMargin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString($"VIN : {vehicle.Vehicle.VIN}", normalFont, XBrushes.Black, textMargin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString($"Type : {vehicle.Vehicle.Type}", normalFont, XBrushes.Black, textMargin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString($"Mise en circulation : {vehicle.Vehicle.CirculationDate:dd/MM/yyyy}", normalFont, XBrushes.Black, textMargin, yPosition);
+            foreach (var info in vehicleInfo)
+            {
+                gfx.DrawString(info[0], normalFont, XBrushes.Black, textMargin, yPosition);
+                gfx.DrawString(info[1], normalFont, XBrushes.Black, textMargin + maxLabelWidth, yPosition);
+                yPosition += LineHeight;
+            }
 
-            // Mettez à jour yPosition pour le prochain élément après les deux rectangles
-            yPosition = initialYPosition + rectHeight;
-
-            return yPosition;
-
+            // Mettez à jour yPosition pour le prochain élément après le rectangle
+            return initialYPosition + rectHeight;
         }
 
-        private double DrawServiceTable(XGraphics gfx, ManagerInvoiceViewModel historyParts, XFont headerFont, XFont normalFont, double yPosition)
+        private double DrawServiceTable(XGraphics gfx, ManagerInvoiceViewModel historyParts, XFont strongFont, XFont normalFont, double yPosition)
         {
             // Définir les largeurs de colonnes (ajustées pour tenir dans la page)
             double[] columnWidths = { 295, 55, 75, 55, 75 };
@@ -275,7 +306,7 @@ namespace Facilys.Components.Services
                 gfx.DrawRectangle(tablePen, headerRect);
 
                 // Centrer le texte dans la cellule
-                gfx.DrawString(headers[i], headerFont, XBrushes.Black, headerRect, XStringFormats.Center);
+                gfx.DrawString(headers[i], strongFont, XBrushes.Black, headerRect, XStringFormats.Center);
             }
             yPosition += LineHeight + cellPadding * 2;
 
@@ -360,11 +391,11 @@ namespace Facilys.Components.Services
 
         }
 
-        private double DrawTotalAndLegalMentions(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
+        private double DrawTotal(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
         {
             // Définir les dimensions et la position du rectangle
-            double rectWidth = 200; // Ajustez selon vos besoins
-            double rectHeight = LineHeight * 6; // 4 lignes
+            double rectWidth = 190; // Ajustez selon vos besoins
+            double rectHeight = LineHeight * 8; // 4 lignes
             double rectX = PageWidth - RightMargin - rectWidth;
             double rectY = yPosition;
 
@@ -392,7 +423,7 @@ namespace Facilys.Components.Services
                 }
 
                 // Dessiner le texte
-                XRect textRect = new XRect(rectX + 5, lineY, rectWidth - 10, LineHeight * (2 + i));
+                XRect textRect = new XRect(rectX + 5, lineY, rectWidth - 10, LineHeight * ((2 + i) + i));
                 gfx.DrawString(labels[i], i == 0 || i == 3 ? headerFont : normalFont, XBrushes.Black, textRect, XStringFormats.CenterLeft);
                 gfx.DrawString(values[i], i == 0 || i == 3 ? headerFont : normalFont, XBrushes.Black, textRect, XStringFormats.CenterRight);
             }
@@ -401,27 +432,87 @@ namespace Facilys.Components.Services
             yPosition = rectY + rectHeight + LineHeight;
 
             // Mentions légales
-            gfx.DrawString("SIRET : 53085129400021", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString("SIRET : " + invoiceData.CompanySettings.Siret, headerFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString("TVA : FR37530851294", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString("TVA : " + invoiceData.CompanySettings.TVA, headerFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight;
-            gfx.DrawString("APE : 4520A", normalFont, XBrushes.Black, Margin, yPosition);
+            gfx.DrawString("APE : " + invoiceData.CompanySettings.CodeNAF, headerFont, XBrushes.Black, Margin, yPosition);
             yPosition += LineHeight * 2;
-
-            // Conditions de règlement
-            gfx.DrawString("Acceptant les règlements des sommes dues par chèque libellé à mon nom.", normalFont, XBrushes.Black, Margin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString("Règlement nos réparations sont payables exclusivement au comptant.", normalFont, XBrushes.Black, Margin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString("Toutes pièces fournies par le client ne sont pas garanties, ainsi que les dommages causés.", normalFont, XBrushes.Black, Margin, yPosition);
-            yPosition += LineHeight;
-            gfx.DrawString("Déplacement non inclus dans la prise sous garantie.", normalFont, XBrushes.Black, Margin, yPosition);
-            yPosition += LineHeight * 2;
-
-            // Remerciements
-            gfx.DrawString("MERCI DE VOTRE CONFIANCE !", headerFont, XBrushes.Black, Margin, yPosition);
 
             return yPosition;
+        }
+
+        private double DrawLegalMentions(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
+        {
+            // Calcul de la position de départ depuis le bas de page
+            double startY = PageHeight - BottomMargin - (LineHeight * 6);
+
+            // 1. Première phrase centrée
+            XStringFormat centerFormat = new XStringFormat
+            {
+                Alignment = XStringAlignment.Center,
+                LineAlignment = XLineAlignment.Near
+            };
+
+            XRect firstTextRect = new XRect(LeftMargin, startY, PageWidth - 2 * LeftMargin, LineHeight);
+            gfx.DrawString(invoiceData.Edition.SentenceInformationBottom, normalFont, XBrushes.Black, firstTextRect, centerFormat);
+            startY += LineHeight;
+
+            // 2. Rectangle rouge avec texte
+            const double padding = 5;
+            double redBoxHeight = 3 * LineHeight + padding * 2;
+
+            // Positionnement du rectangle
+            XRect redRect = new XRect(
+                LeftMargin,
+                startY,
+                PageWidth - 2 * LeftMargin,
+                redBoxHeight
+            );
+
+            gfx.DrawRectangle(XBrushes.IndianRed, redRect);
+
+            // Texte dans le rectangle
+            string[] redBoxLines = invoiceData.Edition.SentenceBottom.Split('.');
+
+            XStringFormat redBoxFormat = new XStringFormat
+            {
+                Alignment = XStringAlignment.Center,
+                LineAlignment = XLineAlignment.Center
+            };
+
+            double textY = startY + padding;
+            foreach (string line in redBoxLines)
+            {
+                XRect lineRect = new XRect(LeftMargin, textY, PageWidth - 2 * LeftMargin, LineHeight);
+                gfx.DrawString(line, normalFont, XBrushes.Black, lineRect, redBoxFormat);
+                textY += LineHeight;
+            }
+
+            startY += redBoxHeight + LineHeight;
+
+            // 3. Message de remerciement en bas de page
+            XRect footerRect = new XRect(
+                0,
+                PageHeight - BottomMargin,
+                PageWidth,
+                LineHeight
+            );
+
+            XStringFormat footerFormat = new XStringFormat
+            {
+                Alignment = XStringAlignment.Center,
+                LineAlignment = XLineAlignment.Far
+            };
+
+            gfx.DrawString("MERCI DE VOTRE CONFIANCE !",
+                          headerFont,
+                          XBrushes.Black,
+                          footerRect,
+                          footerFormat);
+
+            // Retourne la nouvelle position Y maximale
+            return PageHeight - BottomMargin;
         }
     }
 }

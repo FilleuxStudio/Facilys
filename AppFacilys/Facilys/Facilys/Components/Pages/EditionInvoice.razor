@@ -98,6 +98,7 @@
                     <div class="card-body pt-0">
                         <div class="col">
                             <InputSelect @bind-Value="selectedValueVehicle" class="form-select">
+                                <option>Selectionner un véhicule</option>
                                 @foreach (var item in managerInvoiceViewModel.VehicleItems)
                                 {
                                     <option value="@item.Value">@item.Text</option>

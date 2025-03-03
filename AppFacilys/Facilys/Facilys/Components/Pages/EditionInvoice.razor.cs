@@ -400,27 +400,27 @@ namespace Facilys.Components.Pages
                 PhonesClients phonesClients = await DbContext.Phones.Where(c => c.Client.Id == Guid.Parse(selectedValueClient)).FirstOrDefaultAsync();
                 EmailsClients emailsClients = await DbContext.Emails.Where(m => m.Client.Id == Guid.Parse(selectedValueClient)).FirstOrDefaultAsync();
 
-                byte[] pdfBytes = null;
+                string fileName = invoiceNumber + "-" + managerInvoiceViewModel.Client.Fname + "-" + managerInvoiceViewModel.Client.Lname + "-" + DateTime.Now.Date.ToString("dd-MM-yy") + ".pdf";
+                byte[] pdfBytesInvoice = null, pdfBytesOrder = null;
+                PdfRepairOrderService pdfRepairOrder = new();
                 switch (managerInvoiceViewModel.Edition.TypeDesign)
                 {
                     case InvoiceTypeDesign.TypeA:
                         PdfInvoiceType1Service pdfInvoiceType1 = new();
-                        pdfBytes = pdfInvoiceType1.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
-                        var fileName = $"\"Facture-L0280-AMADOMARIA-2025-02-05.pdf";
-                        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, pdfBytes);
+                        pdfBytesInvoice = pdfInvoiceType1.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        pdfBytesOrder = pdfRepairOrder.GenerateRepairOrderPdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        //await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
+                        await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
+
+                      //  await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
                         break;
                 }
-
-                //await FileService.SaveAsAsync("facture.pdf", pdfBytes, "application/pdf");
-                ////ou
-                //var pdfService = new PdfInvoiceService();
-                //var pdfBytes = pdfService.GenerateInvoicePdf(invoice);
-                //File.WriteAllBytes("Facture-L0280-AMADOMARIA-2025-02-05.pdf", pdfBytes);
+               
             }
 
             StateHasChanged();
         }
-
     }
 
     public class InvoiceData()
