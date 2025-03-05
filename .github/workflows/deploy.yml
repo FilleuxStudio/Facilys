@@ -31,6 +31,22 @@ jobs:
         echo "FIREBASE_CONFIG=./facilys-fe686-firebase-adminsdk-2vciw-af78a9b08f.json "  >> .env
         echo "CSRF_SECRET=a7afdda3a765a50889e7c6c5dc9970b11729f36fa1c87387808a7007037669a4"  >> .env
 
+    - name: Copy SiteWebFacilys to temp directory
+      run: |
+        mkdir -p temp_deploy
+        cp -R SiteWebFacilys/* temp_deploy/
+
+    - name: Copy files to server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "temp_deploy/*"
+        target: "server"
+        strip_components: 1
+
     - name: Deploy to PlanetHoster
       uses: appleboy/ssh-action@master
       with:
@@ -40,6 +56,5 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd server
-          git pull origin main
           source /home/jmaqmsnt/nodevenv/server/22/bin/activate
           npm install
