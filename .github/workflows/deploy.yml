@@ -1,0 +1,46 @@
+name: Deploy Node.js App to PlanetHoster
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'SiteWebFacilys'  # Remplacez par le chemin de votre app Node.js
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22'  # Assurez-vous que cela correspond à votre version Node.js
+
+    - name: Install dependencies
+      run: |
+        cd SiteWebFacilys  # Remplacez par le chemin de votre app Node.js
+        npm ci
+
+    - name: Create production .env file
+      run: |
+        cd SiteWebFacilys
+        echo "NODE_ENV=production" > .env
+        echo PORT=passenger
+        echo HOST=127.0.0.1
+        echo FIREBASE_CONFIG=./facilys-fe686-firebase-adminsdk-2vciw-af78a9b08f.json
+        echo CSRF_SECRET=a7afdda3a765a50889e7c6c5dc9970b11729f36fa1c87387808a7007037669a4
+
+    - name: Deploy to PlanetHoster
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        port: ${{ secrets.PORT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd server
+          git pull origin main
+          source /home/jmaqmsnt/nodevenv/server/22/bin/activate
+          npm install

@@ -5,20 +5,24 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const crypto = require('crypto');
 //const bodyParser = require("body-parser");
-const dotenv = require('dotenv').config({ path: '../.env' });
+const dotenv = require('dotenv');
 const helmet = require('helmet');
 const compression = require('compression');
 const { doubleCsrf } = require('csrf-csrf');
 
-
 const app = express();
 
-const port = process.env.PORT || 3100;
+const envPath = path.join(__dirname, '..', '.env');
+dotenv.config({ path: envPath });
+
+const port = process.env.PORT || 8056;
+const hostname = process.env.HOST ||'localhost';
 const isProduction = process.env.NODE_ENV === 'production';
 const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
 const sessionSecret = crypto.createHash("sha256").update("Facilys-2025-session").digest("base64");
 
 console.log(isProduction);
+console.log(process.env.CSRF_SECRET);
 
 // Configuration du moteur de vue EJS
 app.set("view engine", "ejs");
@@ -48,7 +52,7 @@ app.use(session({
   cookie: { 
     secure: isProduction, // Mettez à true si vous utilisez HTTPS
     sameSite: isProduction ? 'None' : 'Lax', // Utilisez 'None' pour les cookies tiers en production
-    //httpOnly: true,
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 heures
   }
 }));
@@ -59,7 +63,8 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
   cookieOptions: {
     httpOnly: true,
     sameSite: "Lax",
-    secure: isProduction
+    secure: isProduction,
+    maxAge: 24 * 60 * 60 * 1000 // 24 heures
   },
   size: 64,
   ignoredMethods: ["GET", "HEAD", "OPTIONS"],
@@ -69,7 +74,7 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
       return req.body._csrf; // Priorité au token dans le corps
     }
     // Pour les autres types de requêtes, essayez d'abord le header, puis le cookie
-    return req.headers["x-csrf-token"] || req.body["_csrf"];
+    return req.body._csrf || req.headers["x-csrf-token"] || req.cookies["facylis.x-csrf-token"];
   }
 });
 
@@ -84,6 +89,7 @@ app.get('/csrf-token', (req, res) => {
 
 // Middleware pour rendre le token CSRF disponible dans les vues
 app.use((req, res, next) => {
+  console.log(CSRF_SECRET);
   res.header("Access-Control-Allow-Origin", "localhost:3100");
   res.header("Access-Control-Allow-Credentials", "true");
   res.locals.csrfToken = req.csrfToken(); // Utilisation de req.csrfToken() après le middleware doubleCsrf Protection
@@ -123,7 +129,7 @@ app.use((err, req, res, next) => {
 });
 
 // Démarrage du serveur
-app.listen(port, () => {
+app.listen(port, hostname, () => {
   console.log(`Server running on port ${port}`);
 });
 
