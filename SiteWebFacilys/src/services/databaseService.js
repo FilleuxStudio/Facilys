@@ -45,7 +45,7 @@ class DatabaseService {
   }
 
   async executeSQLScript(conn, dbName) {
-    const scriptPath = path.join(__dirname, '..', 'sql', 'init_user_db.sql');
+    const scriptPath = path.join(__dirname, '..', 'sql', 'init_db.sql');
     const sqlScript = await fs.readFile(scriptPath, 'utf8');
 
     await conn.query(`USE ${dbName}`);
