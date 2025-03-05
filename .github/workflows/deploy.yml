@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'SiteWebFacilys'  # Remplacez par le chemin de votre app Node.js
 
 jobs:
   deploy:
