@@ -27,10 +27,10 @@ jobs:
       run: |
         cd SiteWebFacilys
         echo "NODE_ENV=production" > .env
-        echo PORT=passenger
-        echo HOST=127.0.0.1
-        echo FIREBASE_CONFIG=./facilys-fe686-firebase-adminsdk-2vciw-af78a9b08f.json
-        echo CSRF_SECRET=a7afdda3a765a50889e7c6c5dc9970b11729f36fa1c87387808a7007037669a4
+        echo "PORT=passenger"  >> .env
+        echo "HOST=127.0.0.1"  >> .env
+        echo "FIREBASE_CONFIG=./facilys-fe686-firebase-adminsdk-2vciw-af78a9b08f.json "  >> .env
+        echo "CSRF_SECRET=a7afdda3a765a50889e7c6c5dc9970b11729f36fa1c87387808a7007037669a4"  >> .env
 
     - name: Deploy to PlanetHoster
       uses: appleboy/ssh-action@master
