@@ -15,7 +15,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22'  # Assurez-vous que cela correspond à votre version Node.js
+        node-version: '22' 
 
     - name: Install dependencies
       run: |
@@ -56,5 +56,7 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd server
+          rm -R -f node_modules/
+          rm -f package-lock.json
           source /home/jmaqmsnt/nodevenv/server/22/bin/activate
           npm install
