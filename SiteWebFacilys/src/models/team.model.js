@@ -59,6 +59,18 @@ class Team {
     }
   }
 
+  static async findByEmail(email) {
+    const teamQuery = db.collection("teams").where('email', '==', email);
+    const querySnapshot = await teamQuery.get();
+  
+    if (querySnapshot.empty) {
+      return null;
+    }
+  
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  }
+  
   static async findAll() {
     try {
       const teamRef = db.collection('teams');

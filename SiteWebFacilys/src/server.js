@@ -21,9 +21,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
 const sessionSecret = crypto.createHash("sha256").update("Facilys-2025-session").digest("base64");
 
-console.log(isProduction);
-console.log(process.env.CSRF_SECRET);
-
 // Configuration du moteur de vue EJS
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "views"));
@@ -70,8 +67,8 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
   ignoredMethods: ["GET", "HEAD", "OPTIONS"],
   getTokenFromRequest: (req) => {   
     // Vérifiez si le formulaire est multipart et récupérez le token depuis le corps
-    if (req.headers['content-type'].startsWith('multipart/form-data')) {
-      return req.body._csrf; // Priorité au token dans le corps
+    if (req.headers['content-type'] && req.headers['content-type'].startsWith('multipart/form-data')) {
+      return req.body && req.body._csrf;
     }
     // Pour les autres types de requêtes, essayez d'abord le header, puis le cookie
     return req.body._csrf || req.headers["x-csrf-token"] || req.cookies["facylis.x-csrf-token"];
@@ -82,7 +79,7 @@ app.use(doubleCsrfProtection);
 
 
 // Route pour générer et envoyer le token CSRF
-app.get('/csrf-token', (req, res) => {
+app.get('/get-csrf-token-2025', (req, res) => {
   const csrfToken = generateToken(req, res);
   res.json({ csrfToken });
 });

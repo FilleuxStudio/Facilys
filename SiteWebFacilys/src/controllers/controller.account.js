@@ -215,7 +215,7 @@ exports.accountAddTeam = async (req, res) => {
       fname: tfname,
       lname: tlname,
       type: ttype,
-      tpassword: await argon2.hash(tpassword),
+      password: await argon2.hash(tpassword),
       team: userManager.companyName,
       manager: userManager.email,
       email: temail,
