@@ -16,10 +16,11 @@ namespace Facilys.Components.Services
         private const int CookieValidityDays = 30;
         private CookieData cookieUserConnect;
         private readonly ApplicationDbContext _context;
-
-        public AuthService(ApplicationDbContext context)
+        private readonly APIWebSiteService _webSiteService;
+        public AuthService(ApplicationDbContext context, APIWebSiteService webSiteService)
         {
             _context = context;
+            _webSiteService = webSiteService;
         }
 
         public async Task<Users> AuthenticateAsync(string email, string password)
@@ -29,6 +30,14 @@ namespace Facilys.Components.Services
             {
                await SetAuthenticatedAsync(user);
                 return user;
+            }
+            else
+            {
+                var result = await _webSiteService.PostConnectionUserAsync(email, password);
+                if (result)
+                {
+                    // Connexion réussie, gérer la navigation ou l'état de l'application
+                }
             }
             return null;
         }
@@ -52,7 +61,7 @@ namespace Facilys.Components.Services
         /// </summary>
         public async Task SetAuthenticatedAsync(Users user)
         {
-            bool flag = APIWebSiteService.PostConnectionUser(user.Email, user.Password);
+           // bool flag = await _webSiteService.PostConnectionUserAsync(user.Email, user.Password);
 
             var cookieData = new CookieData
             {

@@ -39,7 +39,7 @@ namespace Facilys.Components.Pages
         private async Task LoadDataHeader()
         {
             managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync();
-            managerInvoiceViewModel.Invoice = await DbContext.Invoices.OrderByDescending(d => d.InvoiceNumber).LastOrDefaultAsync();
+            managerInvoiceViewModel.Invoice = await DbContext.Invoices.OrderByDescending(d => d.InvoiceNumber).FirstOrDefaultAsync();
             managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
             managerInvoiceViewModel.Clients = await DbContext.Clients.ToListAsync();
 
@@ -380,7 +380,7 @@ namespace Facilys.Components.Pages
 
                 managerInvoiceViewModel.InvoiceData = invoiceData;
 
-                /*using var transaction = await DbContext.Database.BeginTransactionAsync();
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
                 try
                 {
 
@@ -395,7 +395,7 @@ namespace Facilys.Components.Pages
                 catch (Exception ex)
                 {
                     Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-                }*/
+                }
 
                 PhonesClients phonesClients = await DbContext.Phones.Where(c => c.Client.Id == Guid.Parse(selectedValueClient)).FirstOrDefaultAsync();
                 EmailsClients emailsClients = await DbContext.Emails.Where(m => m.Client.Id == Guid.Parse(selectedValueClient)).FirstOrDefaultAsync();
@@ -409,11 +409,31 @@ namespace Facilys.Components.Pages
                         PdfInvoiceType1Service pdfInvoiceType1 = new();
                         pdfBytesInvoice = pdfInvoiceType1.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
                         pdfBytesOrder = pdfRepairOrder.GenerateRepairOrderPdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
-                        //await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
+                        await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
                         await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
 
-                      //  await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
                         await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        break;
+                    case InvoiceTypeDesign.TypeB:
+                        PdfInvoiceType2Service pdfInvoiceType2 = new();
+                        pdfBytesInvoice = pdfInvoiceType2.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        pdfBytesOrder = pdfRepairOrder.GenerateRepairOrderPdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
+                        await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
+
+                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        break;
+                    case InvoiceTypeDesign.TypeC:
+                        //PdfInvoiceType3Service pdfInvoiceType3 = new();
+                        //pdfBytesInvoice = pdfInvoiceType3.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        //pdfBytesOrder = pdfRepairOrder.GenerateRepairOrderPdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
+                        //await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
+                        //await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
+
+                        //await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                        //await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
                         break;
                 }
                
@@ -421,22 +441,5 @@ namespace Facilys.Components.Pages
 
             StateHasChanged();
         }
-    }
-
-    public class InvoiceData()
-    {
-        public List<string> LineRef { get; set; } = new();
-        public List<string> LineDesc { get; set; } = new();
-        public List<float?> LineQt { get; set; } = new();
-        public List<float?> LinePrice { get; set; } = new();
-        public List<float?> LineDisc { get; set; } = new();
-        public List<float?> LineMo { get; set; } = new();
-        public string GeneralConditionInvoice { get; set; } = string.Empty;
-        public string GeneralConditionOrder { get; set; } = string.Empty;
-        public bool PartReturnedCustomer { get; set; } = false;
-        public bool CustomerSuppliedPart { get; set; } = false;
-        public float HT { get; set; } = 0.0f;
-        public float TVA { get; set; } = 0.0f;
-        public float TTC { get; set; } = 0.0f;
     }
 }

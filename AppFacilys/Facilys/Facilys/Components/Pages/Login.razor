@@ -3,6 +3,7 @@
 @layout MainLayoutLogin
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
+@inject APIWebSiteService ApiService
 
 <div class="container-xxl">
     <div class="row vh-100 d-flex justify-content-center">
@@ -100,10 +101,7 @@
 
         try
         {
-            // Logique d'authentification simulée
-            // await AuthService.SetAuthenticatedAsync(email, password);
-
-            var user = await AuthService.AuthenticateAsync(loginModel.Email, loginModel.Password);
+             var user = await AuthService.AuthenticateAsync(loginModel.Email, loginModel.Password);
             if (user != null)
             {
                 // Redirigez l'utilisateur vers une page protégée ou tableau de bord

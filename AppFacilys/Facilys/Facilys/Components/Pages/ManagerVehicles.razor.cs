@@ -126,6 +126,13 @@ namespace Facilys.Components.Pages
             StateHasChanged();
         }
 
+        private async void CloseModalOCR(string id)
+        {
+            await JSRuntime.InvokeVoidAsync("modifyBodyForModal", false);
+            modalManager.CloseModal(id);
+            StateHasChanged();
+        }
+
         private void ResetForm()
         {
             managerVehicleViewModel.Client = new();
@@ -370,17 +377,18 @@ namespace Facilys.Components.Pages
 
                    var extractedText = await documentAnalyzer.AnalyzeDocument(memoryStream);
 
+                    managerVehicleViewModel.DataOCR = extractedText.DataRead;
                     managerVehicleViewModel.Vehicle = new()
                     {
-                        VIN = extractedText.VIN,
-                        Immatriculation = extractedText.Registration,
-                        Model = extractedText.Model,
-                        Mark = extractedText.Mark,
-                        Type = extractedText.Type,
-                        CirculationDate = DateTime.Parse(extractedText.ReleaseDate),
-                        Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync(),
+                        VIN = extractedText.VIN ?? "??",
+                        Immatriculation = extractedText.Registration ?? "??",
+                        Model = extractedText.Model ?? "??",
+                        Mark = extractedText.Mark ?? "??",
+                        Type = extractedText.Type ?? "??",
+                        //CirculationDate = DateTime.Parse(extractedText.ReleaseDate),
+                        //Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync() ?? null,
                     };
-                    //managerVehicleViewModel.DataOCR = extractedText;
+                  
                     ViewRawOCRData = true;
 
                 }

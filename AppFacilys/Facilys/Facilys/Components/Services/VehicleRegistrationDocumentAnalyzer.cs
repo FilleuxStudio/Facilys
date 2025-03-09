@@ -1,6 +1,5 @@
 ﻿using Facilys.Components.Constants;
 using Microsoft.AspNetCore.Components.Forms;
-using OpenCvSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,45 +28,44 @@ namespace Facilys.Components.Services
         {
             try
             {
-                var rawImage = imageStream.ToArray();
-                var processedImages = ImagePreprocessor.ProcessImage(rawImage);
-                var results = new ConcurrentBag<VehicleRegisterData>();
+                // Repositionner le curseur au début pour s'assurer que tout le contenu est lu
+                imageStream.Position = 0;
 
-                await Parallel.ForEachAsync(processedImages, async (image, _) =>
-                {
-                    foreach (var mode in new[] { 3, 4, 6, 11 })
-                    {
-                        var text = await PerformOcrAsync(image, mode);
-                        var data = _extractor.ExtractDocumentInfo(text);
-                        results.Add(data);
-                    }
-                });
+                // Utiliser directement Tesseract avec le flux d'image
+                string text = await PerformOcrAsync(imageStream);
 
-                return _performanceMonitor.FindBestResult(results.ToList());
+                // Extraire les informations du texte
+                var data = _extractor.ExtractDocumentInfo(text);
+                _performanceMonitor.UpdateConfidenceMetrics(data);
+
+                return _performanceMonitor.FindBestResult(new List<VehicleRegisterData> { data });
             }
             catch (Exception ex)
             {
                 // Logging des erreurs
+                Console.WriteLine($"Erreur lors de l'analyse du document: {ex.Message}");
                 return new VehicleRegisterData { Error = ex.Message };
             }
         }
 
-        private async Task<string> PerformOcrAsync(byte[] imageData, int pageSegMode)
+        private async Task<string> PerformOcrAsync(MemoryStream imageStream)
         {
             var tessdataPath = await EnsureTessdataFiles();
 
             using var engine = new TesseractEngine(tessdataPath, "fra", EngineMode.LstmOnly);
-            ConfigureEngine(engine, pageSegMode);
+            ConfigureEngine(engine);
 
+            // Lire l'image directement à partir du MemoryStream
+            byte[] imageData = imageStream.ToArray();
             using var img = Pix.LoadFromMemory(imageData);
             using var page = engine.Process(img);
 
             return PostProcessText(page.GetText());
         }
 
-        private void ConfigureEngine(TesseractEngine engine, int pageSegMode)
+        private void ConfigureEngine(TesseractEngine engine)
         {
-            engine.SetVariable("tessedit_pageseg_mode", pageSegMode.ToString());
+            engine.SetVariable("tessedit_pageseg_mode", "3"); // Mode de segmentation de page
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/. ");
             engine.SetVariable("tessedit_ocr_engine_mode", "2"); // LSTM Only
             engine.SetVariable("user_defined_dpi", "300"); // Résolution optimale
@@ -108,76 +106,47 @@ namespace Facilys.Components.Services
         }
     }
 
-    public static class ImagePreprocessor
-    {
-        public static List<byte[]> ProcessImage(byte[] imageData)
-        {
-            using var src = Cv2.ImDecode(imageData, ImreadModes.Color);
-            var processed = new List<byte[]>
-            {
-                ApplyStandardProcessing(src),
-                ApplyAlternativeProcessing(src)
-            };
-            return processed;
-        }
-
-        private static byte[] ApplyStandardProcessing(Mat image)
-        {
-            using var processed = image.Clone();
-
-            Cv2.CvtColor(processed, processed, ColorConversionCodes.BGR2GRAY);
-            Cv2.GaussianBlur(processed, processed, new Size(3, 3), 0);
-            Cv2.AdaptiveThreshold(processed, processed, 255,
-                AdaptiveThresholdTypes.GaussianC,
-                ThresholdTypes.Binary, 11, 2);
-
-            return processed.ToBytes(".png");
-        }
-
-        private static byte[] ApplyAlternativeProcessing(Mat image)
-        {
-            using var processed = image.Clone();
-
-            Cv2.FastNlMeansDenoisingColored(processed, processed);
-            Cv2.Canny(processed, processed, 50, 200);
-            Cv2.Dilate(processed, processed, null);
-
-            return processed.ToBytes(".png");
-        }
-
-        private static byte[] ToBytes(this Mat image, string extension)
-        {
-            return Cv2.ImEncode(extension, image, out var ret) ? ret : Array.Empty<byte>();
-        }
-    }
-
     public class VehicleRegistrationExtractor
     {
         private readonly List<FieldPattern> _fieldPatterns = new()
         {
-            new("VIN", ["E"], @"E\s*([A-HJ-NPR-Z0-9]{17})",
+            new("VIN", new[] { "E" }, @"E\s*([A-HJ-NPR-Z0-9]{17})",
                 transform: v => v.Replace(" ", ""),
                 validate: IsValidVin),
 
-            new("Registration", ["A"], @"([A-Z]{2}[- ]?[0-9]{3}[- ]?[A-Z]{2})",
+            new("Registration", new[] { "A" }, @"([A-Z]{2}[- ]?[0-9]{3}[- ]?[A-Z]{2})",
                 transform: v => Regex.Replace(v, @"\s", "-")),
 
-            new("ReleaseDate", ["B"], @"(\d{2}[/\-\.]\d{2}[/\-\.]\d{4})",
+            new("ReleaseDate", new[] { "B" }, @"B\s*(\d{2}[/\-\.]\d{2}[/\-\.]\d{4})",
                 validate: IsValidDate),
 
-            new("Name", ["C.1", "C1"], @"C\.?1\s*([\p{L}\s-]+)(?=\s*C\.?2)",
+            new("Name", new[] { "C.1", "C1" }, @"C\.?1\s*([\p{L}\s-]+)(?=\s*C\.?2|\s*C\.?3)",
                 multiLine: true,
                 transform: CleanText),
 
-            new("Address", ["C.3", "C3"], @"C\.?3\s*([\p{L}0-9\s,.-]+)(?=\s*C\.?4)",
+            new("Address", new[] { "C.3", "C3" }, @"C\.?3\s*([\p{L}0-9\s,.-]+)(?=\s*C\.?4|D\.?1)",
                 multiLine: true,
-                transform: CleanText)
+                transform: CleanText),
+
+            new("Mark", new[] { "D.1", "D1" }, @"D\.?1\s*([\p{L}0-9\s-]+)(?=\s*D\.?2|\s*D\.?3)",
+                transform: CleanText),
+
+            new("Model", new[] { "D.2", "D2" }, @"D\.?2\s*([\p{L}0-9\s-]+)(?=\s*D\.?3|\s*E)",
+                transform: CleanText),
+
+            new("Type", new[] { "J", "J.1", "J1" }, @"J(?:\.1)?\s*([\p{L}0-9\s-]+)",
+                transform: CleanText),
+
+            new("SerieNumber", new[] { "E" }, @"E\s*([A-Z0-9]+)",
+                transform: v => v.Replace(" ", ""))
         };
 
         public VehicleRegisterData ExtractDocumentInfo(string text)
         {
             var data = new VehicleRegisterData();
             var lines = text.Split('\n').Select(l => l.Trim()).ToList();
+
+            data.DataRead = text;
 
             for (int i = 0; i < lines.Count; i++)
             {
@@ -201,9 +170,12 @@ namespace Facilys.Components.Services
         private static bool IsValidVin(string vin) =>
             vin.Length == 17 && Regex.IsMatch(vin, "^[A-HJ-NPR-Z0-9]{17}$");
 
-        private static bool IsValidDate(string date) =>
-            DateTime.TryParseExact(date, ["dd/MM/yyyy", "dd-MM-yyyy"], null,
-                System.Globalization.DateTimeStyles.None, out _);
+        private static bool IsValidDate(string date)
+        {
+            string[] formats = { "dd/MM/yyyy", "dd-MM-yyyy", "dd.MM.yyyy" };
+            return DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out _);
+        }
     }
 
     public class OcrPerformanceMonitor
@@ -212,11 +184,14 @@ namespace Facilys.Components.Services
 
         public VehicleRegisterData FindBestResult(List<VehicleRegisterData> results)
         {
+            if (!results.Any())
+                return new VehicleRegisterData();
+
             return results.OrderByDescending(r => r.ConfidenceScore)
                           .FirstOrDefault() ?? new VehicleRegisterData();
         }
 
-        private void UpdateConfidenceMetrics(VehicleRegisterData data)
+        public void UpdateConfidenceMetrics(VehicleRegisterData data)
         {
             foreach (var prop in data.GetProperties())
             {
@@ -242,7 +217,7 @@ namespace Facilys.Components.Services
         public string Address => _data.GetValueOrDefault(nameof(Address));
         public string Type => _data.GetValueOrDefault(nameof(Type));
         public string Error { get; set; }
-
+        public string DataRead { get; set; }
         public int ConfidenceScore => CalculateConfidenceScore();
 
         public void SetProperty(string fieldName, string value)
@@ -259,7 +234,6 @@ namespace Facilys.Components.Services
         private int CalculateConfidenceScore()
         {
             int score = 0;
-
             if (IsValidVin(VIN)) score += 30;
             if (IsValidRegistration(Registration)) score += 25;
             if (IsValidDate(ReleaseDate)) score += 20;
@@ -281,12 +255,13 @@ namespace Facilys.Components.Services
             !string.IsNullOrEmpty(registration) &&
             Regex.IsMatch(registration, @"^[A-Z]{2}-?\d{3}-?[A-Z]{2}$");
 
-        private bool IsValidDate(string date) =>
-            DateTime.TryParseExact(date, ["dd/MM/yyyy", "dd-MM-yyyy"],
-                System.Globalization.CultureInfo.InvariantCulture,
-                System.Globalization.DateTimeStyles.None, out _);
+        private bool IsValidDate(string date)
+        {
+            string[] formats = { "dd/MM/yyyy", "dd-MM-yyyy", "dd.MM.yyyy" };
+            return DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out _);
+        }
     }
-
 
     public class FieldPattern
     {
@@ -354,6 +329,19 @@ namespace Facilys.Components.Services
                 if (MultiLine)
                 {
                     sb.Append(line + " ");
+                    var fullText = sb.ToString();
+                    var multiLineMatch = Pattern.Match(fullText);
+
+                    if (multiLineMatch.Success)
+                    {
+                        var rawValue = multiLineMatch.Groups[1].Value.Trim();
+                        var transformed = Transform(rawValue);
+                        if (Validate(transformed))
+                        {
+                            return (true, transformed, currentLineIndex + 1);
+                        }
+                    }
+
                     if (line.Contains("  ") || line.Length == 0)
                     {
                         var fullValue = sb.ToString().Trim();
@@ -367,6 +355,4 @@ namespace Facilys.Components.Services
             return (false, null, triggerIndex);
         }
     }
-
-
 }

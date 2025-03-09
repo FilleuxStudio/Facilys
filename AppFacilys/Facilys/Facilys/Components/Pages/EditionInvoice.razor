@@ -149,7 +149,7 @@
                                                     <InputNumber @bind-Value="invoiceData.LineDisc[index]" @oninput="(e) => OnLineDiscChanged(e.Value, index)" class="form-control" id="@($"invoiceData-LineDisc-{index}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineMo[index]" class="form-control" id="@($"invoiceData-LineMo-{index}")" readonly />
+                                                    <InputNumber @bind-Value="invoiceData.LineMo[index]" class="form-control no-spinner" id="@($"invoiceData-LineMo-{index}")" readonly />
                                                 </td>
                                             </tr>
                                         }
@@ -160,19 +160,19 @@
                                         <div class="mb-2 row">
                                             <label for="HT" class="col-sm-2 col-form-label text-end">HT</label>
                                             <div class="col-sm-10">
-                                                <InputNumber @bind-Value="invoiceData.HT" id="HT" class="form-control" readonly />
+                                                <InputNumber @bind-Value="invoiceData.HT" id="HT" class="form-control no-spinner" readonly />
                                             </div>
                                         </div>
                                         <div class="mb-2 row">
                                             <label for="TVA" class="col-sm-2 col-form-label text-end">TVA</label>
                                             <div class="col-sm-10">
-                                                <InputNumber @bind-Value="invoiceData.TVA" id="TVA" class="form-control" readonly />
+                                                <InputNumber @bind-Value="invoiceData.TVA" id="TVA" class="form-control no-spinner" readonly />
                                             </div>
                                         </div>
                                         <div class="row">
                                             <label for="TTC" class="col-sm-2 col-form-label text-end"><strong>TTC</strong></label>
                                             <div class="col-sm-10">
-                                                <InputNumber @bind-Value="invoiceData.TTC" id="TTC" class="form-control" readonly />
+                                                <InputNumber @bind-Value="invoiceData.TTC" id="TTC" class="form-control no-spinner" readonly />
                                             </div>
                                         </div>
                                     </div>

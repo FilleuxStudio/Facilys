@@ -34,8 +34,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {
-    client.BaseAddress = new Uri("https://filleuxstudio.fr/");
+    client.BaseAddress = new Uri("http://localhost:8056/api/");
 });
+
 builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
 
