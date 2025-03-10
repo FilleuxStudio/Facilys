@@ -14,7 +14,7 @@ namespace Facilys.Components.Pages
         private ManagerInvoiceViewModel managerInvoiceViewModel = new();
         private string invoiceNumber = string.Empty, selectedValueClient = string.Empty, selectedValueVehicle = string.Empty, searchClient = string.Empty;
         private Guid IdUser = Guid.Empty;
-        private int km = 0;
+        public int km = 0;
         private short actionType;
         private InvoiceData invoiceData = new();
 
