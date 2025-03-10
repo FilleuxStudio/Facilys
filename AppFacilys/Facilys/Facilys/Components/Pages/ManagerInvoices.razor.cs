@@ -1,10 +1,6 @@
-﻿using Facilys.Components.Models;
-using Facilys.Components.Models.Modal;
+﻿using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
@@ -30,7 +26,7 @@ namespace Facilys.Components.Pages
         private async Task LoadDataHeader()
         {
             managerInvoiceViewModel.Invoices = await DbContext.Invoices.Include(v => v.Vehicle).Include(ov => ov.OtherVehicle).ToListAsync();
-            
+
         }
 
         private async void OpenModal(string id)
@@ -44,7 +40,7 @@ namespace Facilys.Components.Pages
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             modalManager.OpenModal(idModal);
-            
+
 
             StateHasChanged();
         }

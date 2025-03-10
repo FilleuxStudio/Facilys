@@ -1,12 +1,12 @@
-﻿using ElectronNET.API.Entities;
-using ElectronNET.API;
-using System.Text;
-using System.Text.Json;
-using System.Security.Cryptography;
+﻿using ElectronNET.API;
+using ElectronNET.API.Entities;
 using Facilys.Components.Constants;
 using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 
 namespace Facilys.Components.Services
 {
@@ -28,7 +28,7 @@ namespace Facilys.Components.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user != null && Users.VerifyPassword(password, user.Password))
             {
-               await SetAuthenticatedAsync(user);
+                await SetAuthenticatedAsync(user);
                 return user;
             }
             else
@@ -61,7 +61,7 @@ namespace Facilys.Components.Services
         /// </summary>
         public async Task SetAuthenticatedAsync(Users user)
         {
-           // bool flag = await _webSiteService.PostConnectionUserAsync(user.Email, user.Password);
+            // bool flag = await _webSiteService.PostConnectionUserAsync(user.Email, user.Password);
 
             var cookieData = new CookieData
             {
@@ -99,7 +99,7 @@ namespace Facilys.Components.Services
         {
             //var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
 
-           var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
 

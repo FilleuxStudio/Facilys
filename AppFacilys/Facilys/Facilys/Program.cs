@@ -1,8 +1,7 @@
-using Facilys.Components;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
-using Facilys.Components.Services;
 using Facilys.Components.Data;
+using Facilys.Components.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -18,7 +18,7 @@ namespace Facilys.Components.Models
         public string RIB { get; set; } = string.Empty;
         [Required]
         public string HeadOfficeAddress { get; set; } = string.Empty;
-        public string? BillingAddress {  get; set; } = string.Empty;
+        public string? BillingAddress { get; set; } = string.Empty;
         [Required]
         public string LegalStatus { get; set; } = string.Empty;
         [Required]
@@ -30,6 +30,6 @@ namespace Facilys.Components.Models
         [Required]
         public string Phone { get; set; } = string.Empty;
         public string? Email { get; set; } = string.Empty;
-        public string? WebSite {  get; set; } = string.Empty;
+        public string? WebSite { get; set; } = string.Empty;
     }
 }

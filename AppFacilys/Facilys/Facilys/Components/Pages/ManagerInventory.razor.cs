@@ -1,7 +1,5 @@
 ﻿using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
-using Facilys.Components.Models.ViewModels;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -72,7 +70,7 @@ namespace Facilys.Components.Pages
                 {
                     inventory.Picture = await ConvertToBase64(selectedFile);
                 }
-                
+
                 await DbContext.Inventorys.AddAsync(inventory);
                 await DbContext.SaveChangesAsync();
 
@@ -124,7 +122,7 @@ namespace Facilys.Components.Pages
             {
 
                 DbContext.Inventorys.Remove(inventory);
-              
+
                 await DbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 

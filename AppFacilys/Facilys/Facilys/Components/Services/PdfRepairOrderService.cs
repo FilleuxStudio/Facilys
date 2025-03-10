@@ -1,5 +1,5 @@
-﻿using Facilys.Components.Models.ViewModels;
-using Facilys.Components.Models;
+﻿using Facilys.Components.Models;
+using Facilys.Components.Models.ViewModels;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 
@@ -72,7 +72,6 @@ namespace Facilys.Components.Services
         private double DrawHeader(XGraphics gfx, Invoices invoice, ManagerInvoiceViewModel company, XFont titleFont, XFont headerFont, double yPosition)
         {
             double newHeight = 0;
-            double availableWidth = 0;
             try
             {
                 byte[] imageBytes = PictureToStream(company.CompanySettings.Logo);
@@ -117,9 +116,6 @@ namespace Facilys.Components.Services
 
             // Réinitialiser yPosition pour les informations de droite
             yPosition = initialYPosition;
-
-            // Calculer la largeur disponible
-            availableWidth = PageWidth - Margin - RightMargin;
 
             // Date et numéro de facture (à droite)
             string dateString = $"Date : {invoice.DateAdded:dd-MM-yyyy}";
@@ -377,7 +373,7 @@ namespace Facilys.Components.Services
 
             ////yPosition += LineHeight * 2;
             ///
-            yPosition = DrawCheckbox(gfx, (yPosition - 15), invoiceData.InvoiceData.PartReturnedCustomer ,invoiceData.InvoiceData.CustomerSuppliedPart ,normalFont);
+            yPosition = DrawCheckbox(gfx, (yPosition - 15), invoiceData.InvoiceData.PartReturnedCustomer, invoiceData.InvoiceData.CustomerSuppliedPart, normalFont);
 
             return yPosition;
         }

@@ -1,10 +1,7 @@
 ﻿using Facilys.Components.Models;
 using Facilys.Components.Models.ViewModels;
-using Facilys.Components.Pages;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
-using PdfSharp.UniversalAccessibility.Drawing;
-using System.Drawing;
 
 namespace Facilys.Components.Services
 {
@@ -79,11 +76,10 @@ namespace Facilys.Components.Services
         private double DrawHeader(XGraphics gfx, Invoices invoice, ManagerInvoiceViewModel company, int km, XFont titleFont, XFont normalFont, double yPosition)
         {
             double newHeight = 0;
-            double availableWidth = 0;
             try
             {
                 byte[] imageBytes = PictureToStream(company.CompanySettings.Logo);
-                using (MemoryStream ms = new MemoryStream(imageBytes, 0, imageBytes.Length, true, true))
+                using (MemoryStream ms = new(imageBytes, 0, imageBytes.Length, true, true))
                 {
                     XImage logo = XImage.FromStream(ms);
 
@@ -109,7 +105,7 @@ namespace Facilys.Components.Services
             }
             yPosition += LineHeight;
             //Title
-            XRect rect = new XRect(LeftMargin, yPosition, PageWidth - LeftMargin - RightMargin, LineHeight);
+            XRect rect = new(LeftMargin, yPosition, PageWidth - LeftMargin - RightMargin, LineHeight);
             gfx.DrawString("FACTURE", titleFont, XBrushes.Black, rect, XStringFormats.TopRight);
 
             yPosition += newHeight + LineHeight;
@@ -127,9 +123,6 @@ namespace Facilys.Components.Services
 
             // Réinitialiser yPosition pour les informations de droite
             yPosition = initialYPosition;
-
-            // Calculer la largeur disponible
-            availableWidth = PageWidth - Margin - RightMargin;
 
             // Date et numéro de facture (à droite)
             string dateString = $"Date : {invoice.DateAdded:dd-MM-yyyy}";
@@ -164,14 +157,14 @@ namespace Facilys.Components.Services
             double rectHeight = LineHeight * 7; // Ajustez selon le nombre de lignes
 
             // Créez le rectangle
-            XRect rect = new XRect(LeftMargin, yPosition, rectWidth, rectHeight);
+            XRect rect = new(LeftMargin, yPosition, rectWidth, rectHeight);
 
             // Dessinez le rectangle avec une bordure noire de 2px
-            XPen pen = new XPen(XColors.Black, 1);
+            XPen pen = new(XColors.Black, 1);
             gfx.DrawRectangle(pen, rect);
 
             // Centrez le titre "CLIENT"
-            XRect titleRect = new XRect(rect.Left, yPosition, rectWidth, LineHeight);
+            XRect titleRect = new(rect.Left, yPosition, rectWidth, LineHeight);
             gfx.DrawString("CLIENT", normalFont, XBrushes.Black, titleRect, XStringFormats.Center);
             yPosition += LineHeight * 1.5; // Espace après le titre
 
@@ -223,14 +216,14 @@ namespace Facilys.Components.Services
             double rectHeight = LineHeight * 7; // Ajustez selon le nombre de lignes
 
             // Créez le rectangle pour le véhicule (à droite)
-            XRect rect = new XRect(PageWidth - RightMargin - rectWidth, yPosition, rectWidth, rectHeight);
+            XRect rect = new(PageWidth - RightMargin - rectWidth, yPosition, rectWidth, rectHeight);
 
             // Dessinez le rectangle avec une bordure noire de 1px
-            XPen pen = new XPen(XColors.Black, 1);
+            XPen pen = new(XColors.Black, 1);
             gfx.DrawRectangle(pen, rect);
 
             // Centrez le titre "VEHICULE"
-            XRect titleRect = new XRect(rect.Left, yPosition, rectWidth, LineHeight);
+            XRect titleRect = new(rect.Left, yPosition, rectWidth, LineHeight);
             gfx.DrawString("VEHICULE", normalFont, XBrushes.Black, titleRect, XStringFormats.Center);
             yPosition += LineHeight * 1.5; // Espace après le titre
 
@@ -293,7 +286,7 @@ namespace Facilys.Components.Services
             double cellPadding = 5; // Espace à l'intérieur des cellules
 
             // Créer un stylo pour les lignes
-            XPen tablePen = new XPen(XColors.Black, 1);
+            XPen tablePen = new(XColors.Black, 1);
 
             // Dessiner l'en-tête du tableau
             string[] headers = { "Description", "Quantité", "Prix Unitaire", "Remise", "Montant HT" };

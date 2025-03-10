@@ -12,8 +12,8 @@ namespace Facilys.Components.Models
         public string Fname { get; set; } = string.Empty;
         [Required]
         public string Email { get; set; } = string.Empty;
-        public string Login {  get; set; } = string.Empty;
-        public string? Picture {  get; set; } = string.Empty;
+        public string Login { get; set; } = string.Empty;
+        public string? Picture { get; set; } = string.Empty;
         [Required]
         public string Password { get; set; } = string.Empty;
         public string Team { get; set; } = string.Empty;

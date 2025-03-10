@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Facilys.Components.Models
 {
@@ -23,7 +23,7 @@ namespace Facilys.Components.Models
         public string? RepairOrderSentenceBottom { get; set; } = string.Empty;
         public float? TVA { get; set; } = 0.0f;
         [Required]
-        public int PreloadedLine {  get; set; } = 2;
+        public int PreloadedLine { get; set; } = 2;
         public List<AssociationSettingReference>? AssociationSettingReferences { get; set; } = null;
     }
 

@@ -1,7 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
-
-namespace Facilys.Components.Services
+﻿namespace Facilys.Components.Services
 {
     public class APIWebSiteService
     {

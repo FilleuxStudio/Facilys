@@ -5,10 +5,6 @@ using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using Tesseract;
-using Facilys.Components.Constants;
-using PdfSharp.Pdf.IO;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Facilys.Components.Pages
 {
@@ -20,7 +16,7 @@ namespace Facilys.Components.Pages
         readonly ModalManagerId modalManager = new();
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
-        VehicleRegistrationDocumentAnalyzer documentAnalyzer;
+        VehicleRegistrationDocumentAnalyzer documentAnalyzer = new();
         bool ViewRawOCRData = false;
 
         protected override async Task OnInitializedAsync()
@@ -46,8 +42,6 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalLargeEditOtherVehicle");
             modalManager.RegisterModal("OpenModalLargeDeleteOtherVehicle");
             modalManager.RegisterModal("OpenModalDataOCR");
-            
-            documentAnalyzer = new VehicleRegistrationDocumentAnalyzer();
         }
 
         private async Task LoadDataHeader()
@@ -366,7 +360,7 @@ namespace Facilys.Components.Pages
         private async Task OnFileReadOcr(InputFileChangeEventArgs e)
         {
             var file = e.File;
-           // string extractedText = string.Empty;
+            // string extractedText = string.Empty;
             if (file != null)
             {
                 try
@@ -375,7 +369,7 @@ namespace Facilys.Components.Pages
                     await file.OpenReadStream(maxAllowedSize: 8_500_000).CopyToAsync(memoryStream);
                     memoryStream.Position = 0;
 
-                   var extractedText = await documentAnalyzer.AnalyzeDocument(memoryStream);
+                    var extractedText = await documentAnalyzer.AnalyzeDocument(memoryStream);
 
                     managerVehicleViewModel.DataOCR = extractedText.DataRead;
                     managerVehicleViewModel.Vehicle = new()
@@ -388,7 +382,7 @@ namespace Facilys.Components.Pages
                         //CirculationDate = DateTime.Parse(extractedText.ReleaseDate),
                         //Client = await DbContext.Clients.Where(c => c.Fname == extractedText.Name).FirstOrDefaultAsync() ?? null,
                     };
-                  
+
                     ViewRawOCRData = true;
 
                 }

@@ -10,7 +10,7 @@ namespace Facilys.Components.Models
         [Required]
         public string Version { get; set; } = "0";
         [Required]
-        public DateTime DateVersion  { get; set; } = DateTime.Now;
+        public DateTime DateVersion { get; set; } = DateTime.Now;
         [Required]
         public string PathBackup { get; set; } = string.Empty;
 

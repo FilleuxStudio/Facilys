@@ -1,5 +1,4 @@
-﻿using Facilys.Components.Models.Modal;
-using Facilys.Components.Models.ViewModels;
+﻿using Facilys.Components.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Facilys.Components.Pages
@@ -29,7 +28,7 @@ namespace Facilys.Components.Pages
         {
             try
             {
-                if(managerInvoiceViewModel.Edition.Id == Guid.Empty)
+                if (managerInvoiceViewModel.Edition.Id == Guid.Empty)
                 {
                     managerInvoiceViewModel.Edition.Id = Guid.NewGuid();
                     await DbContext.EditionSettings.AddAsync(managerInvoiceViewModel.Edition);
@@ -38,7 +37,7 @@ namespace Facilys.Components.Pages
                 {
                     DbContext.EditionSettings.Update(managerInvoiceViewModel.Edition);
                 }
-               
+
                 await DbContext.SaveChangesAsync();
             }
             catch (Exception ex)

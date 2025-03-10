@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Facilys.Components.Models
 {
@@ -22,7 +22,7 @@ namespace Facilys.Components.Models
         public string? RepairType { get; set; } = string.Empty;
         public StatusInvoice Status { get; set; } = StatusInvoice.OnHold;
         public bool PartReturnedCustomer { get; set; } = false;
-        public bool CustomerSuppliedPart {  get; set; } = false;
+        public bool CustomerSuppliedPart { get; set; } = false;
         public Users? User { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.Now;
     }
@@ -42,7 +42,7 @@ namespace Facilys.Components.Models
     public enum StatusInvoice
     {
         Validate = 0,
-        OnHold  = 1,
+        OnHold = 1,
         Canceled = 2,
         Delete = 3,
         Postponed = 4,

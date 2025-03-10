@@ -1,9 +1,7 @@
-﻿using ElectronNET.API.Entities;
-using Facilys.Components.Models;
+﻿using Facilys.Components.Models;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -15,7 +13,7 @@ namespace Facilys.Components.Pages
     {
         private ManagerInvoiceViewModel managerInvoiceViewModel = new();
         private string invoiceNumber = string.Empty, selectedValueClient = string.Empty, selectedValueVehicle = string.Empty, searchClient = string.Empty;
-        private Guid IdUser = Guid.Empty;   
+        private Guid IdUser = Guid.Empty;
         private int km = 0;
         private short actionType;
         private InvoiceData invoiceData = new();
@@ -59,7 +57,7 @@ namespace Facilys.Components.Pages
                     invoiceNumber = managerInvoiceViewModel.Edition.StartNumberInvoice;
             }
 
-            foreach(var client in managerInvoiceViewModel.Clients)
+            foreach (var client in managerInvoiceViewModel.Clients)
             {
                 managerInvoiceViewModel.ClientItems.Add(new SelectListItem(client.Lname + " " + client.Fname, client.Id.ToString()));
             }
@@ -80,7 +78,7 @@ namespace Facilys.Components.Pages
         {
             searchClient = e.Value?.ToString() ?? string.Empty;
 
-            if(searchClient != string.Empty)
+            if (searchClient != string.Empty)
             {
                 managerInvoiceViewModel.ClientItems = managerInvoiceViewModel.ClientItems
                .Where(c => c.Text.Contains(searchClient, StringComparison.OrdinalIgnoreCase))
@@ -258,8 +256,8 @@ namespace Facilys.Components.Pages
 
         private async Task OnLinePriceChanged(object value, int index)
         {
-           if (value is string stringValue)
-           {
+            if (value is string stringValue)
+            {
                 if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
                 {
                     invoiceData.LinePrice[index] = result;
@@ -301,7 +299,7 @@ namespace Facilys.Components.Pages
                 // Mettez à jour LineMo
                 invoiceData.LineMo[index] = (float?)Math.Round(amount, 2); // Arrondi à 2 décimales
 
-               CalculateTotals();
+                CalculateTotals();
             }
         }
 
@@ -436,7 +434,7 @@ namespace Facilys.Components.Pages
                         //await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
                         break;
                 }
-               
+
             }
 
             StateHasChanged();

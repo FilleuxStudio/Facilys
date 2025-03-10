@@ -1,11 +1,8 @@
 ﻿using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
-using Facilys.Components.Models.ViewModels;
-using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Facilys.Components.Pages
 {

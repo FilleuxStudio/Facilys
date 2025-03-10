@@ -170,6 +170,43 @@ exports.accountTeams = async (req, res) => {
   }
 };
 
+exports.accountDownload = async (req, res) => {
+  try {
+    // Vérifier si le cookie authToken existe
+    var token = await CheckTokenConnection(req, res);
+
+    // Vérifier la validité du token JWT
+    try {
+      const decoded = jwt.verify(token, cookieConfig.cookieSecret);
+
+      // Vérifier si la session utilisateur existe
+      if (!req.session.user) {
+        return res.redirect("/login");
+      }
+
+      const csrfToken = req.csrfToken(true);
+      const userData = await User.findByEmail(req.session.user.email);
+      const message = req.query.message || null;
+      res.render("account-download", {
+        user: userData,
+        currentDateTime: now,
+        currentRoute: req.path,
+        message: message,
+        session: req.session,
+        csrfToken,
+      });
+    } catch (error) {
+      // Si le token est invalide ou expiré
+      console.error("Token invalide ou expiré:", error);
+      res.clearCookie("authToken");
+      return res.redirect("/login");
+    }
+  } catch (err) {
+    console.error("Erreur lors de l'accès au compte :", err);
+    res.status(500).send("Erreur serveur");
+  }
+}
+
 exports.accoutUpdate = async (req, res) => {
   try {
     var logoDataUrl = "";

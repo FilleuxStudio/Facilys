@@ -1,10 +1,9 @@
 ﻿using Facilys.Components.Models;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Facilys.Components.Data
 {
-    public class ApplicationDbContext: DbContext
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -28,7 +27,7 @@ namespace Facilys.Components.Data
         public DbSet<QuotesItems> QuotesItems { get; set; }
         public DbSet<EditionSetting> EditionSettings { get; set; }
         public DbSet<ReferencesIgnored> ReferencesIgnored { get; set; }
-        public DbSet<InterestingReferences> InterestingReferences {  get; set; }
+        public DbSet<InterestingReferences> InterestingReferences { get; set; }
         public DbSet<AssociationSettingReference> AssociationSettingReferences { get; set; }
         public DbSet<CompanySettings> CompanySettings { get; set; }
 

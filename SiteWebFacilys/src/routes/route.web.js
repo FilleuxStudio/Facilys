@@ -85,6 +85,8 @@ router.get("/manager-product", managerController.managerProducts);
 
 router.get("/manager-clients", managerController.managerClients);
 
+router.get("/account-download", accountController.accountDownload)
+
 /// Compte
 router.post("/update-account", accountController.accoutUpdate);
 

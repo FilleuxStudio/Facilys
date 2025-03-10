@@ -1,5 +1,5 @@
-﻿using Facilys.Components.Models.Modal;
-using Facilys.Components.Models;
+﻿using Facilys.Components.Models;
+using Facilys.Components.Models.Modal;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 

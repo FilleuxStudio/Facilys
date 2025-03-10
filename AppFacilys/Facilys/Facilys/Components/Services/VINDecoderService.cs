@@ -1,7 +1,4 @@
-﻿using System.Runtime;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Facilys.Components.Services
+﻿namespace Facilys.Components.Services
 {
     public class VINDecoderService
     {

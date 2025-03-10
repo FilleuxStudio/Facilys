@@ -1,5 +1,5 @@
-﻿using Facilys.Components.Models.ViewModels;
-using Facilys.Components.Models;
+﻿using Facilys.Components.Models;
+using Facilys.Components.Models.ViewModels;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 
@@ -76,7 +76,6 @@ namespace Facilys.Components.Services
         private double DrawHeader(XGraphics gfx, Invoices invoice, ManagerInvoiceViewModel company, int km, XFont titleFont, XFont normalFont, double yPosition)
         {
             double newHeight = 0;
-            double availableWidth = PageWidth - Margin - RightMargin;
 
             try
             {

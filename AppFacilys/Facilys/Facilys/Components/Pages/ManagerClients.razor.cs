@@ -4,7 +4,6 @@ using Facilys.Components.Models.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
@@ -58,7 +57,7 @@ namespace Facilys.Components.Pages
                     Client = client,
                     EmailsClients = managerClientViewModel.EmailsClients.Where(c => c.Client.Id == client.Id).ToList(),
                     PhonesClients = managerClientViewModel.PhonesClients.Where(c => c.Client.Id == client.Id).ToList(),
-                    Vehicles = managerClientViewModel.Vehicles.Where(c => c.Client.Id == client.Id).ToList(),
+                    Vehicles = [.. managerClientViewModel.Vehicles.Where(c => c.Client.Id == client.Id)],
                 });
             }
 
@@ -199,7 +198,7 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitAddClient()
         {
-            if(managerClientViewModel.Client.Fname != "" && managerClientViewModel.Client.Lname != "" && managerClientViewModel.Client.Address != "")
+            if (managerClientViewModel.Client.Fname != "" && managerClientViewModel.Client.Lname != "" && managerClientViewModel.Client.Address != "")
             {
                 try
                 {
