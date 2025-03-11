@@ -10,8 +10,11 @@ class User {
     this.siret = data.siret;
     this.addressclient = data.addressclient;
     this.phone = data.phone;
-    this.password = data.password; // Note: Le mot de passe doit être haché avant d'être stocké
+    this.password = data.password; 
     this.manager = data.manager;
+    this.mariadbUser = data.mariadbUser;
+    this.mariadbPassword = data.mariadbPassword;
+    this.mariadbDb = data.mariadbDb;
   }
 
   // Méthode pour sauvegarder l'utilisateur dans Firestore
@@ -28,6 +31,9 @@ class User {
       phone: this.phone,
       password: this.password, // Assurez-vous de hacher le mot de passe avant d'appeler cette méthode
       manager: this.manager,
+      mariadbUser: this.mariadbUser,
+      mariadbPassword: this.mariadbPassword,
+      mariadbDb: this.mariadbDb,
     });
   }
 
@@ -73,6 +79,42 @@ class User {
     } catch (error) {
       console.error("Error updating document: ", error);
       return false;
+    }
+  }
+
+  static async updateMariaDBInfo(userId, dbInfo) {
+    try {
+      const updateData = {
+        mariadbUser: dbInfo.user,
+        mariadbPassword: dbInfo.password,
+        mariadbDb: dbInfo.name
+      };
+
+      const userRef = db.collection("users").doc(userId);
+      
+      // Utilisation d'une transaction pour plus de sécurité
+      await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(userRef);
+        if (!doc.exists) {
+          throw new Error("Document utilisateur non trouvé");
+        }
+        
+        transaction.update(userRef, updateData);
+      });
+
+      console.log("Informations MariaDB mises à jour avec succès");
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour MariaDB :", error);
+      
+      // Log supplémentaire pour le débogage
+      if (error.code === 'NOT_FOUND') {
+        console.error(`Utilisateur ${userId} introuvable`);
+      } else if (error.code === 'PERMISSION_DENIED') {
+        console.error("Permissions Firestore insuffisantes");
+      }
+      
+      throw new Error("Échec de la mise à jour des informations de base de données");
     }
   }
 }

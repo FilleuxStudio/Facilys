@@ -3,6 +3,7 @@ const cookieConfig = require("../config/cookie-config");
 const jwt = require("jsonwebtoken");
 const argon2 = require("@node-rs/argon2");
 const { createCanvas } = require("canvas");
+const databaseService = require("../services/databaseService");
 
 exports.login = async (req, res) => {
   const { _csrf, email, password, rememberMe } = req.body;
@@ -131,11 +132,22 @@ exports.register = async (req, res) => {
       phone: "null",
       password: hashedPassword, // Mot de passe haché
       manager: false, // Par défaut, false, peut être ajusté selon vos besoins
+      mariadbUser: "null",
+      mariadbPassword: "null",
+      mariadbDb: "null"
     });
 
     // Sauvegarder l'utilisateur dans Firestore
     if (checkTerm == true) {
       await user.save();
+      const userId = user.id; 
+      const dbInfo = await databaseService.createUserDatabase(userId);
+
+      await user.updateMariaDBInfo(user.email, {
+        user: dbInfo.user,
+        password: dbInfo.password,
+        name: dbInfo.name
+      });
     } else {
       if (pathLink.link == undefined) {
         return res
@@ -161,6 +173,17 @@ exports.register = async (req, res) => {
     }
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur:", error);
+
+     // Nettoyage en cas d'erreur après la création de l'utilisateur
+     if (user && user.id) {
+      try {
+        await admin.firestore().collection('users').doc(user.id).delete();
+        await databaseService.deleteUserDatabase(user.id); // À implémenter si nécessaire
+      } catch (cleanupError) {
+        console.error("Erreur lors du nettoyage:", cleanupError);
+      }
+    }
+
     res.status(500).send("Erreur lors de la création de l'utilisateur");
   }
 };

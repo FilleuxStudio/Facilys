@@ -1,6 +1,7 @@
 const mariadb = require('mariadb');
 const fs = require('fs').promises;
 const path = require('path');
+const crypto = require('crypto');
 
 class DatabaseService {
   constructor() {
@@ -24,9 +25,14 @@ class DatabaseService {
       const mariadbUser = `user_${userId}`;
       const mariadbPassword = this.generateSecurePassword();
 
-      await conn.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
-      await conn.query(`CREATE USER '${mariadbUser}'@'%' IDENTIFIED BY '${mariadbPassword}'`);
-      await conn.query(`GRANT ALL PRIVILEGES ON ${dbName}.* TO '${mariadbUser}'@'%'`);
+      // Échappement des éléments dynamiques
+      const dbNameEscaped = conn.escapeId(dbName);
+      const userEscaped = conn.escape(mariadbUser);
+      const passwordEscaped = conn.escape(mariadbPassword);
+
+      await conn.query(`CREATE DATABASE IF NOT EXISTS ${dbNameEscaped}`);
+      await conn.query(`CREATE USER ${userEscaped}@'%' IDENTIFIED BY ${passwordEscaped}`);
+      await conn.query(`GRANT ALL PRIVILEGES ON ${dbNameEscaped}.* TO ${userEscaped}@'%'`);
       await conn.query('FLUSH PRIVILEGES');
 
       await this.executeSQLScript(conn, dbName);
@@ -48,16 +54,19 @@ class DatabaseService {
     const scriptPath = path.join(__dirname, '..', 'sql', 'init_db.sql');
     const sqlScript = await fs.readFile(scriptPath, 'utf8');
 
-    await conn.query(`USE ${dbName}`);
-    const statements = sqlScript.split(';').filter(statement => statement.trim() !== '');
-    for (let statement of statements) {
-      await conn.query(statement);
+    await conn.query(`USE ${conn.escapeId(dbName)}`);
+    const statements = sqlScript.split(/;\s*(?=CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT)/i)
+                               .filter(statement => statement.trim() !== '');
+    
+    for (const statement of statements) {
+      if (statement.trim()) {
+        await conn.query(statement);
+      }
     }
   }
 
   generateSecurePassword() {
-    // Implémentez la logique pour générer un mot de passe sécurisé
-    return 'password_sécurisé'; // À remplacer par une vraie implémentation
+    return crypto.randomBytes(16).toString('hex');
   }
 
   async close() {
