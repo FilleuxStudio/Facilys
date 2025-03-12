@@ -11,11 +11,14 @@ namespace Facilys.Components.Pages
 {
     public partial class EditionInvoice
     {
-        private ManagerInvoiceViewModel managerInvoiceViewModel = new();
-        private string invoiceNumber = string.Empty, selectedValueClient = string.Empty, selectedValueVehicle = string.Empty, searchClient = string.Empty;
+        private string invoiceNumber = string.Empty;
         private Guid IdUser = Guid.Empty;
-        public int km = 0;
+        private string selectedValueClient { get; set; } = string.Empty;
+        private string selectedValueVehicle { get; set; } = string.Empty;
+        private string searchClient { get; set; } = string.Empty;
+        private int km { get; set; } = 0;
         private short actionType;
+        private ManagerInvoiceViewModel managerInvoiceViewModel = new();
         private InvoiceData invoiceData = new();
 
         protected override async Task OnInitializedAsync()

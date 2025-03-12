@@ -2,7 +2,7 @@
 {
     public class InvoiceData()
     {
-        public List<string> LineRef { get; set; } = new();
+        public List<string> LineRef { get; set; } = [];
         public List<string> LineDesc { get; set; } = new();
         public List<float?> LineQt { get; set; } = new();
         public List<float?> LinePrice { get; set; } = new();
