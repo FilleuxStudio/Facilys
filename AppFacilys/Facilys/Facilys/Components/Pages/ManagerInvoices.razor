@@ -71,7 +71,18 @@
                                         </p>
                                     </td>
                                     <td>@invoice.DateAdded</td>
-                                    <td>@invoice.Payment</td>
+                                    <td>
+                                        <select class="form-select" @onchange="@(e => UpdatePayment(Enum.Parse<PaymentMethod>(e.Value.ToString()), invoice.Id))">
+                                            <option value="@invoice.Payment.ToString()">@invoice.Payment</option>
+                                            <option value="@PaymentMethod.BankCards.ToString()">Carte</option>
+                                            <option value="@PaymentMethod.CashPayment.ToString()">Espèces</option>
+                                            <option value="@PaymentMethod.BankTransfers.ToString()">Virement</option>
+                                            <option value="@PaymentMethod.PaymentByCheck.ToString()">Chèque</option>
+                                            <option value="@PaymentMethod.MobilePayment.ToString()">Paiement mobile</option>
+                                            <option value="@PaymentMethod.Cryptocurrencies.ToString()">Crypto-monnaies</option>
+                                            <option value="@PaymentMethod.NotInformed.ToString()">Pas informé</option>
+                                        </select>
+                                    </td>
                                     <td>
                                         <span class="badge bg-success-subtle text-success"><i class="fas fa-check me-1"></i> @invoice.Status</span>
                                     </td>

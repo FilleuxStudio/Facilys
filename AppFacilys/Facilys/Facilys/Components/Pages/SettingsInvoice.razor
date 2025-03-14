@@ -61,25 +61,26 @@
                     <div class="mb-3 row">
                         <div class="col-12">
                         <label class="col-md-3 my-1 control-label">Modèle de facture <span class="text-danger">*</span></label>
-                            <InputRadioGroup @bind-Value="managerInvoiceViewModel.Edition.TypeDesign" TValue="InvoiceTypeDesign" id=" TypeDesign" required>
-                            <div class="col-md-9 text-center">
-                                <div class="form-check form-check-inline">
-                                        <InputRadio TValue="InvoiceTypeDesign" class="form-check-input" type="radio" id="TypeA" value="InvoiceTypeDesign.TypeA" />
-                                    <label class="form-check-label" for="TypeA">Style 1</label>
-                                    <img src="assets/images/products/t1.png" alt="type facture 1" class="rounded d-block mx-auto border" style="width:150px">
+                            <InputRadioGroup @bind-Value="managerInvoiceViewModel.Edition.TypeDesign" TValue="InvoiceTypeDesign" id="TypeDesign" required>
+                                <div class="col-md-9 text-center">
+                                    <div class="form-check form-check-inline">
+                                        <InputRadio TValue="InvoiceTypeDesign" class="form-check-input" id="TypeA" Value="@InvoiceTypeDesign.TypeA" />
+                                        <label class="form-check-label" for="TypeA">Style 1</label>
+                                        <img src="assets/images/products/t1.png" alt="type facture 1" class="rounded d-block mx-auto border" style="width:150px">
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <InputRadio TValue="InvoiceTypeDesign" class="form-check-input" id="TypeB" Value="@InvoiceTypeDesign.TypeB" />
+                                        <label class="form-check-label" for="TypeB">Style 2</label>
+                                        <img src="assets/images/products/t2.png" alt="type facture 2" class="rounded d-block mx-auto border" style="width:150px">
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <InputRadio TValue="InvoiceTypeDesign" class="form-check-input" id="TypeC" Value="@InvoiceTypeDesign.TypeC" />
+                                        <label class="form-check-label" for="TypeC">Style 3</label>
+                                        <img src="assets/images/products/t3.png" alt="type facture 3" class="rounded d-block mx-auto border" style="width:150px">
+                                    </div>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                        <InputRadio TValue="InvoiceTypeDesign" class="form-check-input" type="radio" id="TypeB" value="InvoiceTypeDesign.TypeB" />
-                                    <label class="form-check-label" for="TypeB">Style 2</label>
-                                    <img src="assets/images/products/t2.png" alt="type facture 2" class="rounded d-block mx-auto border" style="width:150px">
-                                </div>
-                                <div class="form-check form-check-inline">
-                                        <InputRadio TValue="InvoiceTypeDesign" class="form-check-input" type="radio" id="TypeC" value="InvoiceTypeDesign.TypeC" />
-                                    <label class="form-check-label" for="TypeC">Style 3</label>
-                                    <img src="assets/images/products/t3.png" alt="type facture 3" class="rounded d-block mx-auto border" style="width:150px">
-                                </div>
-                            </div>
-                        </InputRadioGroup>
+                            </InputRadioGroup>
+
                         </div>
                     </div>
                     <div class="mb-3 row">

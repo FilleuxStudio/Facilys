@@ -86,7 +86,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col text-center">
-                                        <span class="fs-18 fw-semibold">@todayRevenue.ToString("#.##") €</span>
+                                        <span class="fs-18 fw-semibold">@(todayRevenue == 0 ? "0" : todayRevenue.ToString("#.##")) €</span>
                                         <h6 class="text-uppercase text-muted mt-2 m-0">Les revenus d'aujourd'hui</h6>
                                     </div><!--end col-->
                                 </div> <!-- end row -->
@@ -98,7 +98,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col text-center">
-                                        <span class="fs-18 fw-semibold">@monthlyRevenue.ToString("#.##") €</span>
+                                        <span class="fs-18 fw-semibold">@(monthlyRevenue == 0 ? "0" : monthlyRevenue.ToString("#.##")) €</span>
                                         <h6 class="text-uppercase text-muted mt-2 m-0">Les revenus moyens au mois</h6>
                                     </div><!--end col-->
                                 </div> <!-- end row -->
@@ -111,7 +111,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col text-center">
-                                        <span class="fs-18 fw-semibold">@maxInvoice.ToString("#.##") €</span>
+                                        <span class="fs-18 fw-semibold">@(maxInvoice == 0 ? "0" : maxInvoice.ToString("#.##")) €</span>
                                         <h6 class="text-uppercase text-muted mt-2 m-0">Max Facture</h6>
                                     </div><!--end col-->
                                 </div> <!-- end row -->
@@ -123,7 +123,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col text-center">
-                                        <span class="fs-18 fw-semibold">@minInvoice.ToString("#.##") €</span>
+                                        <span class="fs-18 fw-semibold">@(minInvoice == 0 ? "0" : minInvoice.ToString("#.##")) €</span>
                                         <h6 class="text-uppercase text-muted mt-2 m-0">Min Facture</h6>
                                     </div><!--end col-->
                                 </div> <!-- end row -->

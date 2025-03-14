@@ -73,7 +73,7 @@
                     <div class="card-body pt-0">
                         <div class="row">
                             <div class="col">
-                                <InputText @bind-value="searchClient" placeholder="Rechercher..." class="form-control mb-1" @oninput="HandleSearchClient" />
+                                <InputText @bind-Value="searchClient" placeholder="Rechercher..." class="form-control mb-1" @oninput="HandleSearchClient" />
                                 <select class="form-select" @onchange="HandleSelectionChangedClient">
                                     <option>Selectionner un client</option>
                                     @foreach (var item in managerInvoiceViewModel.ClientItems)
@@ -193,10 +193,10 @@
                                 </div>
                                 <div class="row mt-1 mb-3">
                                     <div class="col-6">
-                                        <InputTextArea @bind-value="invoiceData.GeneralConditionInvoice" placeholder="Détails supplémentaires côté facturation…" class="form-control" rows="5" />
+                                        <InputTextArea @bind-Value="invoiceData.GeneralConditionInvoice" placeholder="Détails supplémentaires côté facturation…" class="form-control" rows="5" />
                                     </div><!-- end col -->
                                     <div class="col-6">
-                                        <InputTextArea @bind-value="invoiceData.GeneralConditionOrder" placeholder="Éléments additionnels relatifs à l’ordre de réparation…" class="form-control" rows="5" />
+                                        <InputTextArea @bind-Value="invoiceData.GeneralConditionOrder" placeholder="Éléments additionnels relatifs à l’ordre de réparation…" class="form-control" rows="5" />
                                     </div><!-- end col -->
                                 </div>
                             </div>

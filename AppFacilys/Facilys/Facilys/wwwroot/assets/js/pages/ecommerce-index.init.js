@@ -77,7 +77,7 @@ export function updateMonthlyIncomeData(newData) {
     }
 }
 
-export function initPaymentChart(data) {
+export function initPaymentChart(data, labels) {
     // Vérification de l'existence de l'élément DOM
     const chartElement = document.querySelector("#payment_chart");
     if (!chartElement) {
@@ -102,7 +102,7 @@ export function initPaymentChart(data) {
         dataLabels: { enabled: false },
         stroke: { show: true, width: 2, colors: ["transparent"] },
         series: data,
-        labels: ["Cash", "Carte Bancaire", "Virement Bancaire", "Solutions de Paiement en Ligne", "Paiement Mobile", "Chèque", "Cryptomonnaies", "Non Informé"],
+        labels: labels, // Utilisation des labels dynamiques
         colors: ["#22c55e", "#08b0e7", "#ffc728", "#ff5c75", "#007bff", "#6f42c1", "#fd7e14", "#343a40"],
         legend: {
             show: true, position: "bottom",
@@ -120,7 +120,7 @@ export function initPaymentChart(data) {
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + " transactions"; // Affichage du nombre de transactions
+                    return `${val} €`; // Affichage du montant en euros
                 }
             }
         }
@@ -129,9 +129,11 @@ export function initPaymentChart(data) {
     paymentChart = new ApexCharts(chartElement, options);
     return paymentChart.render();
 }
-
-export function updatePaymentChart(newData) {
+export function updatePaymentChart(newData, newLabels) {
     if (paymentChart) {
-        paymentChart.updateSeries(newData); // Redessine le graphique avec les nouvelles données
+        paymentChart.updateOptions({
+            series: newData,
+            labels: newLabels
+        });
     }
 }

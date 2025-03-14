@@ -26,6 +26,7 @@ namespace Facilys.Components.Services
         public async Task<Users> AuthenticateAsync(string email, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
             if (user != null && Users.VerifyPassword(password, user.Password))
             {
                 await SetAuthenticatedAsync(user);
@@ -34,7 +35,7 @@ namespace Facilys.Components.Services
             else
             {
                 var result = await _webSiteService.PostConnectionUserAsync(email, password);
-                if (result)
+                if (result.Success)
                 {
                     // Connexion réussie, gérer la navigation ou l'état de l'application
                 }
@@ -48,6 +49,9 @@ namespace Facilys.Components.Services
         /// </summary>
         public async Task<bool> IsAuthenticatedAsync()
         {
+            var token = await _webSiteService.GetKeyAccessApp();
+            EnvironmentApp.AccessToken = token.Trim();
+
             var cookieData = await LoadCookieDataAsync();
             if (cookieData == null) return false;
 
@@ -102,8 +106,6 @@ namespace Facilys.Components.Services
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
-
-            Console.WriteLine(filePath);
 
             if (!File.Exists(filePath)) return null;
 

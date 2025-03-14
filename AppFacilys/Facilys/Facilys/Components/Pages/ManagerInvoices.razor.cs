@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models.Modal;
+﻿using Facilys.Components.Models;
+using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -25,8 +26,7 @@ namespace Facilys.Components.Pages
 
         private async Task LoadDataHeader()
         {
-            managerInvoiceViewModel.Invoices = await DbContext.Invoices.Include(v => v.Vehicle).Include(ov => ov.OtherVehicle).ToListAsync();
-
+            managerInvoiceViewModel.Invoices = await DbContext.Invoices.Include(v => v.Vehicle).Include(ov => ov.OtherVehicle).Take(10).OrderByDescending(d => d.DateAdded).ToListAsync();
         }
 
         private async void OpenModal(string id)
@@ -64,6 +64,18 @@ namespace Facilys.Components.Pages
         {
             managerInvoiceViewModel.Invoices = await DbContext.Invoices.Where(i => i.InvoiceNumber.StartsWith(searchInvoice)).ToListAsync();
             StateHasChanged();
+        }
+
+        private async Task UpdatePayment(PaymentMethod newPaymentMethod, Guid idInvoice)
+        {
+            var invoiceToUpdate = await DbContext.Invoices.FindAsync(idInvoice);
+            if (invoiceToUpdate != null)
+            {
+                invoiceToUpdate.Payment = newPaymentMethod;
+                DbContext.Invoices.Update(invoiceToUpdate);
+                await DbContext.SaveChangesAsync();
+                StateHasChanged(); // Rafraîchir l'UI si nécessaire
+            }
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

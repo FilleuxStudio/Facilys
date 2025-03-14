@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Facilys.Components.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
@@ -11,7 +12,8 @@ namespace Facilys.Components.Pages
         private int totalInvoiceAvgMonth = 0;
         private List<InvoiceDto> RecentInvoice = [];
         private double[] monthlyInvoiceTotals = new double[12];
-        private List<double> paymentData = new();
+        private int[] paymentData = [];
+        private string[] paymentLabels = [];
         public List<string> lastFiveYearsRevenue { get; set; } = new List<string>();
         protected override async Task OnInitializedAsync()
         {
@@ -54,25 +56,31 @@ namespace Facilys.Components.Pages
                 ClientLastName = i.Vehicle != null ? i.Vehicle.Client.Lname : (i.OtherVehicle != null ? i.OtherVehicle.Client.Lname : "N/A")
             }).ToListAsync();
 
-            var paymentMethodTotals = await DbContext.Invoices.GroupBy(i => i.Payment)
-         .Select(g => new
-         {
-             PaymentMethod = g.Key,
-             TotalAmount = g.Sum(i => i.TotalAmount)
-         }).ToListAsync();
+            var paymentMethodTotals = await DbContext.Invoices
+       .GroupBy(i => i.Payment)
+       .Select(g => new
+       {
+           PaymentMethod = g.Key,
+           TotalAmount = g.Sum(i => i.TotalAmount)
+       })
+       .ToListAsync();
 
 
-            foreach (var item in paymentMethodTotals)
+            var allPaymentMethods = Enum.GetValues(typeof(PaymentMethod))
+                               .Cast<PaymentMethod>()
+                               .OrderBy(p => p)
+                               .ToList();
+
+            paymentData = new int[allPaymentMethods.Count];
+            paymentLabels = new string[allPaymentMethods.Count];
+
+            foreach (var method in allPaymentMethods)
             {
-                // Vérifier si l'index est dans les limites
-                if ((int)item.PaymentMethod >= 0 && (int)item.PaymentMethod < paymentData.Count)
-                {
-                    paymentData[(int)item.PaymentMethod] = item.TotalAmount;
-                }
-                else
-                {
-                    Console.WriteLine($"Index de méthode de paiement invalide : {(int)item.PaymentMethod}");
-                }
+                var index = (int)method;
+                var total = paymentMethodTotals.FirstOrDefault(p => p.PaymentMethod == method)?.TotalAmount ?? 0;
+
+                paymentData[index] = (int)Math.Round(total);
+                paymentLabels[index] = GetPaymentMethodLabel(method); // Méthode de traduction
             }
 
             var annualRevenues = await DbContext.Invoices
@@ -90,6 +98,21 @@ namespace Facilys.Components.Pages
             lastFiveYearsRevenue = annualRevenues
                 .Select(x => $"{x.Year}:{x.TotalRevenue}")  // Formatage "Année: Revenu"
                 .ToList();
+        }
+
+        private string GetPaymentMethodLabel(PaymentMethod method)
+        {
+            return method switch
+            {
+                PaymentMethod.CashPayment => "Espèces",
+                PaymentMethod.BankCards => "Carte Bancaire",
+                PaymentMethod.BankTransfers => "Virement Bancaire",
+                PaymentMethod.PaymentByCheck => "Chèque",
+                PaymentMethod.MobilePayment => "Paiement Mobile",
+                PaymentMethod.Cryptocurrencies => "Cryptomonnaies",
+                PaymentMethod.NotInformed => "Non Informé",
+                _ => method.ToString()
+            };
         }
 
         private async Task LoadDataInvoicesByMonth()
@@ -117,7 +140,7 @@ namespace Facilys.Components.Pages
                     await Task.Delay(100);
 
                     await chartModule.InvokeVoidAsync("initMonthlyIncomeChart", monthlyInvoiceTotals);
-                    await chartModule.InvokeVoidAsync("initPaymentChart", paymentData);
+                    await chartModule.InvokeVoidAsync("initPaymentChart", paymentData, paymentLabels);
 
                     isChartInitialized = true;
                 }
