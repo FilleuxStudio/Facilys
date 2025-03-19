@@ -61,6 +61,42 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.company =  async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Vérifiez si l'utilisateur existe
+    let company = await User.findByEmail(email);
+
+    if (!company) {
+      // Si l'utilisateur n'existe pas, vérifiez si c'est une équipe
+      user = await Team.findByEmail(email);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "Ni utilisateur ni équipe trouvés avec cet email",
+          data: null,
+        });
+      }
+
+      company = await User.findByEmail(user.manager);
+    }
+
+    // Réponse en fonction du type d'utilisateur
+    return res.status(200).json({
+      success: true,
+      data: company,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la connexion :", error);
+    return res.status(500).json({
+      success: false,
+      message: "Une erreur interne est survenue",
+      data: null,
+    });
+  }
+};
+
 exports.executeQuery = async (req, res) => {
   try {
     const { operation, table, data, conditions } = req.body;

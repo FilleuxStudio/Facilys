@@ -1,6 +1,7 @@
 ﻿using Facilys.Components.Constants;
 using Facilys.Components.Models;
 using PdfSharp.Snippets;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
 namespace Facilys.Components.Services
@@ -12,7 +13,7 @@ namespace Facilys.Components.Services
         public APIWebSiteService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:8056");
+            _httpClient.BaseAddress = new Uri("https://facilys.flixmail.fr");
         }
 
         public async Task<string> GetKeyAccessApp()
@@ -26,7 +27,7 @@ namespace Facilys.Components.Services
             return "null";
         }
 
-        public async Task<(bool Success, bool IsTeam, object UserData)> PostConnectionUserAsync(string email, string password)
+        public async Task<(bool Success, bool IsTeam, UserData UserData)> PostConnectionUserAsync(string email, string password)
         {
             // Création du FormData
             var formContent = new MultipartFormDataContent
@@ -55,16 +56,105 @@ namespace Facilys.Components.Services
 
             try
             {
-                //object userData = isTeam
-                //    ? content.Data.Deserialize<TeamData>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                //    : content.Data.Deserialize<UserData>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var document = JsonDocument.Parse(content.Data.GetRawText());
+                string lname = string.Empty, fname = string.Empty, company = string.Empty;
+                RoleUser roleUser = RoleUser.User;
+                if (isTeam)
+                {
+                    fname = document.RootElement.GetProperty("fname").GetString();
+                    lname = document.RootElement.GetProperty("lname").GetString();
+                    company = document.RootElement.GetProperty("manager").GetString();
+                    switch (document.RootElement.GetProperty("type").GetString())
+                    {
+                        case "user": roleUser = RoleUser.User; break;
+                        case "manager": roleUser = RoleUser.Manager; break;
+                        case "administrator": roleUser = RoleUser.Administrator; break;
+                        case "master": roleUser = RoleUser.SuperUser; break;
+                    }
+                }
+                else
+                {
+                    fname = document.RootElement.GetProperty("firstName").GetString();
+                    lname = document.RootElement.GetProperty("lastName").GetString();
+                    company = document.RootElement.GetProperty("companyName").GetString();
+                    roleUser = RoleUser.Manager;
+                }
 
-                return (true, isTeam, null);
+                UserData user = new()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Email = document.RootElement.GetProperty("email").GetString(),
+                    Password = document.RootElement.GetProperty("password").GetString(),
+                    Fname = fname,
+                    Lname = lname,
+                    Role = roleUser,
+                    Company = company,
+                };
+
+                return (true, isTeam, user);
             }
             catch (JsonException ex)
             {
                 Console.WriteLine($"Erreur de désérialisation : {ex.Message}");
                 return (false, false, null);
+            }
+        }
+
+        public async Task<(bool Success,  CompanySettings companySettings)> PostGetCompanyUserAsync(string email)
+        {
+            // Création du FormData
+            var formContent = new MultipartFormDataContent
+            {
+                { new StringContent(email), "email" },
+                {new StringContent(EnvironmentApp.AccessToken), "_csrf" }
+            };
+
+            // Ajout du header CSRF
+            _httpClient.DefaultRequestHeaders.Add("x-csrf-token", EnvironmentApp.AccessToken);
+            _httpClient.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
+
+            var response = await _httpClient.PostAsync("api/company", formContent);
+
+            if (!response.IsSuccessStatusCode)
+                return (false, null);
+
+            var content = await response.Content.ReadFromJsonAsync<ApiResponse>();
+
+            if (content?.Success != true)
+                return (false, null);
+
+
+            try
+            {
+                var document = JsonDocument.Parse(content.Data.GetRawText());
+
+                CompanySettings company = new()
+                {
+
+                    NameCompany = document.RootElement.GetProperty("companyName").GetString(),
+                    Logo = document.RootElement.GetProperty("logo").GetString(),
+                    TVA = "NULL",
+                    Siret = document.RootElement.GetProperty("siret").GetString(),
+                    RIB = "NULL",
+                    HeadOfficeAddress = document.RootElement.GetProperty("addressclient").GetString(),
+                    BillingAddress = document.RootElement.GetProperty("addressclient").GetString(),
+                    LegalStatus = "NULL",
+                    RMNumber = "NULL",
+                    RCS = "NULL",
+                    RegisteredCapital = 1000f,
+                    CodeNAF = "NULL",
+                    ManagerName = document.RootElement.GetProperty("lastName").GetString().ToUpper() + " " + document.RootElement.GetProperty("firstName").ToString(),
+                    Phone = document.RootElement.GetProperty("phone").GetString(),
+                    Email = document.RootElement.GetProperty("email").GetString(),
+                    WebSite = "NULL",
+                };
+
+                return (true, company);
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Erreur de désérialisation : {ex.Message}");
+                return (false, null);
             }
         }
 
@@ -82,19 +172,15 @@ namespace Facilys.Components.Services
         // Ajoutez d'autres méthodes pour interagir avec votre API selon vos besoins
     }
 
-    public class LoginResponse
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public string Token { get; set; }
-    }
-
     public class UserData
     {
         public string Id { get; set; }
         public string Email { get; set; }
-        public string Name { get; set; }
-        // Ajoutez d'autres propriétés selon la structure de vos données utilisateur
+        public string Password { get; set; }
+        public string Fname { get; set; }
+        public string Lname { get; set; }
+        public RoleUser Role { get; set; }
+        public string Company { get; set; }
     }
 
     public class ApiResponse

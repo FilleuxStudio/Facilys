@@ -37,7 +37,15 @@ namespace Facilys.Components.Services
                 var result = await _webSiteService.PostConnectionUserAsync(email, password);
                 if (result.Success)
                 {
-                    // Connexion réussie, gérer la navigation ou l'état de l'application
+                    Users userDb = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+
+                    if (userDb == null) {
+                       await SetUserWebAsync(result.UserData);
+                        userDb = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+                    }
+
+                    await SetAuthenticatedAsync(userDb);
+                    return userDb;
                 }
             }
             return null;
@@ -49,9 +57,12 @@ namespace Facilys.Components.Services
         /// </summary>
         public async Task<bool> IsAuthenticatedAsync()
         {
-            var token = await _webSiteService.GetKeyAccessApp();
-            EnvironmentApp.AccessToken = token.Trim();
-
+            if(EnvironmentApp.AccessToken == "")
+            {
+                var token = await _webSiteService.GetKeyAccessApp();
+                EnvironmentApp.AccessToken = token.Trim();
+            }
+           
             var cookieData = await LoadCookieDataAsync();
             if (cookieData == null) return false;
 
@@ -101,9 +112,9 @@ namespace Facilys.Components.Services
         /// </summary>
         private async Task<CookieData> LoadCookieDataAsync()
         {
-            //var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
+            //string appDataPath = await Electron.App.GetPathAsync(PathName.Documents); // Model Electron.Net
 
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments); // Mode Dev et web
 
             var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
 
@@ -121,7 +132,7 @@ namespace Facilys.Components.Services
         private async Task SaveCookieDataAsync(CookieData cookieData)
         {
             // Récupère le chemin "Documents"
-            //var appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
+            //string appDataPath = await Electron.App.GetPathAsync(PathName.Documents);
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             // Combine le chemin pour le dossier de l'application et le fichier cookie
@@ -160,6 +171,25 @@ namespace Facilys.Components.Services
             }
         }
 
+
+        public async Task SetUserWebAsync(UserData user)
+        {
+            var AddUserWeb = new Users
+            {
+                Lname = user.Lname,
+                Fname = user.Fname,
+                Email = user.Email,
+                Login = user.Email,
+                Password = user.Password,
+                Role = user.Role,
+                Team = user.Company,
+                DateAdded = DateTime.Now
+            };
+
+            _context.Users.Add(AddUserWeb);
+            _context.SaveChanges();
+        }
+
         /// <summary>
         /// Génère un hash SHA256 à partir d'une chaîne d'entrée.
         /// Utilise : System.Security.Cryptography pour le hachage SHA256,
@@ -177,7 +207,8 @@ namespace Facilys.Components.Services
         public static async Task EnsureApplicationFolderExistsAsync()
         {
             // Obtient le chemin des documents utilisateur via Electron
-            var documentsPath = await Electron.App.GetPathAsync(PathName.Documents);
+            //var documentsPath = await Electron.App.GetPathAsync(PathName.Documents);
+            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             // Combine le chemin pour inclure le dossier "Facilys"
             var facilysFolderPath = Path.Combine(documentsPath, "Facilys");

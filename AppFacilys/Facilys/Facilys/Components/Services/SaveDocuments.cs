@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using ElectronNET.API.Entities;
+using ElectronNET.API;
+using System.Text.Json;
 
 namespace Facilys.Components.Services
 {
@@ -68,6 +70,5 @@ namespace Facilys.Components.Services
                 return false;
             }
         }
-
     }
 }

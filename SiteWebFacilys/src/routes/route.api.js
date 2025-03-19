@@ -4,6 +4,7 @@ const apiController = require("../controllers/controller.api");
 
 router.get("/version", apiController.getVersion);
 router.post("/login", apiController.login);
+router.post("/company", apiController.company);
 router.post("/query", apiController.executeQuery);
 
 module.exports = router;

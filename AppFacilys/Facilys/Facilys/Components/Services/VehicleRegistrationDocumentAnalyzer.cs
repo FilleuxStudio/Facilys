@@ -1,4 +1,6 @@
-﻿using Facilys.Components.Constants;
+﻿using ElectronNET.API.Entities;
+using ElectronNET.API;
+using Facilys.Components.Constants;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
@@ -75,10 +77,9 @@ namespace Facilys.Components.Services
 
         private async Task<string> EnsureTessdataFiles()
         {
-            var destDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                EnvironmentApp.FolderData,
-                "tessdata");
+            string pathDoc = await Electron.App.GetPathAsync(PathName.Documents);
+            //string pathDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            var destDir = Path.Combine(pathDoc, EnvironmentApp.FolderData,"tessdata");
 
             if (!Directory.Exists(destDir) || !Directory.GetFiles(destDir).Any())
             {

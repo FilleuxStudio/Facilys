@@ -1,3 +1,133 @@
+//using ElectronNET.API;
+//using ElectronNET.API.Entities;
+//using Facilys.Components.Data;
+//using Facilys.Components.Services;
+//using Microsoft.EntityFrameworkCore;
+
+//var builder = WebApplication.CreateBuilder(args);
+//builder.Services.AddDbContext<ApplicationDbContext>(async options =>
+//{
+//    var documentsPath = await Electron.App.GetPathAsync(PathName.Documents);
+//    //var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+//    var facilysPath = Path.Combine(documentsPath, "Facilys");
+//    var databasePath = Path.Combine(facilysPath, "Database");
+//    var dbFilePath = Path.Combine(databasePath, "data.db");
+
+//    Directory.CreateDirectory(databasePath);
+
+//    options.UseSqlite($"Data Source={dbFilePath}");
+//});
+
+//// Configuer Electron
+//builder.WebHost.UseElectron(args);
+////builder.WebHost.UseEnvironment("Development");
+//builder.Services.AddElectron();
+
+//// Add services to the container.
+//builder.Services.AddRazorComponents()
+//    .AddInteractiveServerComponents();
+
+//builder.Services.AddHttpContextAccessor();
+
+//builder.Services.AddScoped<AuthService>();
+//builder.Services.AddHttpClient<APIWebSiteService>(client =>
+//{
+//    client.BaseAddress = new Uri("https://facilys.flixmail.fr");
+//});
+
+//builder.Services.AddSingleton<PageTitleService>();
+//builder.Services.AddScoped<VINDecoderService>();
+
+//// Ajouter le DbContextFactory
+//builder.Services.AddDbContextFactory<ApplicationDbContext>(ConfigureDbContext);
+
+//var app = builder.Build();
+
+//// Configure the HTTP request pipeline.
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+//    app.UseHsts();
+//}
+
+
+//// Initialisez la base de données avec l'utilisateur par défaut
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    DbInitializer.Initialize(services);
+//}
+
+//app.UseHttpsRedirection();
+
+//app.UseStaticFiles();
+//app.UseAntiforgery();
+
+//app.MapRazorComponents<Facilys.Components.App>()
+//    .AddInteractiveServerRenderMode();
+
+//// Créer la fenêtre Electron
+//async Task CreateElectronWindow()
+//{
+//    // Création d'une nouvelle fenêtre avec les options spécifiées
+//    var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
+//    {
+//        Width = 1200,
+//        Height = 800,
+//        Show = true, // Affiche la fenêtre directement
+//        //WebPreferences = new WebPreferences
+//        //{
+//        //    ContextIsolation = false, // Permet une meilleure interaction avec les scripts JS
+//        //    DevTools = true           // Activez si besoin de déboguer
+//        //}
+//    });
+
+//    // Vider le cache et recharger
+//    window.OnReadyToShow += () =>
+//    {
+//        var session = window.WebContents.Session;
+//        session.ClearCacheAsync(); // Efface le cache
+//    };
+
+//    // Nettoyer le cache et recharger la fenêtre
+//    await ClearCache();
+//    ReloadWindow(window);
+
+//    // Action lors de la fermeture de la fenêtre
+//    window.OnClosed += () => Electron.App.Quit();
+//}
+
+//void ReloadWindow(BrowserWindow? mainWindow)
+//{
+//    mainWindow?.Reload();
+//}
+
+//async Task ClearCache()
+//{
+//    var browserWindows = Electron.WindowManager.BrowserWindows;
+
+//    foreach (var window in browserWindows)
+//    {
+//        // Efface le cache de session pour chaque fenêtre
+//        await window.WebContents.Session.ClearCacheAsync();
+//    }
+//}
+
+//// Vérifiez si l'application s'exécute dans Electron
+//if (HybridSupport.IsElectronActive)
+//{
+//    // Crée le dossier avant de lancer la fenêtre Electron
+//    await AuthService.EnsureApplicationFolderExistsAsync();
+
+//    await Task.Run(async () =>
+//    {
+//        await CreateElectronWindow();
+//    });
+//}
+
+//app.Run();
+
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Facilys.Components.Data;
@@ -6,124 +136,106 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-    var facilysPath = Path.Combine(documentsPath, "Facilys");
-    var databasePath = Path.Combine(facilysPath, "Database");
-    var dbFilePath = Path.Combine(databasePath, "data.db");
-
-    Directory.CreateDirectory(databasePath);
-
-    options.UseSqlite($"Data Source={dbFilePath}");
-});
-
-
-// Configuer Electron
+// Configuration Electron
 builder.WebHost.UseElectron(args);
-//builder.WebHost.UseEnvironment("Development");
 builder.Services.AddElectron();
 
-// Add services to the container.
+// Configuration des services
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpContextAccessor();
 
+// Configuration de la base de données
+builder.Services.AddDbContextFactory<ApplicationDbContext>((services, options) =>
+{
+    var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+    var facilysPath = Path.Combine(documentsPath, "Facilys", "Database");
+    Directory.CreateDirectory(facilysPath);
+    options.UseSqlite($"Data Source={Path.Combine(facilysPath, "data.db")}");
+});
+
+// Services personnalisés
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8056/api/");
+    client.BaseAddress = new Uri("https://facilys.flixmail.fr");
 });
-
 builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-
-// Initialisez la base de données avec l'utilisateur par défaut
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    DbInitializer.Initialize(services);
-}
-
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<Facilys.Components.App>()
     .AddInteractiveServerRenderMode();
 
-// Créer la fenêtre Electron
-async Task CreateElectronWindow()
+// Initialisation de la base de données
+using (var scope = app.Services.CreateScope())
 {
-    // Création d'une nouvelle fenêtre avec les options spécifiées
-    var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.EnsureCreatedAsync();
+    DbInitializer.Initialize(scope.ServiceProvider);
+}
+
+// Gestion du mode Electron
+if (HybridSupport.IsElectronActive)
+{
+    await StartElectronApp(app);
+}
+else
+{
+    await app.RunAsync();
+}
+
+async Task StartElectronApp(WebApplication app)
+{
+    await app.StartAsync();
+
+    // Configuration de la fenêtre Electron
+    var mainWindow = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
     {
         Width = 1200,
         Height = 800,
-        Show = true, // Affiche la fenêtre directement
-        //WebPreferences = new WebPreferences
-        //{
-        //    ContextIsolation = false, // Permet une meilleure interaction avec les scripts JS
-        //    DevTools = true           // Activez si besoin de déboguer
-        //}
+        Show = true,
+        WebPreferences = new WebPreferences
+        {
+            NodeIntegration = true,
+            WebSecurity = false
+        }
     });
 
-    // Vider le cache et recharger
-    window.OnReadyToShow += () =>
+    mainWindow.SetTitle("Facilys Application");
+    mainWindow.OnReadyToShow += async () =>
     {
-        var session = window.WebContents.Session;
-        session.ClearCacheAsync(); // Efface le cache
+        await ClearCache();
+        mainWindow.Reload();
     };
 
-    // Nettoyer le cache et recharger la fenêtre
-    await ClearCache();
-    ReloadWindow(window);
+    mainWindow.OnClosed += () =>
+    {
+        Electron.App.Quit();
+        app.StopAsync().GetAwaiter().GetResult();
+    };
 
-    // Action lors de la fermeture de la fenêtre
-    window.OnClosed += () => Electron.App.Quit();
-}
-
-void ReloadWindow(BrowserWindow? mainWindow)
-{
-    mainWindow?.Reload();
+    Electron.App.WindowAllClosed += () => app.StopAsync().GetAwaiter().GetResult();
 }
 
 async Task ClearCache()
 {
-    var browserWindows = Electron.WindowManager.BrowserWindows;
-
-    foreach (var window in browserWindows)
+    foreach (var window in Electron.WindowManager.BrowserWindows)
     {
-        // Efface le cache de session pour chaque fenêtre
         await window.WebContents.Session.ClearCacheAsync();
+        await window.WebContents.Session.ClearStorageDataAsync();
     }
 }
-
-// Vérifiez si l'application s'exécute dans Electron
-if (HybridSupport.IsElectronActive)
-{
-    // Crée le dossier avant de lancer la fenêtre Electron
-    await AuthService.EnsureApplicationFolderExistsAsync();
-
-    await Task.Run(async () =>
-    {
-        await CreateElectronWindow();
-    });
-}
-
-
-
-app.Run();

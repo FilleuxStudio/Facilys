@@ -1,5 +1,7 @@
-﻿using Facilys.Components.Models;
+﻿using Facilys.Components.Data;
+using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
+using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +9,12 @@ namespace Facilys.Components.Pages
 {
     public partial class SettingCompany
     {
+        public string Email { get; set; }
         CompanySettings CompanySettings;
         readonly ModalManagerId modalManager = new();
         private string? PreviewImageBase64 { get; set; }
         private int? UserCount { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             await LoadDataHeader();
@@ -18,10 +22,19 @@ namespace Facilys.Components.Pages
 
         private async Task LoadDataHeader()
         {
-            CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
+            //CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
             CompanySettings ??= new();
 
             UserCount = await DbContext.Users.CountAsync();
+
+            if (CompanySettings.NameCompany == "" && CompanySettings.Siret == "")
+            {
+                var success = await APIWebSite.PostGetCompanyUserAsync(Email);
+                if (success.Success)
+                {
+                    CompanySettings = success.companySettings;
+                }
+            }
         }
 
         private async Task OnInputFileChange(InputFileChangeEventArgs e)

@@ -1,6 +1,7 @@
-﻿@page "/settingCompany"
+﻿@page "/settingCompany/{Email}"
 @rendermode InteractiveServer
 @inject ApplicationDbContext DbContext
+@inject APIWebSiteService APIWebSite
 @inject IJSRuntime JSRuntime
 @inject ILogger<SettingCompany> Logger
 

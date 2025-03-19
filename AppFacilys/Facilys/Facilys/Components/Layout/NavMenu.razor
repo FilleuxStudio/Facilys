@@ -79,7 +79,7 @@
                         <small class="text-muted px-2 pb-1 d-block">Compte</small>
                         <NavLink class="dropdown-item" href="@($"/profile/{cookieData.Id}")"><i class="las la-wallet fs-18 me-1 align-text-bottom"></i> Mon compte</NavLink>
                         <small class="text-muted px-2 py-1 d-block">Paramètre</small>
-                        <NavLink class="dropdown-item" href="/settingCompany"><i class="las la-cog fs-18 me-1 align-text-bottom"></i>Paramètres de sociète</NavLink>
+                        <NavLink class="dropdown-item" href="@($"/settingCompany/{cookieData.Email}")"><i class="las la-cog fs-18 me-1 align-text-bottom"></i>Paramètres de sociète</NavLink>
                         <a class="dropdown-item" href="pages-profile.html"><i class="las la-lock fs-18 me-1 align-text-bottom"></i> Sécurité</a>
                         <a class="dropdown-item" href="pages-faq.html"><i class="las la-question-circle fs-18 me-1 align-text-bottom"></i> Centre d'aide</a>
                         <div class="dropdown-divider mb-0"></div>

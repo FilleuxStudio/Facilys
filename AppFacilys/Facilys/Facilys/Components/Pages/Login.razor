@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using Facilys.Components.Constants
 @rendermode InteractiveServer
 @layout MainLayoutLogin
 @inject NavigationManager NavigationManager
@@ -82,8 +83,8 @@
         if (string.IsNullOrWhiteSpace(loginModel.Email))
         {
             errorMessage = "L'email est requis.";
-           // StateHasChanged();
-           // await InvokeAsync(StateHasChanged);
+            // StateHasChanged();
+            // await InvokeAsync(StateHasChanged);
             return;
         }
 
@@ -101,10 +102,11 @@
 
         try
         {
-             var user = await AuthService.AuthenticateAsync(loginModel.Email, loginModel.Password);
+            var user = await AuthService.AuthenticateAsync(loginModel.Email, loginModel.Password);
             if (user != null)
             {
                 // Redirigez l'utilisateur vers une page protégée ou tableau de bord
+                EnvironmentApp.EmailUserConnect = user.Email;
                 NavigationManager.NavigateTo("/dashboard", forceLoad: true);
             }
             else
