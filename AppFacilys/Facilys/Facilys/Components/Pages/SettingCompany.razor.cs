@@ -2,6 +2,7 @@
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ namespace Facilys.Components.Pages
 {
     public partial class SettingCompany
     {
+        [Parameter]
         public string Email { get; set; }
         CompanySettings CompanySettings;
         readonly ModalManagerId modalManager = new();
@@ -29,10 +31,10 @@ namespace Facilys.Components.Pages
 
             if (CompanySettings.NameCompany == "" && CompanySettings.Siret == "")
             {
-                var success = await APIWebSite.PostGetCompanyUserAsync(Email);
-                if (success.Success)
+                var (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
+                if (Success)
                 {
-                    CompanySettings = success.companySettings;
+                    CompanySettings = companySettings;
                 }
             }
         }

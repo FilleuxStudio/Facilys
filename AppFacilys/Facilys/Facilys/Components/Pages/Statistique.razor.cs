@@ -11,10 +11,10 @@ namespace Facilys.Components.Pages
         private float totaAmountAnnualInvoice = 0.0f, todayRevenue = 0.0f, monthlyRevenue = 0.0f, maxInvoice = 0.0f, minInvoice = 0.0f;
         private int totalInvoiceAvgMonth = 0;
         private List<InvoiceDto> RecentInvoice = [];
-        private double[] monthlyInvoiceTotals = new double[12];
+        private readonly double[] monthlyInvoiceTotals = new double[12];
         private int[] paymentData = [];
         private string[] paymentLabels = [];
-        public List<string> lastFiveYearsRevenue { get; set; } = new List<string>();
+        public List<string> LastFiveYearsRevenue { get; set; } = [];
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
@@ -33,7 +33,7 @@ namespace Facilys.Components.Pages
             var invoicesByYear = await DbContext.Invoices.Where(i => i.DateAdded.Year == DateTime.Now.Year).GroupBy(i => i.DateAdded.Month).Select(g => new { Month = g.Key, Count = g.Count() }).ToListAsync();
             await LoadDataInvoicesByMonth();
 
-            if (invoicesByYear.Any())
+            if (invoicesByYear.Count != 0)
             {
                 totalInvoiceAvgMonth = (int)invoicesByYear.Average(g => g.Count);
             }
@@ -95,12 +95,10 @@ namespace Facilys.Components.Pages
         .ToListAsync();
 
             // Remplir lastFiveYearsRevenue avec des chaînes formatées
-            lastFiveYearsRevenue = annualRevenues
-                .Select(x => $"{x.Year}:{x.TotalRevenue}")  // Formatage "Année: Revenu"
-                .ToList();
+            LastFiveYearsRevenue = [.. annualRevenues.Select(x => $"{x.Year}:{x.TotalRevenue}")];
         }
 
-        private string GetPaymentMethodLabel(PaymentMethod method)
+        private static string GetPaymentMethodLabel(PaymentMethod method)
         {
             return method switch
             {
@@ -155,7 +153,7 @@ namespace Facilys.Components.Pages
         {
             if (chartModule != null && isChartInitialized)
             {
-                await chartModule.InvokeVoidAsync("updateMonthlyIncomeData", new object[] { newData });
+                await chartModule.InvokeVoidAsync("updateMonthlyIncomeData", [newData]);
             }
         }
 

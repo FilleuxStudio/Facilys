@@ -40,7 +40,7 @@ namespace Facilys.Components.Services
                     Users userDb = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
 
                     if (userDb == null) {
-                       await SetUserWebAsync(result.UserData);
+                       SetUserWeb(result.UserData);
                         userDb = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
                     }
 
@@ -172,7 +172,7 @@ namespace Facilys.Components.Services
         }
 
 
-        public async Task SetUserWebAsync(UserData user)
+        public void SetUserWeb(UserData user)
         {
             var AddUserWeb = new Users
             {
@@ -204,7 +204,7 @@ namespace Facilys.Components.Services
             }
         }
 
-        public static async Task EnsureApplicationFolderExistsAsync()
+        public static void EnsureApplicationFolderExists()
         {
             // Obtient le chemin des documents utilisateur via Electron
             //var documentsPath = await Electron.App.GetPathAsync(PathName.Documents);

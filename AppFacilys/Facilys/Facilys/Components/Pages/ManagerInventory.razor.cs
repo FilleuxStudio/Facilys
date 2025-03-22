@@ -146,7 +146,7 @@ namespace Facilys.Components.Pages
             //StateHasChanged();
         }
 
-        private async Task<string> ConvertToBase64(IBrowserFile file)
+        private static async Task<string> ConvertToBase64(IBrowserFile file)
         {
             using var stream = file.OpenReadStream();
             using var memoryStream = new MemoryStream();

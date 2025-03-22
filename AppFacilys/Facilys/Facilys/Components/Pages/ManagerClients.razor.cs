@@ -17,7 +17,7 @@ namespace Facilys.Components.Pages
 
         private string currentPhone = string.Empty, currentEmail = string.Empty;
 
-        private async Task OpenGoogleMaps(string clientIndex)
+        private static async Task OpenGoogleMaps(string clientIndex)
         {
             Console.WriteLine($"Ouvrir Google Maps pour le client {clientIndex}...");
             await ElectronNET.API.Electron.Shell.OpenExternalAsync("https://www.google.com/maps");
@@ -55,8 +55,8 @@ namespace Facilys.Components.Pages
                 managerClienViewtLists.Add(new()
                 {
                     Client = client,
-                    EmailsClients = managerClientViewModel.EmailsClients.Where(c => c.Client.Id == client.Id).ToList(),
-                    PhonesClients = managerClientViewModel.PhonesClients.Where(c => c.Client.Id == client.Id).ToList(),
+                    EmailsClients = [.. managerClientViewModel.EmailsClients.Where(c => c.Client.Id == client.Id)],
+                    PhonesClients = [.. managerClientViewModel.PhonesClients.Where(c => c.Client.Id == client.Id)],
                     Vehicles = [.. managerClientViewModel.Vehicles.Where(c => c.Client.Id == client.Id)],
                 });
             }
@@ -262,7 +262,7 @@ namespace Facilys.Components.Pages
                 await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Phones WHERE IdClient = {0}", managerClientViewModel.Client.Id);
                 await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Emails WHERE IdClient = {0}", managerClientViewModel.Client.Id);
 
-                if (managerClientViewModel.PhonesClients.Any())
+                if (managerClientViewModel.PhonesClients.Count != 0)
                 {
                     foreach (var phone in managerClientViewModel.PhonesClients)
                     {
@@ -271,7 +271,7 @@ namespace Facilys.Components.Pages
                     await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
                 }
 
-                if (managerClientViewModel.EmailsClients.Any())
+                if (managerClientViewModel.EmailsClients.Count != 0)
                 {
                     foreach (var email in managerClientViewModel.EmailsClients)
                     {
@@ -289,7 +289,7 @@ namespace Facilys.Components.Pages
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                Logger.LogError(message: ex.Message, "Erreur lors de la mise à jour de la base de données");
             }
         }
 

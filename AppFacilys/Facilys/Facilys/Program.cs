@@ -7,8 +7,8 @@
 //var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddDbContext<ApplicationDbContext>(async options =>
 //{
-//    var documentsPath = await Electron.App.GetPathAsync(PathName.Documents);
-//    //var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+//    //var documentsPath = await Electron.App.GetPathAsync(PathName.Documents);
+//    var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 //    var facilysPath = Path.Combine(documentsPath, "Facilys");
 //    var databasePath = Path.Combine(facilysPath, "Database");
 //    var dbFilePath = Path.Combine(databasePath, "data.db");
@@ -39,7 +39,7 @@
 //builder.Services.AddScoped<VINDecoderService>();
 
 //// Ajouter le DbContextFactory
-//builder.Services.AddDbContextFactory<ApplicationDbContext>(ConfigureDbContext);
+//builder.Services.AddDbContextFactory<ApplicationDbContext>();
 
 //var app = builder.Build();
 
@@ -191,44 +191,52 @@ using (var scope = app.Services.CreateScope())
 // Gestion du mode Electron
 if (HybridSupport.IsElectronActive)
 {
-    await StartElectronApp(app);
+    AuthService.EnsureApplicationFolderExists();
+
+    await Task.Run(async () =>
+    {
+        await CreateElectronWindow();
+    });
+
+    await app.RunAsync(); // Démarrage ASP.NET Core après création fenêtre
 }
 else
 {
     await app.RunAsync();
 }
 
-async Task StartElectronApp(WebApplication app)
+async Task CreateElectronWindow()
 {
-    await app.StartAsync();
-
-    // Configuration de la fenêtre Electron
     var mainWindow = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
     {
         Width = 1200,
         Height = 800,
         Show = true,
+        Title = "Facilys Application",
         WebPreferences = new WebPreferences
         {
-            NodeIntegration = true,
-            WebSecurity = false
+            ContextIsolation = false
         }
     });
 
-    mainWindow.SetTitle("Facilys Application");
-    mainWindow.OnReadyToShow += async () =>
+    mainWindow.OnReadyToShow += () =>
     {
-        await ClearCache();
-        mainWindow.Reload();
+        mainWindow.WebContents.Session.ClearCacheAsync();
     };
+
+    await ClearCache();
 
     mainWindow.OnClosed += () =>
     {
         Electron.App.Quit();
+    };
+
+    Electron.App.WindowAllClosed += () =>
+    {
         app.StopAsync().GetAwaiter().GetResult();
     };
 
-    Electron.App.WindowAllClosed += () => app.StopAsync().GetAwaiter().GetResult();
+    mainWindow.Reload();
 }
 
 async Task ClearCache()
@@ -236,6 +244,6 @@ async Task ClearCache()
     foreach (var window in Electron.WindowManager.BrowserWindows)
     {
         await window.WebContents.Session.ClearCacheAsync();
-        await window.WebContents.Session.ClearStorageDataAsync();
+        await Task.Delay(100); // Pause pour la stabilité
     }
 }

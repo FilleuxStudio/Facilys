@@ -16,7 +16,7 @@ namespace Facilys.Components.Pages
         readonly ModalManagerId modalManager = new();
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
-        VehicleRegistrationDocumentAnalyzer documentAnalyzer = new();
+        readonly VehicleRegistrationDocumentAnalyzer documentAnalyzer = new();
         bool ViewRawOCRData = false;
 
         protected override async Task OnInitializedAsync()

@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishReadyToRun>true</PublishReadyToRun>
+    <!--<PublishSingleFile>false</PublishSingleFile>-->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- Ajouté pour la compatibilité Electron/Node.js -->
     <PlatformTarget>x64</PlatformTarget>
     <RestoreUseSkipNonexistentTargets>false</RestoreUseSkipNonexistentTargets>
@@ -20,12 +21,12 @@
    <!-- <PackageReference Include="ElectronNET.CLI" Version="23.6.2" PrivateAssets="all" />-->
 
     <!-- Blazor -->
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.14" />
 
     <!-- Entity Framework -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.13">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.14">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
