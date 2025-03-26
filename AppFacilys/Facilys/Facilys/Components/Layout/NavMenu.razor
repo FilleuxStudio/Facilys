@@ -81,7 +81,7 @@
                         <small class="text-muted px-2 py-1 d-block">Paramètre</small>
                         <NavLink class="dropdown-item" href="@($"/settingCompany/{cookieData.Email}")"><i class="las la-cog fs-18 me-1 align-text-bottom"></i>Paramètres de sociète</NavLink>
                         <a class="dropdown-item" href="pages-profile.html"><i class="las la-lock fs-18 me-1 align-text-bottom"></i> Sécurité</a>
-                        <a class="dropdown-item" href="pages-faq.html"><i class="las la-question-circle fs-18 me-1 align-text-bottom"></i> Centre d'aide</a>
+                        <NavLink class="dropdown-item" href="/helpers"><i class="las la-question-circle fs-18 me-1 align-text-bottom"></i> Centre d'aide</NavLink>
                         <div class="dropdown-divider mb-0"></div>
                         <a class="dropdown-item text-danger" href="#" @onclick="LogoutAndCloseApp"><i class="las la-power-off fs-18 me-1 align-text-bottom"></i> Fermer</a>
                     </div>

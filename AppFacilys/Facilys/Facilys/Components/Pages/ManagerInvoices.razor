@@ -56,42 +56,45 @@
                         <tbody>
                             @foreach (var invoice in managerInvoiceViewModel.Invoices)
                             {
-                                <tr>
-                                    <td>@invoice.InvoiceNumber</td>
-                                    <td>
-                                        <p class="d-inline-block align-middle mb-0">
-                                            @if(invoice.Vehicle != null){
-                                                <span class="d-block align-middle mb-0 product-name text-body">@invoice.Vehicle.Immatriculation</span>
-                                                <span class="text-muted font-13">@invoice.Vehicle.Mark</span>
-                                            }else{
-                                                <span class="d-block align-middle mb-0 product-name text-body">@invoice.OtherVehicle.Mark</span>
-                                                <span class="text-muted font-13">@invoice.OtherVehicle.SerialNumber</span>
+                                    <tr>
+                                        <td>@invoice.InvoiceNumber</td>
+                                        <td>
+                                            <p class="d-inline-block align-middle mb-0">
+                                            @if (invoice.Vehicle != null)
+                                            {
+                                                        <span class="d-block align-middle mb-0 product-name text-body">@invoice.Vehicle.Immatriculation</span>
+                                                        <span class="text-muted font-13">@invoice.Vehicle.Mark</span>
                                             }
-                                            
-                                        </p>
-                                    </td>
-                                    <td>@invoice.DateAdded</td>
-                                    <td>
-                                        <select class="form-select" @onchange="@(e => UpdatePayment(Enum.Parse<PaymentMethod>(e.Value.ToString()), invoice.Id))">
-                                            <option value="@invoice.Payment.ToString()">@invoice.Payment</option>
-                                            <option value="@PaymentMethod.BankCards.ToString()">Carte</option>
-                                            <option value="@PaymentMethod.CashPayment.ToString()">Espèces</option>
-                                            <option value="@PaymentMethod.BankTransfers.ToString()">Virement</option>
-                                            <option value="@PaymentMethod.PaymentByCheck.ToString()">Chèque</option>
-                                            <option value="@PaymentMethod.MobilePayment.ToString()">Paiement mobile</option>
-                                            <option value="@PaymentMethod.Cryptocurrencies.ToString()">Crypto-monnaies</option>
-                                            <option value="@PaymentMethod.NotInformed.ToString()">Pas informé</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success"><i class="fas fa-check me-1"></i> @invoice.Status</span>
-                                    </td>
-                                    <td>@invoice.TotalAmount.ToString("#.##") €</td>
-                                    <td class="text-end">
-                                        <a href="#"><i class="fas fa-print text-secondary fs-18"></i></a>
-                                        <a href="#"><i class="las la-trash-alt text-danger fs-18"></i></a>
-                                    </td>
-                                </tr>
+                                            else
+                                            {
+                                                        <span class="d-block align-middle mb-0 product-name text-body">@invoice.OtherVehicle.Mark</span>
+                                                        <span class="text-muted font-13">@invoice.OtherVehicle.SerialNumber</span>
+                                            }
+
+                                            </p>
+                                        </td>
+                                        <td>@invoice.DateAdded</td>
+                                        <td>
+                                            <select class="form-select" @onchange="@(e => UpdatePayment(Enum.Parse<PaymentMethod>(e.Value.ToString()), invoice.Id))">
+                                                <option value="@invoice.Payment.ToString()">@invoice.Payment</option>
+                                                <option value="@PaymentMethod.BankCards.ToString()">Carte</option>
+                                                <option value="@PaymentMethod.CashPayment.ToString()">Espèces</option>
+                                                <option value="@PaymentMethod.BankTransfers.ToString()">Virement</option>
+                                                <option value="@PaymentMethod.PaymentByCheck.ToString()">Chèque</option>
+                                                <option value="@PaymentMethod.MobilePayment.ToString()">Paiement mobile</option>
+                                                <option value="@PaymentMethod.Cryptocurrencies.ToString()">Crypto-monnaies</option>
+                                                <option value="@PaymentMethod.NotInformed.ToString()">Pas informé</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success"><i class="fas fa-check me-1"></i> @invoice.Status</span>
+                                        </td>
+                                        <td>@invoice.TotalAmount.ToString("#.##") €</td>
+                                        <td class="text-end">
+                                            <a href="#"><i class="fas fa-print text-secondary fs-18"></i></a>
+                                                <button type="button" @onclick="@(() => OpenModalData("OpenModaDeleteInvoice", invoice.Id))" class="btn btn-sm bg-danger-subtle text-danger"><i class="las la-trash-alt text-danger fs-18"></i></button>
+                                        </td>
+                                    </tr>
                             }
                         </tbody>
                     </table>
@@ -100,3 +103,30 @@
         </div>
     </div>
 </div> <!-- end col -->
+
+<div class="@modalManager.GetModal("OpenModaDeleteInvoice")?.ModalClass" id="OpenModaDeleteInvoice" tabindex="-1" role="dialog" aria-labelledby="OpenModaDeleteInvoiceLabel" style="@modalManager.GetModal("OpenModaDeleteInvoice")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModaDeleteInvoice")?.AriaHidden">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModaDeleteInvoiceLabel">Supprimer une facture : @managerInvoiceViewModel.Invoice.InvoiceNumber</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModaDeleteInvoice"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerInvoiceViewModel.Invoice" OnValidSubmit="SubmitDeleteInvoice" FormName="DeleteInvoiceForm">
+                    <p class="text-center">Si vous cliquez ici, seul la facture sera supprimé.</p>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-danger px-4">Supprimer</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div><!--end modal-body-->
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div>
+
+
+@if (modalManager.IsBackdropVisible)
+{
+            <div class="modal-backdrop fade show"></div>
+}

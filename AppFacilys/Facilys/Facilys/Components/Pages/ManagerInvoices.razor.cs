@@ -20,8 +20,9 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Gestion des factures";
             });
 
+            managerInvoiceViewModel.Invoice = new();
             await LoadDataHeader();
-
+            modalManager.RegisterModal("OpenModaDeleteInvoice");
         }
 
         private async Task LoadDataHeader()
@@ -29,16 +30,10 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.Invoices = await DbContext.Invoices.Include(v => v.Vehicle).Include(ov => ov.OtherVehicle).Take(10).OrderByDescending(d => d.DateAdded).ToListAsync();
         }
 
-        private async void OpenModal(string id)
+        private async void OpenModalData(string idModal, Guid idInvoice)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
-            modalManager.OpenModal(id);
-            StateHasChanged();
-        }
-
-        private async void OpenModalData(string idModal, Guid idUser)
-        {
-            await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
+            managerInvoiceViewModel.Invoice = await DbContext.Invoices.FindAsync(idInvoice);
             modalManager.OpenModal(idModal);
 
 
@@ -78,6 +73,35 @@ namespace Facilys.Components.Pages
             }
         }
 
+
+        private async Task SubmitDeleteInvoice()
+        {
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+
+               DbContext.Invoices.Remove(managerInvoiceViewModel.Invoice);
+                await DbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // Réinitialiser le formulaire et rafraîchir la liste des clients
+                ResetForm();
+                CloseModal("OpenModaDeleteInvoice");
+                await RefreshInvoiceList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données de facture");
+            }
+     
+        }
+
+        private async Task RefreshInvoiceList()
+        {
+            managerInvoiceViewModel.Invoices.Clear();
+            await LoadDataHeader();
+            await InvokeAsync(StateHasChanged);
+        }
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
