@@ -80,7 +80,6 @@
                         <NavLink class="dropdown-item" href="@($"/profile/{cookieData.Id}")"><i class="las la-wallet fs-18 me-1 align-text-bottom"></i> Mon compte</NavLink>
                         <small class="text-muted px-2 py-1 d-block">Paramètre</small>
                         <NavLink class="dropdown-item" href="@($"/settingCompany/{cookieData.Email}")"><i class="las la-cog fs-18 me-1 align-text-bottom"></i>Paramètres de sociète</NavLink>
-                        <a class="dropdown-item" href="pages-profile.html"><i class="las la-lock fs-18 me-1 align-text-bottom"></i> Sécurité</a>
                         <NavLink class="dropdown-item" href="/helpers"><i class="las la-question-circle fs-18 me-1 align-text-bottom"></i> Centre d'aide</NavLink>
                         <div class="dropdown-divider mb-0"></div>
                         <button type="button" class="dropdown-item text-danger" @onclick="LogoutAndCloseApp">
@@ -215,7 +214,7 @@
         try
         {
             cookieData = null;
-            AuthService.Logout(); // Assurez-vous que c'est une méthode asynchrone
+            await AuthService.LogoutAsync(); // Assurez-vous que c'est une méthode asynchrone
             NavigationManager.NavigateTo("/login", forceLoad: true);
         }
         catch (Exception ex)

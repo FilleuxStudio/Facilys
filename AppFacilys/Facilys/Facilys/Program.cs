@@ -192,7 +192,7 @@ using (var scope = app.Services.CreateScope())
 // Gestion du mode Electron
 if (HybridSupport.IsElectronActive)
 {
-    AuthService.EnsureApplicationFolderExists();
+   await AuthService.EnsureApplicationFolderExists();
 
     await Task.Run(async () =>
     {
