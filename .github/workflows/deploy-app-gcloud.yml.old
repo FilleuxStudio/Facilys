@@ -1,0 +1,47 @@
+name: Deploy Blazor Web App to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-to-cloud-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Vérifier le code source
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Configurer Google Cloud SDK
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    # 3. Authentification Docker avec Google Artifact Registry
+    - name: Authenticate Docker with Google Artifact Registry
+      run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
+
+    # 4. Construire l'image Docker de l'application
+    - name: Build Docker image
+      working-directory: AppFacilys/Facilys/Facilys
+      run: |
+        docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/blazor-repo/blazor-app:latest .
+
+    # 5. Pousser l'image vers Google Artifact Registry
+    - name: Push Docker image to Google Artifact Registry
+      run: |
+        docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/blazor-repo/blazor-app:latest
+
+    # 6. Déployer sur Cloud Run
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy blazor-app \
+          --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/blazor-repo/blazor-app:latest \
+          --platform managed \
+          --region ${{ secrets.GCP_REGION }} \
+          --allow-unauthenticated \
+          --port 8080

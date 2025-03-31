@@ -1,6 +1,6 @@
 const cookieConfig = require("../config/cookie-config");
 const jwt = require("jsonwebtoken");
-const argon2 = require("@node-rs/argon2");
+const bcrypt = require('bcrypt');
 const User = require("../models/user.model");
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
@@ -252,7 +252,7 @@ exports.accountAddTeam = async (req, res) => {
       fname: tfname,
       lname: tlname,
       type: ttype,
-      password: await argon2.hash(tpassword),
+      password: await bcrypt.hash(tpassword),
       team: userManager.companyName,
       manager: userManager.email,
       email: temail,

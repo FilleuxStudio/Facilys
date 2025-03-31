@@ -1,0 +1,60 @@
+name: Build and Deploy Electron.NET App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: [win, osx, linux]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Navigate to project directory
+      working-directory: AppFacilys/Facilys/Facilys
+      run: echo "Switched to project directory"
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.x'
+
+    - name: Install Electron.NET CLI
+      run: dotnet tool install ElectronNET.CLI --global
+
+    - name: Restore dependencies
+      working-directory: AppFacilys/Facilys/Facilys
+      run: dotnet restore
+
+    - name: Build Electron.NET App for ${{ matrix.platform }}
+      working-directory: AppFacilys/Facilys/Facilys
+      run: |
+        case ${{ matrix.platform }} in
+          win) electronize build /target win ;;
+          osx) electronize build /target osx ;;
+          linux) electronize build /target linux ;;
+        esac
+
+    - name: Copy files to server
+      if: ${{ success() }}
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "AppFacilys/Facilys/Facilys/bin/desktop/*"
+        target: "server/public/setup/"
+        strip_components: 1

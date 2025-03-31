@@ -1,0 +1,57 @@
+{
+  "executable": "Facilys",
+  "splashscreen": {
+    "imageFile": "wwwroot/assets/images/logo-light.png"
+  },
+  "name": "Facilys",
+  "author": "FilleuxStudio",
+  "singleInstance": true,
+  "environment": "Production",
+  "build": {
+    "appId": "com.facilys.app",
+    "productName": "Facilys",
+    "copyright": "Copyright © 2024 FilleuxStudio",
+    "compression": "maximum",
+    "asar": true,
+    "directories": {
+      "output": "bin/desktop",
+      "buildResources": "wwwroot"
+    },
+    "extraResources": [
+      {
+        "from": "wwwroot/",
+        "to": "wwwroot/",
+        "filter": ["**/*"]
+      }
+    ],
+    "files": [
+      "**/*",
+      "!**/node_modules/*",
+      "!*.map",
+      "!*.log",
+      "!*.md"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "wwwroot/favicon.ico",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "wwwroot/favicon.ico",
+      "category": "public.app-category.business"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "wwwroot/favicon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "wwwroot/favicon.ico",
+      "uninstallerIcon": "wwwroot/favicon.ico"
+    }
+  }
+}

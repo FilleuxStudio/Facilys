@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const cookieConfig = require("../config/cookie-config");
 const jwt = require("jsonwebtoken");
-const argon2 = require("@node-rs/argon2");
+const bcrypt = require('bcrypt');
 const { createCanvas } = require("canvas");
 const databaseService = require("../services/databaseService");
 
@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
     }
 
     // Comparer le mot de passe
-    const match = await argon2.verify(user.password, password);
+    const match = await bcrypt.compareSync(user.password, password);
 
     if (!match) {
       if (pathLink.link == undefined) {
@@ -118,8 +118,9 @@ exports.register = async (req, res) => {
 
   const checkTerm = transformCheckboxValue(req.body.checkTerm);
   try {
-    // Hachage du mot de passe avec Argon2
-    var hashedPassword = await argon2.hash(password);
+    // Hachage du mot de passe avec bcrypt
+    const saltRounds = 10; 
+    var hashedPassword = await bcrypt.hash(password, saltRounds);
     // Créer une instance de l'utilisateur
     const user = new User({
       companyName,
@@ -141,7 +142,7 @@ exports.register = async (req, res) => {
     if (checkTerm == true) {
       await user.save();
       const userId = user.id; 
-      const dbInfo = await databaseService.createUserDatabase(userId);
+      const dbInfo = await databaseService.createDatabase(userId);
 
       await user.updateMariaDBInfo(user.email, {
         user: dbInfo.user,

@@ -12,6 +12,7 @@
     <!-- Configuration Electron/Node.js -->
     <ElectronNodeVersion>22.13.0</ElectronNodeVersion>
     <ElectronDisableHttp2>true</ElectronDisableHttp2>
+    <ApplicationIcon>wwwroot\icon-256.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +31,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="MySql.Data" Version="8.4.0" />
 
     <!-- Autres dépendances -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -54,6 +56,7 @@
 
   <ItemGroup>
     <!-- Configuration Tesseract -->
+    <None Include="Components\Services\AuthService.cs" />
     <None Include="wwwroot\Tessdata\carte_grise.user-words" />
     <None Include="wwwroot\Tessdata\fra.traineddata" />
   </ItemGroup>

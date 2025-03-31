@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Data;
+﻿using Facilys.Components.Constants;
+using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Services;
@@ -35,6 +36,16 @@ namespace Facilys.Components.Pages
                 if (Success)
                 {
                     CompanySettings = companySettings;
+                    await SubmitUpdateOrAddCompany();
+                }
+                else
+                {
+                    EnvironmentApp.AccessToken = await APIWebSite.GetKeyAccessApp();
+                    (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
+                    if (Success)
+                    {
+                        CompanySettings = companySettings;
+                    }
                 }
             }
         }

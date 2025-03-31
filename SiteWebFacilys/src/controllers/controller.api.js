@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const Team = require("../models/team.model");
-const argon2 = require("@node-rs/argon2");
+const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const ConnectionPoolService = require("../services/connectionPoolService");
 
@@ -34,7 +34,7 @@ exports.login = async (req, res) => {
     }
 
     // Vérifiez le mot de passe
-    const match = await argon2.verify(user.password, password);
+    const match = await bcrypt.verify(user.password, password);
     if (!match) {
       return res.status(401).json({
         success: false,

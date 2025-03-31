@@ -1,7 +1,7 @@
 ﻿@inject PageTitleService PageTitleService
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
-
+@rendermode InteractiveServer
 <!--<div class="top-row ps-3 navbar navbar-dark">
 <div class="container-fluid">
 <a class="navbar-brand" href="">Facilys</a>
@@ -83,7 +83,9 @@
                         <a class="dropdown-item" href="pages-profile.html"><i class="las la-lock fs-18 me-1 align-text-bottom"></i> Sécurité</a>
                         <NavLink class="dropdown-item" href="/helpers"><i class="las la-question-circle fs-18 me-1 align-text-bottom"></i> Centre d'aide</NavLink>
                         <div class="dropdown-divider mb-0"></div>
-                        <a class="dropdown-item text-danger" href="#" @onclick="LogoutAndCloseApp"><i class="las la-power-off fs-18 me-1 align-text-bottom"></i> Fermer</a>
+                        <button type="button" class="dropdown-item text-danger" @onclick="LogoutAndCloseApp">
+                            <i class="las la-power-off fs-18 me-1 align-text-bottom"></i> Fermer
+                        </button>
                     </div>
                 </li>
             </ul><!--end topbar-nav-->
@@ -208,14 +210,23 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private async Task LogoutAndCloseApp()
+    {
+        try
+        {
+            cookieData = null;
+            AuthService.Logout(); // Assurez-vous que c'est une méthode asynchrone
+            NavigationManager.NavigateTo("/login", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors de la déconnexion : {ex.Message}");
+        }
+    }
+
     public void Dispose()
     {
         // Désabonne pour éviter des références fantômes
         PageTitleService.TitleChanged -= OnTitleChanged;
-    }
-
-    public async Task LogoutAndCloseApp(){
-        cookieData = null;
-        await AuthService.LogoutAsync();
     }
 }

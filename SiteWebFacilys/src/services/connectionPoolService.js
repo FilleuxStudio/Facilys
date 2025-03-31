@@ -14,7 +14,9 @@ class ConnectionPoolService {
         user: user.mariadbUser,
         password: user.mariadbPassword,
         database: user.mariadbDb,
-        connectionLimit: 5
+        connectionLimit: 10,
+        acquireTimeout: 10000,
+        validateConnection: true 
       });
       this.pools.set(user.email, pool);
     }

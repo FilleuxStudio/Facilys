@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models;
+﻿using ElectronNET.API;
+using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Microsoft.AspNetCore.Components;
@@ -16,12 +17,6 @@ namespace Facilys.Components.Pages
         Guid selectClient = Guid.Empty;
 
         private string currentPhone = string.Empty, currentEmail = string.Empty;
-
-        private static async Task OpenGoogleMaps(string clientIndex)
-        {
-            Console.WriteLine($"Ouvrir Google Maps pour le client {clientIndex}...");
-            await ElectronNET.API.Electron.Shell.OpenExternalAsync("https://www.google.com/maps");
-        }
 
         protected override async Task OnInitializedAsync()
         {
@@ -41,6 +36,7 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalLargeEditClient");
             modalManager.RegisterModal("OpenModalLargeDeleteClient");
             modalManager.RegisterModal("OpenModalLargeAddVehicle");
+            modalManager.RegisterModal("OpenModaInfoVehicles");
         }
 
         private async Task LoadDataHeader()
@@ -63,6 +59,26 @@ namespace Facilys.Components.Pages
 
         }
 
+        private static Task OpenGoogleMaps(string clientIndex)
+        {
+            var url = "https://www.google.com/maps";
+
+            if (HybridSupport.IsElectronActive)
+            {
+                // Mode Electron (application desktop)
+                return ElectronNET.API.Electron.Shell.OpenExternalAsync(url);
+            }
+            else
+            {
+                // Mode Web (Cloud Run) - Ouvre dans un nouvel onglet
+                return Task.FromResult(() =>
+                {
+                    // Ce code sera exécuté côté client via JavaScript
+                    Console.WriteLine($"Redirection JS vers: {url}");
+                });
+            }
+        }
+
         /// <summary>
         /// Ouvre un modal sans données supplémentaires.
         /// </summary>
@@ -71,6 +87,10 @@ namespace Facilys.Components.Pages
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             modalManager.OpenModal(id);
+            managerClientViewModel.Client = new();
+            managerClientViewModel.VehicleClient = new();
+            managerClientViewModel.PhonesClients = [];
+            managerClientViewModel.EmailsClients = [];
             StateHasChanged();
         }
 
@@ -78,14 +98,28 @@ namespace Facilys.Components.Pages
         /// Ouvre un modal avec des données spécifiques à un utilisateur.
         /// </summary>
         /// <param name="idModal">L'identifiant du modal à ouvrir.</param>
-        /// <param name="idUser">L'identifiant de l'utilisateur dont les données doivent être chargées.</param>
-        private async void OpenModalData(string idModal, Guid idUser)
+        /// <param name="idClient">L'identifiant de l'utilisateur dont les données doivent être chargées.</param>
+        private async void OpenModalData(string idModal, Guid idClient)
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             modalManager.OpenModal(idModal);
-            managerClientViewModel.Client = await DbContext.Clients.Where(i => i.Id == idUser).FirstOrDefaultAsync();
-            managerClientViewModel.EmailsClients = await DbContext.Emails.Include(c => c.Client).Where(u => u.Client.Id == idUser).ToListAsync();
-            managerClientViewModel.PhonesClients = await DbContext.Phones.Include(c => c.Client).Where(u => u.Client.Id == idUser).ToListAsync();
+            managerClientViewModel.Client = await DbContext.Clients.Where(i => i.Id == idClient).FirstOrDefaultAsync();
+            managerClientViewModel.EmailsClients = await DbContext.Emails.Include(c => c.Client).Where(u => u.Client.Id == idClient).ToListAsync();
+            managerClientViewModel.PhonesClients = await DbContext.Phones.Include(c => c.Client).Where(u => u.Client.Id == idClient).ToListAsync();
+            StateHasChanged();
+        }
+
+        /// <summary>
+        /// Ouvre un modal avec les données véhicules associé à un utilisateur.
+        /// </summary>
+        /// <param name="idModal"></param>
+        /// <param name="idClient"></param>
+        private async void OpenModalDataVehicle(string idModal, Guid idClient)
+        {
+            await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
+            modalManager.OpenModal(idModal);
+            managerClientViewModel.Client = await DbContext.Clients.Where(i => i.Id == idClient).FirstOrDefaultAsync();
+            managerClientViewModel.Vehicles = await DbContext.Vehicles.Include(c => c.Client).Where(u => u.Client.Id == idClient) .ToListAsync();
             StateHasChanged();
         }
 

@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
 @inject ApplicationDbContext DbContext
+@inject DynamicMySQLService MySQLService
+
 <PageTitle>Dashboard</PageTitle>
 
 @if(settingEmpty == false){
@@ -172,6 +174,11 @@
     List<TopVehicle> TopVehicleData = new();
     List<TopClient> TopClientData = new();
 
+    // private string server = "facilys.flixmail.fr";
+    // private string database = "jmaqmsnt_facilys_database_dev";
+    // private string userId = "jmaqmsnt_devuser";
+    // private string password = "nPo@*:1leX";
+
     protected override async void OnInitialized()
     {
         //StateHasChanged();
@@ -183,8 +190,27 @@
 
         await LoadDataHeader();
 
+        // try
+        // {
+        //     MySQLService.InitializeConnection(server, database, userId, password);
+        // }
+        // catch (Exception ex)
+        // {
+        // }
+
         StateHasChanged();
     }
+
+    // private async Task TestConnection()
+    // {
+    //     try
+    //     {
+    //         var isConnected = await MySQLService.TestConnectionAsync();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //     }
+    // }
 
     private async Task LoadDataHeader()
     {

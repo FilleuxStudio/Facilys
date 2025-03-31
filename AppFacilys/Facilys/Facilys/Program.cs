@@ -163,6 +163,7 @@ builder.Services.AddHttpClient<APIWebSiteService>(client =>
 });
 builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
+builder.Services.AddSingleton<DynamicMySQLService>();
 
 var app = builder.Build();
 
@@ -212,6 +213,8 @@ async Task CreateElectronWindow()
         Width = 1200,
         Height = 800,
         Show = true,
+        AutoHideMenuBar = true,
+        Icon = "wwwroot/icon-256.ico",
         Title = "Facilys Application",
         WebPreferences = new WebPreferences
         {

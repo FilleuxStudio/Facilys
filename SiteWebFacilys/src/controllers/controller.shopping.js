@@ -1,6 +1,6 @@
 const cookieConfig = require("../config/cookie-config");
 const jwt = require("jsonwebtoken");
-const argon2 = require("@node-rs/argon2");
+const bcrypt = require('bcrypt');
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
 

@@ -1,67 +1,93 @@
 const mariadb = require('mariadb');
+const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
 
 class DatabaseService {
   constructor() {
-    this.pool = mariadb.createPool({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      connectionLimit: 5
-    });
+    this.apiKey = process.env.PLANETHOSTER_API_KEY;
+    this.apiUser = process.env.PLANETHOSTER_API_USER;
+    this.baseUrl = 'https://api.planethoster.net/v3'; // Assurez-vous d'utiliser la bonne version de l'API
   }
 
-  async getConnection() {
-    return await this.pool.getConnection();
-  }
+  async createDatabase(userId) {
+    const dbName = `user_${userId}_db`;
+    const dbUser = `user_${userId}`;
+    const dbPassword = this.generateSecurePassword();
 
-  async createUserDatabase(userId) {
-    let conn;
+    const endpoint = `${this.baseUrl}/databases`;
+
+    const data = {
+      name: dbName,
+      username: dbUser,
+      password: dbPassword,
+      type: 'mariadb' // ou 'mysql' selon votre besoin
+    };
+
+    const headers = {
+      'X-API-KEY': this.apiKey,
+      'X-API-USER': this.apiUser,
+      'Content-Type': 'application/json'
+    };
+
     try {
-      conn = await this.getConnection();
-      const dbName = `user_${userId}_db`;
-      const mariadbUser = `user_${userId}`;
-      const mariadbPassword = this.generateSecurePassword();
+      const response = await axios.post(endpoint, data, { headers: headers });
 
-      // Échappement des éléments dynamiques
-      const dbNameEscaped = conn.escapeId(dbName);
-      const userEscaped = conn.escape(mariadbUser);
-      const passwordEscaped = conn.escape(mariadbPassword);
+      if (response.status === 200 || response.status === 201) {
+        console.log('Base de données créée avec succès via PlanetHoster API');
 
-      await conn.query(`CREATE DATABASE IF NOT EXISTS ${dbNameEscaped}`);
-      await conn.query(`CREATE USER ${userEscaped}@'%' IDENTIFIED BY ${passwordEscaped}`);
-      await conn.query(`GRANT ALL PRIVILEGES ON ${dbNameEscaped}.* TO ${userEscaped}@'%'`);
-      await conn.query('FLUSH PRIVILEGES');
+        // Exécuter le script SQL sur la base nouvellement créée
+        await this.executeSQLScript({
+          host: process.env.DB_HOST, // L'hôte du serveur MariaDB/MySQL
+          user: dbUser,
+          password: dbPassword,
+          database: dbName
+        });
 
-      await this.executeSQLScript(conn, dbName);
-
-      return {
-        name: dbName,
-        user: mariadbUser,
-        password: mariadbPassword
-      };
+        return {
+          name: dbName,
+          user: dbUser,
+          password: dbPassword
+        };
+      } else {
+        console.error('Erreur lors de la création de la base de données via PlanetHoster API:', response.data);
+        throw new Error(`Erreur API: ${response.data.message}`);
+      }
     } catch (error) {
-      console.error('Erreur lors de la création de la base de données utilisateur:', error);
+      console.error('Erreur lors de l\'appel à l\'API PlanetHoster:', error);
       throw error;
-    } finally {
-      if (conn) conn.release();
     }
   }
 
-  async executeSQLScript(conn, dbName) {
-    const scriptPath = path.join(__dirname, '..', 'sql', 'init_db.sql');
-    const sqlScript = await fs.readFile(scriptPath, 'utf8');
+  async executeSQLScript(connectionConfig) {
+    let conn;
 
-    await conn.query(`USE ${conn.escapeId(dbName)}`);
-    const statements = sqlScript.split(/;\s*(?=CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT)/i)
-                               .filter(statement => statement.trim() !== '');
-    
-    for (const statement of statements) {
-      if (statement.trim()) {
-        await conn.query(statement);
+    try {
+      // Charger le script SQL
+      const scriptPath = path.join(__dirname, '..', 'sql', 'init_db.sql');
+      const sqlScript = await fs.readFile(scriptPath, 'utf8');
+
+      // Établir une connexion à la base de données
+      conn = await mariadb.createConnection(connectionConfig);
+
+      // Diviser le script en instructions SQL individuelles
+      const statements = sqlScript.split(/;\s*(?=CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT)/i)
+                                  .filter(statement => statement.trim() !== '');
+
+      // Exécuter chaque instruction SQL individuellement
+      for (const statement of statements) {
+        if (statement.trim()) {
+          await conn.query(statement);
+        }
       }
+
+      console.log('Script SQL exécuté avec succès sur la base de données:', connectionConfig.database);
+    } catch (error) {
+      console.error('Erreur lors de l\'exécution du script SQL:', error);
+      throw error;
+    } finally {
+      if (conn) await conn.end(); // Fermer la connexion
     }
   }
 
@@ -70,7 +96,7 @@ class DatabaseService {
   }
 
   async close() {
-    await this.pool.end();
+    console.log('Fermeture du service de base de données (API)');
   }
 }
 
