@@ -57,7 +57,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libgbm-dev libasound2 p7zip-full
+          sudo apt-get install -y build-essential libasound2t64 libgbm-dev p7zip-full
 
       - name: Build Electron app
         working-directory: temp_build/Facilys
