@@ -132,6 +132,8 @@ using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Facilys.Components.Data;
 using Facilys.Components.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -141,10 +143,21 @@ builder.WebHost.UseElectron(args);
 builder.Services.AddElectron();
 
 // Configuration des services
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddHttpContextAccessor();
+
+
+// Ajout de la gestion des sessions et du cache en mémoire
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(30); // Durée de session de 30 jours
+    options.Cookie.HttpOnly = true; // Empêche l'accès au cookie via JavaScript
+    options.Cookie.IsEssential = true; // Le cookie est essentiel pour l'application
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
+});
+
 
 // Configuration de la base de données
 builder.Services.AddDbContextFactory<ApplicationDbContext>((services, options) =>
@@ -156,6 +169,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>((services, options) =
 });
 
 // Services personnalisés
+builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {
@@ -173,6 +187,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+app.UseRouting(); 
+app.UseSession();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -192,7 +209,7 @@ using (var scope = app.Services.CreateScope())
 // Gestion du mode Electron
 if (HybridSupport.IsElectronActive)
 {
-   await AuthService.EnsureApplicationFolderExists();
+    await AuthService.EnsureApplicationFolderExists();
 
     await Task.Run(async () =>
     {

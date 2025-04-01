@@ -1,10 +1,11 @@
 ﻿@page "/login"
+@layout MainLayoutLogin
 @using Facilys.Components.Constants
 @rendermode InteractiveServer
-@layout MainLayoutLogin
+@inject PageTitleService PageTitleService
+@inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
-@inject APIWebSiteService ApiService
 
 <div class="container-xxl">
     <div class="row vh-100 d-flex justify-content-center">

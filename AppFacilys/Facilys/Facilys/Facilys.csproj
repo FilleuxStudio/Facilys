@@ -67,8 +67,4 @@
     <None Remove="**\*.user" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Controllers\" />
-  </ItemGroup>
-
 </Project>

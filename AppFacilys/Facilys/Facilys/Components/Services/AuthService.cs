@@ -316,33 +316,36 @@ using ElectronNET.API.Entities;
 using Facilys.Components.Constants;
 using Facilys.Components.Data;
 using Facilys.Components.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using OpenCvSharp;
 using System;
 using System.IO;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace Facilys.Components.Services
 {
     public class AuthService
     {
-        private const string CookieName = "FacilysAuthCookie";
         private const string CookieFileName = "cookieConnect.json";
-        private const int CookieValidityDays = 30;
-        private CookieData cookieUserConnect;
         private readonly ApplicationDbContext _context;
         private readonly APIWebSiteService _webSiteService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ProtectedLocalStorage _localStorage;
+        public CookieData _cookieData { get; set; } = new();
 
-        public AuthService(ApplicationDbContext context, APIWebSiteService webSiteService, IHttpContextAccessor httpContextAccessor)
+        public AuthService(ApplicationDbContext context, APIWebSiteService webSiteService, ProtectedLocalStorage localStorage)
         {
             _context = context;
             _webSiteService = webSiteService;
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _localStorage = localStorage;
         }
 
         public async Task<Users> AuthenticateAsync(string email, string password)
@@ -371,39 +374,6 @@ namespace Facilys.Components.Services
             return null;
         }
 
-        public static async Task EnsureApplicationFolderExists()
-        {
-            // Obtient le chemin des documents utilisateur via Electron
-            var documentsPath = await GetAppDataPathAsync();
-
-            // Combine le chemin pour inclure le dossier "Facilys"
-            var facilysFolderPath = Path.Combine(documentsPath, "Facilys");
-
-            // Vérifie si le dossier existe, sinon le crée
-            if (!Directory.Exists(facilysFolderPath))
-            {
-                Directory.CreateDirectory(facilysFolderPath);
-            }
-        }
-
-
-        /// <summary>
-        /// Vérifie si l'utilisateur est authentifié en chargeant et validant les données du cookie.
-        /// </summary>
-        public async Task<bool> IsAuthenticatedAsync()
-        {
-            if (string.IsNullOrEmpty(EnvironmentApp.AccessToken))
-            {
-                var token = await _webSiteService.GetKeyAccessApp();
-                EnvironmentApp.AccessToken = token;
-            }
-
-            var cookieData = await LoadCookieDataAsync();
-            return cookieData != null &&
-                   cookieData.IsConnected &&
-                   DateTime.UtcNow < cookieData.ExpirationDate;
-        }
-
         /// <summary>
         /// Authentifie l'utilisateur en créant et sauvegardant un nouveau cookie.
         /// </summary>
@@ -415,60 +385,11 @@ namespace Facilys.Components.Services
                 Login = user.Login,
                 Email = user.Email,
                 IsConnected = true,
-                ExpirationDate = DateTime.UtcNow.AddDays(CookieValidityDays),
+                ExpirationDate = DateTime.UtcNow.AddDays(30),
                 Key = GenerateSha256(user.Email + DateTime.UtcNow.Ticks)
             };
-            cookieUserConnect = cookieData;
+            _cookieData = cookieData;
             await SaveCookieDataAsync(cookieData);
-        }
-
-        public async Task<CookieData> GetAuthenticatedAsync()
-        {
-            cookieUserConnect = await LoadCookieDataAsync();
-            return cookieUserConnect;
-        }
-
-        /// <summary>
-        /// Déconnecte l'utilisateur en supprimant les données du cookie.
-        /// </summary>
-        public async Task LogoutAsync()
-        {
-            if (!HybridSupport.IsElectronActive)
-            {
-                _httpContextAccessor.HttpContext?.Response.Cookies.Delete(CookieName);
-            }
-            await DeleteCookieDataAsync();
-        }
-
-        /// <summary>
-        /// Charge les données du cookie.
-        /// Pour Electron, on lit le fichier JSON local, sinon on récupère le cookie du navigateur.
-        /// </summary>
-        private async Task<CookieData> LoadCookieDataAsync()
-        {
-            if (HybridSupport.IsElectronActive)
-            {
-                var appDataPath = await GetAppDataPathAsync();
-                var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
-                if (!File.Exists(filePath))
-                    return null;
-                var json = await File.ReadAllTextAsync(filePath);
-                return JsonSerializer.Deserialize<CookieData>(json);
-            }
-            else
-            {
-                var cookie = _httpContextAccessor.HttpContext?.Request.Cookies[CookieName];
-                if (string.IsNullOrEmpty(cookie))
-                    return null;
-                try
-                {
-                    return JsonSerializer.Deserialize<CookieData>(cookie);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
         }
 
         /// <summary>
@@ -500,44 +421,93 @@ namespace Facilys.Components.Services
                     throw;
                 }
             }
-            else
-            {
-                try
-                {
-                    var json = JsonSerializer.Serialize(cookieData);
-                    var cookieOptions = new CookieOptions
-                    {
-                        Expires = cookieData.ExpirationDate,
-                        HttpOnly = true,
-                        Secure = false,
-                        SameSite = SameSiteMode.Strict
-                    };
+            await _localStorage.SetAsync("cookieData", _cookieData);
+        }
 
-                    var response = _httpContextAccessor.HttpContext?.Response;
-                    if (response != null)
-                    {
-                        if (!response.HasStarted)
-                        {
-                            response.Cookies.Append(CookieName, json, cookieOptions);
-                        }
-                        else
-                        {
-                            // Ajoute le cookie juste avant que la réponse ne soit envoyée
-                            response.OnStarting(() =>
-                            {
-                                response.Cookies.Append(CookieName, json, cookieOptions);
-                                return Task.CompletedTask;
-                            });
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Erreur lors de la sauvegarde du cookie HTTP : {ex.Message}");
-                    throw;
-                }
+        public static async Task EnsureApplicationFolderExists()
+        {
+            // Obtient le chemin des documents utilisateur via Electron
+            var documentsPath = await GetAppDataPathAsync();
+
+            // Combine le chemin pour inclure le dossier "Facilys"
+            var facilysFolderPath = Path.Combine(documentsPath, "Facilys");
+
+            // Vérifie si le dossier existe, sinon le crée
+            if (!Directory.Exists(facilysFolderPath))
+            {
+                Directory.CreateDirectory(facilysFolderPath);
             }
         }
+
+
+        /// <summary>
+        /// Vérifie si l'utilisateur est authentifié en chargeant et validant les données du cookie.
+        /// </summary>
+        public async Task<bool> IsAuthenticatedAsync()
+        {
+            if (string.IsNullOrEmpty(EnvironmentApp.AccessToken))
+            {
+                var token = await _webSiteService.GetKeyAccessApp();
+                EnvironmentApp.AccessToken = token;
+            }
+
+            var cookieData = await GetAuthenticatedAsync();
+            return cookieData != null &&
+                   cookieData.IsConnected &&
+                   DateTime.UtcNow < cookieData.ExpirationDate;
+        }
+
+        /// <summary>
+        /// Déconnecte l'utilisateur en supprimant les données du cookie.
+        /// </summary>
+        public async Task LogoutAsync()
+        {
+            if (HybridSupport.IsElectronActive)
+            {
+                await DeleteCookieDataAsync();
+            }
+
+            _cookieData = new CookieData();
+            await _localStorage.DeleteAsync("cookieData");
+        }
+
+        /// <summary>
+        /// Charge les données du cookie.
+        /// Pour Electron, on lit le fichier JSON local, sinon on récupère le cookie du navigateur.
+        /// </summary>
+        public async Task<CookieData> GetAuthenticatedAsync()
+        {
+            try
+            {
+                if (HybridSupport.IsElectronActive)
+                {
+                    var appDataPath = await GetAppDataPathAsync();
+                    var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
+
+                    if (!File.Exists(filePath))
+                        return null;
+
+                    string json = await File.ReadAllTextAsync(filePath);
+                    if (string.IsNullOrWhiteSpace(json))
+                        return null;
+
+                    return JsonSerializer.Deserialize<CookieData>(json);
+                }
+
+                var result = await _localStorage.GetAsync<CookieData>("cookieData");
+                if (result.Success)
+                {
+                    return _cookieData = result.Value;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Erreur inattendue lors du chargement des cookies : {ex.Message}");
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// Supprime les données du cookie.
@@ -560,10 +530,6 @@ namespace Facilys.Components.Services
                     Console.Error.WriteLine($"Erreur lors de la suppression du cookie : {ex.Message}");
                     throw;
                 }
-            }
-            else
-            {
-                _httpContextAccessor.HttpContext?.Response.Cookies.Delete(CookieName);
             }
         }
 

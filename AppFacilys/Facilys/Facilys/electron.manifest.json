@@ -1,20 +1,26 @@
 {
   "executable": "Facilys",
   "splashscreen": {
-    "imageFile": ""
+    "imageFile": "wwwroot/assets/images/logo-light.png"
   },
   "name": "Facilys",
-  "author": "",
+  "author": "FilleuxStudio",
   "singleInstance": false,
   "environment": "Production",
   "build": {
     "appId": "com.Facilys.app",
     "productName": "Facilys",
-    "copyright": "Copyright © 2025",
+    "copyright": "Copyright © 2025 FilleuxStudio",
     "buildVersion": "1.0.0",
     "compression": "maximum",
     "directories": {
       "output": "../../../bin/Desktop"
+    },
+    "win": {
+      "icon": "../../../wwwroot/icon-256.ico"
+    },
+    "linux": {
+      "icon": "../../../wwwroot/icon-256/png"
     },
     "extraResources": [
       {
@@ -30,15 +36,6 @@
         "filter": [ "**/*" ]
       },
       "**/*"
-    ],
-    "win": {
-      "icon": "wwwroot/assets/images/favicon.ico"
-    },
-    "mac": {
-      "icon": "../../../Assets/app-icon.icns"
-    },
-    "linux": {
-      "icon": "../../../Assets/app-icon.png"
-    }
+    ]
   }
 }

@@ -97,7 +97,7 @@ secrets.json
 **/bin/electron
 **/obj/electron
 **/ElectronHostHook
-electron.manifest.json
+#electron.manifest.json
 
 # Fichiers de build Electron
 **/release-builds
