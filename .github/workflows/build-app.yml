@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir -p temp_build
           cp -r AppFacilys/Facilys/Facilys/ temp_build/
-          ls -l temp_build
+          ls -all temp_build
         shell: bash
 
       - name: Install Electron.NET CLI
@@ -67,14 +67,24 @@ jobs:
           dotnet restore
           electronize build /target ${{ matrix.platform }}
 
+      - name: Verify build output
+        working-directory: temp_build/Facilys/bin/desktop
+        run: |
+          echo "Contenu du répertoire :"
+          ls -la
+          if [ ! -d "${{ matrix.outputFolder }}" ]; then
+            echo "ERREUR: Dossier ${{ matrix.outputFolder }} introuvable!"
+            exit 1
+          fi
+
       - name: Package artifacts
         working-directory: temp_build/Facilys/bin/desktop
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            7z a -r ${{ matrix.zipFile }} ${{ matrix.outputFolder }}/*
-          else
+           if [ "${{ runner.os }}" = "Linux" ]; then
+            7z a -r ${{ matrix.zipFile }} ./${{ matrix.outputFolder }}/*
+           else
             powershell "Compress-Archive -Path '.\${{ matrix.outputFolder }}\*' -DestinationPath '.\${{ matrix.zipFile }}'"
-          fi
+           fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
