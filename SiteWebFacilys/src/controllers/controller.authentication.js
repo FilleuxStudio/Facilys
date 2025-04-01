@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const cookieConfig = require("../config/cookie-config");
 const jwt = require("jsonwebtoken");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const { createCanvas } = require("canvas");
 const databaseService = require("../services/databaseService");
 
@@ -39,7 +39,11 @@ exports.login = async (req, res) => {
       if (pathLink.link == undefined) {
         res.redirect("/login");
       } else {
-        res.redirect("/shop-checkout?id=" + req.body.idProduct + "&message=Email ou mot de passe incorrect.");
+        res.redirect(
+          "/shop-checkout?id=" +
+            req.body.idProduct +
+            "&message=Email ou mot de passe incorrect."
+        );
       }
     }
 
@@ -70,7 +74,11 @@ exports.login = async (req, res) => {
     if (pathLink.link == undefined) {
       res.redirect("/account");
     } else {
-      res.redirect("/shop-checkout?id=" + req.body.idProduct + "&message=Vous êtes connecté.");
+      res.redirect(
+        "/shop-checkout?id=" +
+          req.body.idProduct +
+          "&message=Vous êtes connecté."
+      );
     }
   } catch (err) {
     console.error("Erreur lors de la connexion :", err);
@@ -84,15 +92,15 @@ exports.logout = (req, res) => {
     if (err) {
       console.error("Erreur lors de la destruction de la session:", err);
     }
-    
+
     // Supprimer le cookie de session
     res.clearCookie("connect.sid", { path: "/" });
-    
+
     // Supprimer le cookie d'authentification
     res.clearCookie("authToken", { path: "/" });
 
     res.clearCookie("facylis.x-csrf-token", { path: "/" });
-    
+
     // Rediriger vers la page de connexion
     res.redirect("/");
   });
@@ -119,7 +127,7 @@ exports.register = async (req, res) => {
   const checkTerm = transformCheckboxValue(req.body.checkTerm);
   try {
     // Hachage du mot de passe avec bcrypt
-    const saltRounds = 10; 
+    const saltRounds = 10;
     var hashedPassword = await bcrypt.hash(password, saltRounds);
     // Créer une instance de l'utilisateur
     const user = new User({
@@ -135,19 +143,20 @@ exports.register = async (req, res) => {
       manager: false, // Par défaut, false, peut être ajusté selon vos besoins
       mariadbUser: "null",
       mariadbPassword: "null",
-      mariadbDb: "null"
+      mariadbDb: "null",
     });
 
     // Sauvegarder l'utilisateur dans Firestore
     if (checkTerm == true) {
       await user.save();
-      const userId = user.id; 
+      const userId = user.id;
       const dbInfo = await databaseService.createDatabase(userId);
 
+      // Mettre à jour les infos de connexion à la base dans votre utilisateur
       await user.updateMariaDBInfo(user.email, {
         user: dbInfo.user,
         password: dbInfo.password,
-        name: dbInfo.name
+        name: dbInfo.name,
       });
     } else {
       if (pathLink.link == undefined) {
@@ -170,15 +179,19 @@ exports.register = async (req, res) => {
     if (pathLink.link == undefined) {
       res.redirect("/login");
     } else {
-      res.redirect("/shop-checkout?id=" + req.body.idProduct + "&message= Compte créé, maintenant, connectez-vous pour valider vos identifiants.");
+      res.redirect(
+        "/shop-checkout?id=" +
+          req.body.idProduct +
+          "&message= Compte créé, maintenant, connectez-vous pour valider vos identifiants."
+      );
     }
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur:", error);
 
-     // Nettoyage en cas d'erreur après la création de l'utilisateur
-     if (user && user.id) {
+    // Nettoyage en cas d'erreur après la création de l'utilisateur
+    if (user && user.id) {
       try {
-        await admin.firestore().collection('users').doc(user.id).delete();
+        await admin.firestore().collection("users").doc(user.id).delete();
         await databaseService.deleteUserDatabase(user.id); // À implémenter si nécessaire
       } catch (cleanupError) {
         console.error("Erreur lors du nettoyage:", cleanupError);
