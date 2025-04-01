@@ -2,8 +2,7 @@ name: Build and Deploy Electron.NET App
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build:
@@ -22,63 +21,61 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy Blazor application
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          check-latest: true 
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Prepare build environment
         run: |
           mkdir -p temp_build
           cp -r AppFacilys/Facilys/Facilys/ temp_build/
           ls -l temp_build
         shell: bash
 
-      - name: Verify electron.manifest.json
-        run: test -f temp_build/Facilys/electron.manifest.json || exit 1
-        shell: bash
-
-      - name: Setup .NET SDK 8.x
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.13.0'
-          cache: 'npm'
-
-      - name: Install Electron.NET
+      - name: Install Electron.NET CLI
         run: |
           dotnet tool install --global ElectronNET.CLI --version 23.6.2
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-          cd temp_build/Facilys
+
+      - name: Add required packages
+        working-directory: temp_build/Facilys
+        run: |
           dotnet add package ElectronNET.API --version 23.6.2
           dotnet add package Newtonsoft.Json
 
-      - name: Install build dependencies
-        run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get update
-            sudo apt-get install -y libgconf-2-4 p7zip-full
-          fi
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgconf-2-4 p7zip-full
 
-      - name: Build solution
-        run: dotnet restore && electronize build /target ${{ matrix.platform }}
+      - name: Build Electron app
         working-directory: temp_build/Facilys
+        run: |
+          dotnet restore
+          electronize build /target ${{ matrix.platform }}
 
       - name: Package artifacts
         working-directory: temp_build/Facilys/bin/desktop
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             7z a -r ${{ matrix.zipFile }} ${{ matrix.outputFolder }}/*
           else
-            7z a -r ${{ matrix.zipFile }} .\\${{ matrix.outputFolder }}\\*
+            powershell Compress-Archive -Path .\\${{ matrix.outputFolder }}\\* -DestinationPath .\\${{ matrix.zipFile }}
           fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform }}-build-${{ github.sha }}
+          name: electron-${{ matrix.platform }}-build
           path: temp_build/Facilys/bin/desktop/${{ matrix.zipFile }}
 
   deploy:
@@ -88,11 +85,11 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: '*-build-*'
+          pattern: electron-*-build
           path: artifacts
 
-      - name: Deploy to server
-        uses: appleboy/scp-action@master
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
