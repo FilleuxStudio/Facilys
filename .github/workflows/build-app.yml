@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '22.13.0'
-          check-latest: true 
+          node-version: 22
+          check-latest: true
 
       - name: Setup .NET 8 SDK
         uses: actions/setup-dotnet@v3
@@ -53,9 +53,11 @@ jobs:
           dotnet add package ElectronNET.API --version 23.6.2
           dotnet add package Newtonsoft.Json
 
-      - name: Install system dependencies
+      - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgconf-2-4 p7zip-full
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgbm-dev libasound2 p7zip-full
 
       - name: Build Electron app
         working-directory: temp_build/Facilys
@@ -69,7 +71,7 @@ jobs:
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             7z a -r ${{ matrix.zipFile }} ${{ matrix.outputFolder }}/*
           else
-            powershell Compress-Archive -Path .\\${{ matrix.outputFolder }}\\* -DestinationPath .\\${{ matrix.zipFile }}
+            powershell "Compress-Archive -Path '.\${{ matrix.outputFolder }}\*' -DestinationPath '.\${{ matrix.zipFile }}'"
           fi
 
       - name: Upload artifact
@@ -89,7 +91,7 @@ jobs:
           path: artifacts
 
       - name: Deploy via SCP
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
