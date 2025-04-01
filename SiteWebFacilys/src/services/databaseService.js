@@ -1,20 +1,39 @@
 const mariadb = require("mariadb");
-const axios = require("axios");
+const axiosLib = require("axios");
 const fs = require("fs").promises;
 const path = require("path");
 const crypto = require("crypto");
 
 class DatabaseService {
   constructor() {
-    this.apiKey = process.env.PLANETHOSTER_API_KEY;
-    this.apiUser = process.env.PLANETHOSTER_API_USER;
-    this.worldAccountId = process.env.WORLDACCOUNTS;
+    // Destructuration et vérification des variables d'environnement
+    const { PLANETHOSTER_API_KEY, PLANETHOSTER_API_USER, WORLDACCOUNTS } =
+      process.env;
+    if (!PLANETHOSTER_API_KEY || !PLANETHOSTER_API_USER || !WORLDACCOUNTS) {
+      throw new Error(
+        "Les variables d'environnement pour l'API PlanetHoster ne sont pas définies."
+      );
+    }
+    this.apiKey = PLANETHOSTER_API_KEY;
+    this.apiUser = PLANETHOSTER_API_USER;
+    this.worldAccountId = WORLDACCOUNTS;
     this.baseUrl = "https://api.planethoster.net/v3";
     this.suffix = "jmaqmsnt_";
+
+    // Création d'une instance Axios configurée
+    this.apiClient = axiosLib.create({
+      baseURL: this.baseUrl,
+      headers: {
+        "X-API-KEY": this.apiKey,
+        "X-API-USER": this.apiUser,
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   /**
-   * Crée une base de données et un utilisateur associé avec tous les privilèges, puis exécute un script SQL d'initialisation.
+   * Crée une base de données et un utilisateur associé avec tous les privilèges,
+   * puis exécute un script SQL d'initialisation.
    * @param {string|number} userId - L'identifiant de l'utilisateur dans votre application.
    * @returns {Promise<Object>} - Objet contenant le nom de la DB, le nom d'utilisateur et le mot de passe généré.
    */
@@ -22,142 +41,114 @@ class DatabaseService {
     // Génération des identifiants et mot de passe
     const dbName = `user_${userId}_db`;
     const dbUser = `user_${userId}`;
-    var dbPassword = this.generateSecurePassword();
+    const dbPassword = this.generateSecurePassword();
 
-    // Configuration des headers pour les appels API
-    const headers = {
-      "X-API-KEY": this.apiKey,
-      "X-API-USER": this.apiUser,
-      "Content-Type": "application/json",
-    };
+    // Création des noms avec préfixe
+    const prefixedDbName = `${this.suffix}${dbName}`;
+    const prefixedDbUser = `${this.suffix}${dbUser}`;
 
     try {
       // 1. Création de la base de données
-      const createDbUrl = `${this.baseUrl}/hosting/database`;
       const createDbPayload = {
         id: this.worldAccountId,
         name: dbName,
         databaseType: "MYSQL",
       };
-
-      const dbResponse = await axios.post(createDbUrl, createDbPayload, {
-        headers,
-      });
-      if (!(dbResponse.status === 200 || dbResponse.status === 201)) {
+      const dbResponse = await this.apiClient.post(
+        "/hosting/database",
+        createDbPayload
+      );
+      if (![200, 201].includes(dbResponse.status)) {
         throw new Error(
           `Erreur lors de la création de la DB : ${dbResponse.data.message}`
         );
       }
-      console.log(
-        `Base de données "${dbName}" créée avec succès via l'API PlanetHoster.`
-      );
+      console.log(`Base de données "${dbName}" créée via l'API PlanetHoster.`);
 
-      // 1.5. Lister les bases de données existantes
-      const getDatabasesUrl = `${this.baseUrl}/hosting/databases`; // Adapté en fonction de l'API
+      // 1.5. Récupération des bases de données existantes
       const getDatabasesPayload = {
         id: this.worldAccountId,
         databaseType: "MYSQL",
       };
-
-      const dbListResponse = await axios.get(getDatabasesUrl, {
-        headers,
+      const dbListResponse = await this.apiClient.get("/hosting/databases", {
         params: getDatabasesPayload,
       });
-      if (!(dbListResponse.status === 200 || dbListResponse.status === 201)) {
+      if (![200, 201].includes(dbListResponse.status)) {
         throw new Error(
           `Erreur lors de la récupération des bases de données : ${dbListResponse.data.message}`
         );
       }
+      console.log("Bases de données existantes : ", dbListResponse.data);
 
-      console.log(
-        "Bases de données existantes récupérées : ",
-        dbListResponse.data
-      );
-
-      // Rechercher la base de données correspondant à user_${userId}_db
+      // Recherche de la base de données créée
       const existingDb = dbListResponse.data.find(
-        (db) => db.name === `${this.suffix}${dbName}`
+        (db) => db.name === prefixedDbName
       );
       if (!existingDb) {
         throw new Error(
-          `La base de données "${dbName}" n'existe pas dans la liste des bases de données.`
+          `La base de données "${dbName}" n'existe pas dans la liste.`
         );
       }
-      console.log(
-        `Base de données "${existingDb.name}" trouvée dans la liste des bases de données.`
-      );
+      console.log(`Base de données "${existingDb.name}" trouvée.`);
 
       // 2. Création de l'utilisateur associé
-      const createUserUrl = `${this.baseUrl}/hosting/database/user`;
       const createUserPayload = {
         id: this.worldAccountId,
         dbUser: dbUser,
         password: dbPassword,
         databaseType: "MYSQL",
       };
-
-      const userResponse = await axios.post(createUserUrl, createUserPayload, {
-        headers,
-      });
-      if (!(userResponse.status === 200 || userResponse.status === 201)) {
+      const userResponse = await this.apiClient.post(
+        "/hosting/database/user",
+        createUserPayload
+      );
+      if (![200, 201].includes(userResponse.status)) {
         throw new Error(
           `Erreur lors de la création de l'utilisateur : ${userResponse.data.message}`
         );
       }
-      console.log(
-        `Utilisateur "${dbUser}" créé avec succès via l'API PlanetHoster.`
-      );
+      console.log(`Utilisateur "${dbUser}" créé via l'API PlanetHoster.`);
 
-      // 2.5. Lister les utilisateurs existants
-      const getUsersUrl = `${this.baseUrl}/hosting/databases/users`;
+      // 2.5. Récupération des utilisateurs existants
       const getUsersPayload = {
         id: this.worldAccountId,
         databaseType: "MYSQL",
       };
-
-      const UserListResponse = await axios.get(getUsersUrl, {
-        headers,
-        params: getUsersPayload,
-      });
-
-      if (
-        !(UserListResponse.status === 200 || UserListResponse.status === 201)
-      ) {
+      const userListResponse = await this.apiClient.get(
+        "/hosting/databases/users",
+        { params: getUsersPayload }
+      );
+      if (![200, 201].includes(userListResponse.status)) {
         throw new Error(
-          `Erreur lors de la récupération des utilisateurs : ${UserListResponse.data.message}`
+          `Erreur lors de la récupération des utilisateurs : ${userListResponse.data.message}`
         );
       }
+      console.log("Utilisateurs existants : ", userListResponse.data);
 
-      console.log("Utilisateurs existants récupérés : ", UserListResponse.data);
-
-      // Aplatir le tableau de réponses pour récupérer tous les utilisateurs
-      const allUsers = UserListResponse.data.flat();
-
-      // Rechercher un utilisateur correspondant au nom de l'utilisateur avec le préfixe
-      const existingUser = allUsers.find(
-        (user) => user === `${this.suffix}${dbUser}`
-      );
-
+      // Aplatir la liste si nécessaire et recherche de l'utilisateur
+      const allUsers = Array.isArray(userListResponse.data)
+        ? userListResponse.data.flat()
+        : [];
+      const existingUser = allUsers.find((user) => user === prefixedDbUser);
       if (!existingUser) {
         throw new Error(
-          `L'utilisateur "${this.suffix}${dbUser}" n'existe pas dans la liste des utilisateurs.`
+          `L'utilisateur "${prefixedDbUser}" n'existe pas dans la liste.`
         );
       }
 
       // 3. Attribution des privilèges à l'utilisateur sur la base
-      const grantPrivilegesUrl = `${this.baseUrl}/hosting/database/user/privileges`;
       const grantPayload = {
         databaseType: "MYSQL",
         privileges: "ALL PRIVILEGES",
         id: this.worldAccountId,
-        databaseName: this.suffix + dbName,
-        databaseUsername: this.suffix + dbUser,
+        databaseName: prefixedDbName,
+        databaseUsername: prefixedDbUser,
       };
-
-      const grantResponse = await axios.put(grantPrivilegesUrl, grantPayload, {
-        headers,
-      });
-      if (!(grantResponse.status === 200 || grantResponse.status === 201)) {
+      const grantResponse = await this.apiClient.put(
+        "/hosting/database/user/privileges",
+        grantPayload
+      );
+      if (![200, 201].includes(grantResponse.status)) {
         throw new Error(
           `Erreur lors de l'attribution des privilèges : ${grantResponse.data.message}`
         );
@@ -168,15 +159,15 @@ class DatabaseService {
 
       // 4. Exécution du script SQL d'initialisation
       await this.executeSQLScript({
-        host: "127.0.0.1", // Hôte du serveur MariaDB/MySQL
-        user: this.suffix + dbUser,
+        host: "node117-eu.n0c.com", // Hôte du serveur MariaDB/MySQL
+        user: prefixedDbUser,
         password: dbPassword,
-        database: this.suffix + dbName,
+        database: prefixedDbName,
       });
 
       return {
-        name: this.suffix + dbUser,
-        user: this.suffix + dbName,
+        dbUser: prefixedDbUser,
+        dbName: prefixedDbName,
         password: dbPassword,
       };
     } catch (error) {
@@ -186,31 +177,31 @@ class DatabaseService {
   }
 
   /**
-   * Exécute un script SQL (contenu dans un fichier) pour initialiser la base de données.
+   * Exécute un script SQL pour initialiser la base de données.
    * @param {Object} connectionConfig - La configuration de connexion {host, user, password, database}.
    */
   async executeSQLScript(connectionConfig) {
     let conn;
     try {
-      // Charger le script SQL depuis le fichier (assurez-vous que le chemin est correct)
+      // Chargement du script SQL depuis le fichier
       const scriptPath = path.join(__dirname, "..", "sql", "init_db.sql");
       const sqlScript = await fs.readFile(scriptPath, "utf8");
 
-      // Établir une connexion à la base de données
+      // Établir la connexion à la base de données
       conn = await mariadb.createConnection(connectionConfig);
 
       // Découper le script en instructions individuelles
       const statements = sqlScript
-        .split(/;\s*(?=CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT)/i)
-        .map((statement) => statement.trim())
-        .filter((statement) => statement.length > 0);
+        .split(/;\s*(?=(CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT))/i)
+        .map((stmt) => stmt.trim())
+        .filter((stmt) => stmt.length > 0);
 
-      // Exécuter chaque instruction SQL
+      // Exécution de chaque instruction SQL
       for (const statement of statements) {
         await conn.query(statement);
       }
       console.log(
-        `Script SQL exécuté avec succès sur la base "${connectionConfig.database}".`
+        `Script SQL exécuté sur la base "${connectionConfig.database}".`
       );
     } catch (error) {
       console.error("Erreur lors de l'exécution du script SQL :", error);

@@ -131,13 +131,13 @@ jobs:
         shell: bash
 
       - name: Deploy to PlanetHoster
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: "artifacts/**/*.zip"
-          target: "/server/public/setup"
-          strip_components: 1
-          recursive: true
+          source: "artifacts/*.zip"
+          target: "server/public/setup"
+          strip_components: 0
+          timeout: 120s
