@@ -12,10 +12,10 @@ jobs:
         include:
           - os: windows-latest
             platform: win
-            outputFolder: win-unpacked
+            zipFile: facilys-windows.zip
           - os: ubuntu-latest
             platform: linux
-            outputFolder: linux-unpacked
+            zipFile: facilys-linux.zip
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -39,7 +39,6 @@ jobs:
         run: |
           mkdir -p temp_build
           cp -r AppFacilys/Facilys/Facilys/ temp_build/
-          echo "Structure du projet copiée :"
           ls -l temp_build
         shell: bash
 
@@ -62,7 +61,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libasound2t64 libgbm-dev build-essential
+          sudo apt-get install -y libasound2t64 libgbm-dev build-essential p7zip-full
 
       - name: Build application
         working-directory: temp_build/Facilys
@@ -70,30 +69,36 @@ jobs:
           dotnet restore
           electronize build /target ${{ matrix.platform }}
 
-      - name: Verify build output
-        working-directory: temp_build/Facilys/bin/desktop
+      - name: Package artifacts
+        working-directory: temp_build/Facilys/bin/Desktop
         run: |
-          # Vérification multi-OS
           if [ "${{ runner.os }}" = "Linux" ]; then
-            if [ ! -d "${{ matrix.outputFolder }}" ] || [ -z "$(ls -A ${{ matrix.outputFolder }})" ]; then
-              echo "ERREUR: Dossier ${{ matrix.outputFolder }} introuvable ou vide!"
-              ls -la
-              exit 1
-            fi
+            # Packaging Linux
+            7z a -r ${{ matrix.zipFile }} \
+              linux-unpacked/ \
+              __appImage-x64/ \
+              __snap-amd64/ \
+              *.AppImage \
+              *.snap
           else
-            if (-not (Test-Path ${{ matrix.outputFolder }})) -or (-not (Get-ChildItem ${{ matrix.outputFolder }})) {
-              Write-Host "ERREUR: Dossier ${{ matrix.outputFolder }} introuvable ou vide!"
-              Get-ChildItem
-              exit 1
-            }
+            # Packaging Windows avec tar
+            tar -cvzf ${{ matrix.zipFile }} \
+              win-unpacked/ \
+              "Facilys Setup 1.0.0.exe" \
+              "Facilys Setup 1.0.0.exe.blockmap"
           fi
+        shell: pwsh
+
+      - name: Verify archive content
+        run: |
+          7z l temp_build/Facilys/bin/Desktop/${{ matrix.zipFile }}
         shell: bash
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: electron-${{ matrix.platform }}-build
-          path: temp_build/Facilys/bin/desktop/${{ matrix.outputFolder }}
+          path: temp_build/Facilys/bin/Desktop/${{ matrix.zipFile }}
 
   deploy:
     needs: build
@@ -105,16 +110,6 @@ jobs:
           path: artifacts
           pattern: electron-*-build
 
-      - name: Verify downloaded files
-        run: |
-          echo "Contenu des artefacts :"
-          find artifacts -type f
-          if [ -z "$(find artifacts -type f)" ]; then
-            echo "Aucun fichier à déployer!"
-            exit 1
-          fi
-        shell: bash
-
       - name: Deploy to PlanetHoster
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -122,7 +117,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT || 22 }}
-          source: "artifacts/**/*"
+          source: "artifacts/*.zip"
           target: "/server/public/setup"
           strip_components: 0
-          recursive: true
