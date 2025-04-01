@@ -5,7 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishReadyToRun>true</PublishReadyToRun>
     <!--<PublishSingleFile>false</PublishSingleFile>-->
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- Ajouté pour la compatibilité Electron/Node.js -->
+    <!--<RuntimeIdentifier>win-x64</RuntimeIdentifier>--> <!-- Ajouté pour la compatibilité Electron/Node.js -->
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PlatformTarget>x64</PlatformTarget>
     <RestoreUseSkipNonexistentTargets>false</RestoreUseSkipNonexistentTargets>
     
