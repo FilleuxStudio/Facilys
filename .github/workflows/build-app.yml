@@ -73,20 +73,21 @@ jobs:
       - name: Verify build output
         working-directory: temp_build/Facilys/bin/desktop
         run: |
-          $outputFolder = "${{ matrix.outputFolder }}"
-          if ([string]::IsNullOrEmpty($outputFolder)) { exit 1 }
-          
-          if (-not (Test-Path $outputFolder -PathType Container)) {
-            Write-Error "Dossier $outputFolder introuvable!"
-            Get-ChildItem
-            exit 1
-          }
-          
-          if (-not (Get-ChildItem $outputFolder)) {
-            Write-Error "Dossier $outputFolder vide!"
-            exit 1
-          }
-        shell: pwsh
+          # Vérification multi-OS
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            if [ ! -d "${{ matrix.outputFolder }}" ] || [ -z "$(ls -A ${{ matrix.outputFolder }})" ]; then
+              echo "ERREUR: Dossier ${{ matrix.outputFolder }} introuvable ou vide!"
+              ls -la
+              exit 1
+            fi
+          else
+            if (-not (Test-Path ${{ matrix.outputFolder }})) -or (-not (Get-ChildItem ${{ matrix.outputFolder }})) {
+              Write-Host "ERREUR: Dossier ${{ matrix.outputFolder }} introuvable ou vide!"
+              Get-ChildItem
+              exit 1
+            }
+          fi
+        shell: bash
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

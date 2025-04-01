@@ -70,7 +70,7 @@ class DatabaseService {
         databaseUsername: dbUser
       };
 
-      const grantResponse = await axios.post(grantPrivilegesUrl, grantPayload, { headers });
+      const grantResponse = await axios.put(grantPrivilegesUrl, grantPayload, { headers });
       if (!(grantResponse.status === 200 || grantResponse.status === 201)) {
         throw new Error(`Erreur lors de l'attribution des privilèges : ${grantResponse.data.message}`);
       }

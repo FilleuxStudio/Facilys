@@ -63,3 +63,4 @@ jobs:
           rm -f package-lock.json
           source /home/jmaqmsnt/nodevenv/server/22/bin/activate
           npm install
+          exit
