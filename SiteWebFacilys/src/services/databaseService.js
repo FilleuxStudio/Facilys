@@ -8,7 +8,7 @@ class DatabaseService {
   constructor() {
     this.apiKey = process.env.PLANETHOSTER_API_KEY;
     this.apiUser = process.env.PLANETHOSTER_API_USER;
-    this.worldAccountId = process.env.WORLDACCOUNTS; // Exemple : "2222" pour l'abonnement "The World"
+    this.worldAccountId = process.env.WORLDACCOUNTS; 
     this.baseUrl = 'https://api.planethoster.net/v3';
   }
 

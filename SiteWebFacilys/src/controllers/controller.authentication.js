@@ -149,7 +149,7 @@ exports.register = async (req, res) => {
     // Sauvegarder l'utilisateur dans Firestore
     if (checkTerm == true) {
       await user.save();
-      const userId = user.id;
+      const userId = user.companyName.toLowerCase().trim();
       const dbInfo = await databaseService.createDatabase(userId);
 
       // Mettre à jour les infos de connexion à la base dans votre utilisateur

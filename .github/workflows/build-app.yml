@@ -13,11 +13,9 @@ jobs:
           - os: windows-latest
             platform: win
             outputFolder: win-unpacked
-            zipFile: app-win.zip
           - os: ubuntu-latest
             platform: linux
             outputFolder: linux-unpacked
-            zipFile: app-linux.zip
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -27,10 +25,10 @@ jobs:
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22'
           check-latest: true
 
-      - name: Setup .NET 8 SDK
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
@@ -41,7 +39,12 @@ jobs:
         run: |
           mkdir -p temp_build
           cp -r AppFacilys/Facilys/Facilys/ temp_build/
-          ls -all temp_build
+          echo "Structure du projet copiée :"
+          ls -l temp_build
+        shell: bash
+
+      - name: Verify electron.manifest.json
+        run: test -f temp_build/Facilys/electron.manifest.json || (echo "Fichier manifest manquant!" && exit 1)
         shell: bash
 
       - name: Install Electron.NET CLI
@@ -49,19 +52,19 @@ jobs:
           dotnet tool install --global ElectronNET.CLI --version 23.6.2
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: Add required packages
+      - name: Add Electron.NET dependencies
         working-directory: temp_build/Facilys
         run: |
           dotnet add package ElectronNET.API --version 23.6.2
           dotnet add package Newtonsoft.Json
 
-      - name: Install system dependencies (Linux)
+      - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libasound2t64 libgbm-dev p7zip-full
+          sudo apt-get install -y libasound2t64 libgbm-dev build-essential
 
-      - name: Build Electron app
+      - name: Build application
         working-directory: temp_build/Facilys
         run: |
           dotnet restore
@@ -70,27 +73,26 @@ jobs:
       - name: Verify build output
         working-directory: temp_build/Facilys/bin/desktop
         run: |
-          echo "Contenu du répertoire :"
-          ls -la
-          if [ ! -d "${{ matrix.outputFolder }}" ]; then
-            echo "ERREUR: Dossier ${{ matrix.outputFolder }} introuvable!"
+          $outputFolder = "${{ matrix.outputFolder }}"
+          if ([string]::IsNullOrEmpty($outputFolder)) { exit 1 }
+          
+          if (-not (Test-Path $outputFolder -PathType Container)) {
+            Write-Error "Dossier $outputFolder introuvable!"
+            Get-ChildItem
             exit 1
-          fi
+          }
+          
+          if (-not (Get-ChildItem $outputFolder)) {
+            Write-Error "Dossier $outputFolder vide!"
+            exit 1
+          }
+        shell: pwsh
 
-      - name: Package artifacts
-        working-directory: temp_build/Facilys/bin/desktop
-        run: |
-           if [ "${{ runner.os }}" = "Linux" ]; then
-            7z a -r ${{ matrix.zipFile }} ./${{ matrix.outputFolder }}/*
-           else
-            powershell "Compress-Archive -Path '.\${{ matrix.outputFolder }}\*' -DestinationPath '.\${{ matrix.zipFile }}'"
-           fi
-
-      - name: Upload artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: electron-${{ matrix.platform }}-build
-          path: temp_build/Facilys/bin/desktop/${{ matrix.zipFile }}
+          path: temp_build/Facilys/bin/desktop/${{ matrix.outputFolder }}
 
   deploy:
     needs: build
@@ -99,15 +101,27 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: electron-*-build
           path: artifacts
+          pattern: electron-*-build
 
-      - name: Deploy via SCP
-        uses: appleboy/scp-action@master
+      - name: Verify downloaded files
+        run: |
+          echo "Contenu des artefacts :"
+          find artifacts -type f
+          if [ -z "$(find artifacts -type f)" ]; then
+            echo "Aucun fichier à déployer!"
+            exit 1
+          fi
+        shell: bash
+
+      - name: Deploy to PlanetHoster
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT || 22 }}
-          source: "artifacts/*.zip"
-          target: "server/public/setup"
+          source: "artifacts/**/*"
+          target: "/server/public/setup"
+          strip_components: 0
+          recursive: true
