@@ -28,13 +28,16 @@ jobs:
         echo "NODE_ENV=production" > .env
         echo "PORT=passenger"  >> .env
         echo "HOST=127.0.0.1"  >> .env
-        echo "FIREBASE_CONFIG=./facilys-fe686-firebase-adminsdk-2vciw-af78a9b08f.json "  >> .env
-        echo "CSRF_SECRET=a7afdda3a765a50889e7c6c5dc9970b11729f36fa1c87387808a7007037669a4"  >> .env
+        echo "FIREBASE_CONFIG=./facilys-fe686-firebase-adminsdk-2vciw-af78a9b08f.json"  >> .env
+        echo "CSRF_SECRET=EC0316484547EC3A6E6E423859DD8C620E38819C9896D3008535BFB31D4337A5"  >> .env
+        echo "PLANETHOSTER_API_KEY=891271ae8e70a8609d99a29ff23c0f76e1d817d952f7e1668e13ee56bb68aea8" >> .env
+        echo "PLANETHOSTER_API_USER=d92ac0adc8f7ec4de7fd769af2f4d00b" >> .env
+        echo "WORLDACCOUNTS=658763" >> .env
 
     - name: Copy SiteWebFacilys to temp directory
       run: |
         mkdir -p temp_deploy
-        cp -R SiteWebFacilys/* temp_deploy/
+        cp -R SiteWebFacilys/. temp_deploy/
 
     - name: Copy files to server
       uses: appleboy/scp-action@master
@@ -43,7 +46,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.PORT }}
-        source: "temp_deploy/*"
+        source: "temp_deploy/."
         target: "server"
         strip_components: 1
 
