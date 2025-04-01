@@ -9,41 +9,31 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-          - windows-latest
-          - ubuntu-latest
+        os: [windows-latest, ubuntu-latest]
         include:
           - os: windows-latest
             platform: win
-            outputFolder: "win-unpacked"
-            zipFile: "app-win.zip"
+            outputFolder: win-unpacked
+            zipFile: app-win.zip
           - os: ubuntu-latest
             platform: linux
-            outputFolder: "linux-unpacked"
-            zipFile: "app-linux.zip"
+            outputFolder: linux-unpacked
+            zipFile: app-linux.zip
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Copy Blazor application to temporary directory
+      - name: Copy Blazor application
         run: |
-          rm -rf temp_build
-          mkdir temp_build
-          cp -r AppFacilys/Facilys/Facilys temp_build/
-          echo "Contenu de temp_build :"
+          mkdir -p temp_build
+          cp -r AppFacilys/Facilys/Facilys/ temp_build/
           ls -l temp_build
         shell: bash
 
-      - name: Check electron.manifest.json exists
-        run: |
-          if [ ! -f temp_build/Facilys/electron.manifest.json ]; then
-            echo "Erreur : electron.manifest.json introuvable dans temp_build/Facilys. Arrêt du build."
-            exit 1
-          else
-            echo "electron.manifest.json trouvé."
-          fi
+      - name: Verify electron.manifest.json
+        run: test -f temp_build/Facilys/electron.manifest.json || exit 1
         shell: bash
 
       - name: Setup .NET SDK 8.x
@@ -52,71 +42,61 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Setup Node.js 22
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '22.13.0'
+          cache: 'npm'
 
-      - name: Install Electron.NET dependencies
+      - name: Install Electron.NET
         run: |
           dotnet tool install --global ElectronNET.CLI --version 23.6.2
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
           cd temp_build/Facilys
-          ls -la
           dotnet add package ElectronNET.API --version 23.6.2
           dotnet add package Newtonsoft.Json
-        shell: bash
 
-      - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install -y libgconf-2-4
+      - name: Install build dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get update
+            sudo apt-get install -y libgconf-2-4 p7zip-full
+          fi
 
-      - name: Install 7zip (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install p7zip-full
-
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Build solution
+        run: dotnet restore && electronize build /target ${{ matrix.platform }}
         working-directory: temp_build/Facilys
 
-      - name: Build Electron.NET App for ${{ matrix.platform }}
-        run: electronize build /target ${{ matrix.platform }}
-        working-directory: temp_build/Facilys
-
-      - name: Archive build output
+      - name: Package artifacts
         working-directory: temp_build/Facilys/bin/desktop
         run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          if [ "$RUNNER_OS" == "Linux" ]; then
             7z a -r ${{ matrix.zipFile }} ${{ matrix.outputFolder }}/*
           else
-            powershell -Command "Compress-Archive -Path .\\${{ matrix.outputFolder }}\\* -DestinationPath .\\${{ matrix.zipFile }}"
+            7z a -r ${{ matrix.zipFile }} .\\${{ matrix.outputFolder }}\\*
           fi
-        shell: bash
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.zipFile }}
+          name: ${{ matrix.platform }}-build-${{ github.sha }}
           path: temp_build/Facilys/bin/desktop/${{ matrix.zipFile }}
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
+          pattern: '*-build-*'
           path: artifacts
 
-      - name: Check downloaded artifacts
-        run: ls -l artifacts/
-
-      - name: Deploy to remote server
+      - name: Deploy to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.PORT }}
+          port: ${{ secrets.PORT || 22 }}
           source: "artifacts/*.zip"
           target: "server/public/setup"
-          strip_components: 1
