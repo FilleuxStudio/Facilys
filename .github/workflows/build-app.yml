@@ -69,30 +69,41 @@ jobs:
           dotnet restore
           electronize build /target ${{ matrix.platform }}
 
-      - name: Package artifacts
+      - name: Package artifacts (Linux)
+        if: runner.os == 'Linux'
         working-directory: temp_build/Facilys/bin/Desktop
         run: |
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            # Packaging Linux
-            7z a -r ${{ matrix.zipFile }} \
-              linux-unpacked/ \
-              __appImage-x64/ \
-              __snap-amd64/ \
-              *.AppImage \
-              *.snap
-          else
-            # Packaging Windows avec tar
-            tar -cvzf ${{ matrix.zipFile }} \
-              win-unpacked/ \
-              "Facilys Setup 1.0.0.exe" \
-              "Facilys Setup 1.0.0.exe.blockmap"
+          if [ ! -d "linux-unpacked" ] || [ ! -f *.AppImage ]; then
+            echo "ERREUR: Fichiers de build Linux manquants!"
+            exit 1
           fi
-        shell: pwsh
-
-      - name: Verify archive content
-        run: |
-          7z l temp_build/Facilys/bin/Desktop/${{ matrix.zipFile }}
+          7z a -r ${{ matrix.zipFile }} \
+            linux-unpacked/ \
+            __appImage-x64/ \
+            __snap-amd64/ \
+            *.AppImage \
+            *.snap
         shell: bash
+
+      - name: Package artifacts (Windows)
+        if: runner.os == 'Windows'
+        working-directory: temp_build/Facilys/bin/Desktop
+        run: |
+          if (-not (Test-Path "win-unpacked")) {
+            Write-Error "Dossier win-unpacked manquant!"
+            exit 1
+          }
+          if (-not (Test-Path "Facilys Setup 1.0.0.exe")) {
+            Write-Error "Fichier exe manquant!"
+            exit 1
+          }
+
+          Compress-Archive -Path `
+            "win-unpacked", `
+            "Facilys Setup 1.0.0.exe", `
+            "Facilys Setup 1.0.0.exe.blockmap" `
+            -DestinationPath ${{ matrix.zipFile }}
+        shell: pwsh
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
