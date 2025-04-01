@@ -122,6 +122,13 @@ jobs:
         with:
           path: artifacts
           pattern: electron-*-build
+          merge-multiple: true
+
+      - name: Verify downloaded files
+        run: |
+          echo "Contenu du dossier artifacts :"
+          find artifacts -type f
+        shell: bash
 
       - name: Deploy to PlanetHoster
         uses: appleboy/scp-action@v0.1.7
@@ -130,7 +137,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "artifacts/*.zip"
-          target: "server/public/setup"
-          strip_components: 0
+          source: "artifacts/**/*.zip"
+          target: "/server/public/setup"
+          strip_components: 1
+          recursive: true

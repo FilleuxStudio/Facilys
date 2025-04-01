@@ -150,7 +150,7 @@ exports.register = async (req, res) => {
     if (checkTerm == true) {
       await user.save();
       var userId = user.companyName.toLowerCase().trim();
-      const dbInfo = await databaseService.createDatabase(userId);
+      var dbInfo = await databaseService.createDatabase(userId);
 
       // Mettre à jour les infos de connexion à la base dans votre utilisateur
       await user.updateMariaDBInfo(user.email, {

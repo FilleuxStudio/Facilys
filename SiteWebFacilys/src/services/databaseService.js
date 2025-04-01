@@ -22,7 +22,7 @@ class DatabaseService {
     // Génération des identifiants et mot de passe
     const dbName = `user_${userId}_db`;
     const dbUser = `user_${userId}`;
-    const dbPassword = this.generateSecurePassword();
+    var dbPassword = this.generateSecurePassword();
 
     // Configuration des headers pour les appels API
     const headers = {
@@ -143,6 +143,7 @@ class DatabaseService {
           `L'utilisateur "${this.suffix}${dbUser}" n'existe pas dans la liste des utilisateurs.`
         );
       }
+
       // 3. Attribution des privilèges à l'utilisateur sur la base
       const grantPrivilegesUrl = `${this.baseUrl}/hosting/database/user/privileges`;
       const grantPayload = {
@@ -168,14 +169,14 @@ class DatabaseService {
       // 4. Exécution du script SQL d'initialisation
       await this.executeSQLScript({
         host: "127.0.0.1", // Hôte du serveur MariaDB/MySQL
-        user: dbUser,
+        user: this.suffix + dbUser,
         password: dbPassword,
-        database: dbName,
+        database: this.suffix + dbName,
       });
 
       return {
-        name: dbName,
-        user: dbUser,
+        name: this.suffix + dbUser,
+        user: this.suffix + dbName,
         password: dbPassword,
       };
     } catch (error) {
