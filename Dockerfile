@@ -4,8 +4,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # Copier uniquement le projet Blazor
 WORKDIR /src
 COPY . .
-RUN dotnet restore "Facilys.csproj"
-RUN dotnet publish "Facilys.csproj" -c Release -o /app/publish --no-self-contained
+RUN dotnet restore
+RUN otnet publish -c Release -r linux-x64 --self-contained false
 
 # Étape runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
