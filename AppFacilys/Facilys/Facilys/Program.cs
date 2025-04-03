@@ -194,6 +194,7 @@ app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseWebSockets();
 
 app.MapRazorComponents<Facilys.Components.App>()
     .AddInteractiveServerRenderMode();

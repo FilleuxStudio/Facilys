@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models;
+﻿using ElectronNET.API;
+using Facilys.Components.Models;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
@@ -410,8 +411,11 @@ namespace Facilys.Components.Pages
                         await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
                         await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
 
-                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
-                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        if (HybridSupport.IsElectronActive)
+                        {
+                            await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                            await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        }
                         break;
                     case InvoiceTypeDesign.TypeB:
                         PdfInvoiceType2Service pdfInvoiceType2 = new();
@@ -420,8 +424,11 @@ namespace Facilys.Components.Pages
                         await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
                         await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
 
-                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
-                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        if (HybridSupport.IsElectronActive)
+                        {
+                            await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                            await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        }
                         break;
                     case InvoiceTypeDesign.TypeC:
                         //PdfInvoiceType3Service pdfInvoiceType3 = new();
