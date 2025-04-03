@@ -1,13 +1,10 @@
-# Étape de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-
-# Copier uniquement le projet Blazor
-WORKDIR /src
-COPY . .
+WORKDIR /src/AppFacilys/Facilys/Facilys
+COPY AppFacilys/Facilys/Facilys/*.csproj ./
 RUN dotnet restore
-RUN dotnet publish -c Release -r linux-x64 --self-contained false
+COPY AppFacilys/Facilys/Facilys/ ./
+RUN dotnet publish -c Release -r linux-x64 --self-contained false -o /app/publish
 
-# Étape runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 ENV ASPNETCORE_URLS=http://*:${PORT:-8080}
 WORKDIR /app
