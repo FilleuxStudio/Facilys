@@ -177,9 +177,9 @@ exports.register = async (req, res) => {
     }
 
     if (pathLink.link == undefined) {
-      res.redirect("/login");
+      return  res.redirect("/login");
     } else {
-      res.redirect(
+      return res.redirect(
         "/shop-checkout?id=" +
           req.body.idProduct +
           "&message= Compte créé, maintenant, connectez-vous pour valider vos identifiants."
