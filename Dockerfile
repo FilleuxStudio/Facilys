@@ -32,18 +32,16 @@ RUN wget https://packages.microsoft.com/config/debian/$(lsb_release -rs)/package
 # Copie des fichiers projet (.csproj)
 COPY *.csproj ./
 RUN dotnet restore
-RUN ls -all
 
 # Copie du reste du code source
 COPY . ./
-RUN ls -all
 
 # Ajout de la dépendance ElectronNET.API et installation de l'outil global ElectronNET.CLI
 RUN dotnet add package ElectronNET.API --version 23.6.2
 RUN dotnet tool install --global ElectronNET.CLI --version 23.6.2
 
 # Publication de l'application
-RUN dotnet publish -c Release -r linux-x64 --self-contained false -o /app/publish --verbosity diag
+RUN dotnet publish -c Release -o /app/publish 
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
@@ -57,7 +55,7 @@ RUN apt-get update && apt-get install -y \
     libgconf-2-4 \
     libc6 \
     libgdiplus
-    
+
 ENV ASPNETCORE_URLS=http://*:${PORT:-8080}
 WORKDIR /app
 COPY --from=build /app/publish .
