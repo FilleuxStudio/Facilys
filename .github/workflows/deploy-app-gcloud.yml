@@ -8,7 +8,7 @@ env:
   PROJECT_ID: "myprojectfacilys"
   SERVICE_NAME: "blazor-server-app"
   REGION: "europe-west1" 
-  ARTIFACT_REGISTRY: "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/blazor-repo"
+  ARTIFACT_REGISTRY: "europe-west1-docker.pkg.dev/myprojectfacilys/facilys-repo"
 
 jobs:
   build-and-deploy:
