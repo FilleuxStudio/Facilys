@@ -2,23 +2,36 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update
+RUN apt-get update -qq && apt-cache policy libtesseract-dev libopencv-dev libgdiplus
+
+RUN apt-get update && \
+    apt-get install -y \
     curl \
-    gnupg \
+    gnupg2 \
     lsb-release \
+    ca-certificates \
+    && apt-get clean
+
+RUN apt-get update && \
+    apt-get install -y \
     libx11-dev \
     libxext-dev \
     libxss-dev \
     libgtk-3-dev \
     libgconf-2-4 \
-    libc6-dev \
+    libc6-dev
+
+RUN apt-get update && \
+    apt-get install -y \
     libgdiplus \
     libtesseract-dev \
     libleptonica-dev \
     libopencv-dev \
     tesseract-ocr-fra \
-    libmysqlclient-dev \
-    libgdiplus
+    libmysqlclient-dev
+
+RUN apt-get update
 
 # Installation de Node.js (version 22) et npm
 RUN apt-get update && apt-get install -y curl gnupg && \
