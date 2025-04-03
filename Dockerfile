@@ -20,7 +20,6 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     apt-get install -y nodejs
 
 # Installation des outils nécessaires pour récupérer le runtime .NET 6.0
-# (lsb-release est installé pour que la substitution de commande fonctionne)
 RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
 
 # Installation du runtime .NET 6.0
@@ -59,9 +58,9 @@ RUN apt-get update && apt-get install -y \
     libc6 \
     libgdiplus
 
-# Installation du runtime .NET 6
-RUN apt-get install -y wget && \
-    wget https://packages.microsoft.com/config/debian/$(awk -F'=' '/VERSION_CODENAME/{print $2}' /etc/os-release)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+# Installation du runtime .NET 6.0 dans l'image runtime
+RUN apt-get update && apt-get install -y wget gnupg2 lsb-release && \
+    wget https://packages.microsoft.com/config/debian/$(lsb_release -cs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
     rm packages-microsoft-prod.deb && \
     apt-get update && \
