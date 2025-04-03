@@ -7,9 +7,12 @@ const crypto = require("crypto");
 class DatabaseService {
   constructor() {
     // Vérification des variables d'environnement
-    const { PLANETHOSTER_API_KEY, PLANETHOSTER_API_USER, WORLDACCOUNTS } = process.env;
+    const { PLANETHOSTER_API_KEY, PLANETHOSTER_API_USER, WORLDACCOUNTS } =
+      process.env;
     if (!PLANETHOSTER_API_KEY || !PLANETHOSTER_API_USER || !WORLDACCOUNTS) {
-      throw new Error("Les variables d'environnement pour l'API PlanetHoster ne sont pas définies.");
+      throw new Error(
+        "Les variables d'environnement pour l'API PlanetHoster ne sont pas définies."
+      );
     }
     this.apiKey = PLANETHOSTER_API_KEY;
     this.apiUser = PLANETHOSTER_API_USER;
@@ -38,18 +41,25 @@ class DatabaseService {
           params: { id: this.worldAccountId, databaseType: "MYSQL" },
         });
 
-        if (response.data.some(db => db.name === databaseName)) {
+        if (response.data.data.some((db) => db.name === databaseName)) {
           console.log(`✅ Base de données "${databaseName}" confirmée.`);
           return;
         }
       } catch (error) {
-        console.error("Erreur lors de la récupération des bases de données :", error);
+        console.error(
+          "Erreur lors de la récupération des bases de données :",
+          error
+        );
       }
 
-      console.log(`⏳ En attente de la base "${databaseName}"... (${i + 1}/${retries})`);
-      await new Promise(res => setTimeout(res, delay));
+      console.log(
+        `⏳ En attente de la base "${databaseName}"... (${i + 1}/${retries})`
+      );
+      await new Promise((res) => setTimeout(res, delay));
     }
-    throw new Error(`⛔ Timeout : La base "${databaseName}" n'a pas été trouvée après plusieurs tentatives.`);
+    throw new Error(
+      `⛔ Timeout : La base "${databaseName}" n'a pas été trouvée après plusieurs tentatives.`
+    );
   }
 
   /**
@@ -62,18 +72,26 @@ class DatabaseService {
           params: { id: this.worldAccountId, databaseType: "MYSQL" },
         });
 
-        if (response.data.includes(dbUser)) {
+        const usersList = response.data.data.flat(); // Aplatir les sous-tableaux en un seul
+        if (usersList.includes(dbUser)) {
           console.log(`✅ Utilisateur "${dbUser}" confirmé.`);
           return;
         }
       } catch (error) {
-        console.error("Erreur lors de la récupération des utilisateurs :", error);
+        console.error(
+          "Erreur lors de la récupération des utilisateurs :",
+          error
+        );
       }
 
-      console.log(`⏳ En attente de l'utilisateur "${dbUser}"... (${i + 1}/${retries})`);
-      await new Promise(res => setTimeout(res, delay));
+      console.log(
+        `⏳ En attente de l'utilisateur "${dbUser}"... (${i + 1}/${retries})`
+      );
+      await new Promise((res) => setTimeout(res, delay));
     }
-    throw new Error(`⛔ Timeout : L'utilisateur "${dbUser}" n'a pas été trouvé après plusieurs tentatives.`);
+    throw new Error(
+      `⛔ Timeout : L'utilisateur "${dbUser}" n'a pas été trouvé après plusieurs tentatives.`
+    );
   }
 
   /**
@@ -110,7 +128,9 @@ class DatabaseService {
       await this.waitForUserCreation(prefixedDbUser);
 
       // 3️⃣ Attribution des privilèges à l'utilisateur sur la base
-      console.log(`🚀 Attribution des privilèges à "${dbUser}" sur "${dbName}"...`);
+      console.log(
+        `🚀 Attribution des privilèges à "${dbUser}" sur "${dbName}"...`
+      );
       await this.apiClient.put("/hosting/database/user/privileges", {
         databaseType: "MYSQL",
         privileges: "ALL PRIVILEGES",
@@ -129,7 +149,11 @@ class DatabaseService {
         database: prefixedDbName,
       });
 
-      return { dbUser: prefixedDbUser, dbName: prefixedDbName, password: dbPassword };
+      return {
+        dbUser: prefixedDbUser,
+        dbName: prefixedDbName,
+        password: dbPassword,
+      };
     } catch (error) {
       console.error("❌ Erreur dans createDatabase :", error);
       throw error;
@@ -142,7 +166,9 @@ class DatabaseService {
   async executeSQLScript(connectionConfig) {
     let conn;
     try {
-      console.log(`🚀 Exécution du script SQL pour "${connectionConfig.database}"...`);
+      console.log(
+        `🚀 Exécution du script SQL pour "${connectionConfig.database}"...`
+      );
 
       const scriptPath = path.join(__dirname, "..", "sql", "init_db.sql");
       const sqlScript = await fs.readFile(scriptPath, "utf8");
@@ -151,14 +177,16 @@ class DatabaseService {
 
       const statements = sqlScript
         .split(/;\s*(?=(CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT))/i)
-        .map(stmt => stmt.trim())
-        .filter(stmt => stmt.length > 0);
+        .map((stmt) => stmt.trim())
+        .filter((stmt) => stmt.length > 0);
 
       for (const statement of statements) {
         await conn.query(statement);
       }
 
-      console.log(`✅ Script SQL exécuté avec succès sur "${connectionConfig.database}".`);
+      console.log(
+        `✅ Script SQL exécuté avec succès sur "${connectionConfig.database}".`
+      );
     } catch (error) {
       console.error("❌ Erreur lors de l'exécution du script SQL :", error);
       throw error;
@@ -171,7 +199,17 @@ class DatabaseService {
    * Génère un mot de passe sécurisé.
    */
   generateSecurePassword() {
-    return crypto.randomBytes(16).toString("hex");
+    const length = 8;
+    const chars =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@*$??!!+-/";
+    let password = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = crypto.randomInt(0, chars.length);
+      password += chars[randomIndex];
+    }
+
+    return password;
   }
 
   /**
