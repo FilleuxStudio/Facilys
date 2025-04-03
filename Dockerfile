@@ -57,15 +57,7 @@ RUN apt-get update && apt-get install -y \
     libgconf-2-4 \
     libc6 \
     libgdiplus
-
-# Installation du runtime .NET 6.0 dans l'image runtime
-RUN apt-get update && apt-get install -y wget gnupg2 lsb-release && \
-    wget https://packages.microsoft.com/config/debian/$(lsb_release -cs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
-    apt-get update && \
-    apt-get install -y dotnet-runtime-6.0
-
+    
 ENV ASPNETCORE_URLS=http://*:${PORT:-8080}
 WORKDIR /app
 COPY --from=build /app/publish .
