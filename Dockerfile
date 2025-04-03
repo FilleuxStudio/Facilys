@@ -9,6 +9,7 @@ RUN apt-get update && \
     apt-get install -y \
     curl \
     gnupg2 \
+    gcc \
     lsb-release \
     ca-certificates \
     && apt-get clean
@@ -22,14 +23,12 @@ RUN apt-get update && \
     libgconf-2-4 \
     libc6-dev
 
-RUN apt-get update && \
-    apt-get install -y \
-    libgdiplus \
-    libtesseract-dev \
-    libleptonica-dev \
-    libopencv-dev \
-    tesseract-ocr-fra \
-    libmysqlclient-dev
+RUN apt-get update && apt-get install -y libgdiplus
+    #libtesseract-dev \
+    #libleptonica-dev \
+    #libopencv-dev \
+    #tesseract-ocr-fra \
+    #libmysqlclient-dev
 
 RUN apt-get update
 
