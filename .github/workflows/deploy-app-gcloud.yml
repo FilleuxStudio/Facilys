@@ -42,18 +42,21 @@ jobs:
         dotnet restore "Facilys.csproj"
         dotnet publish "Facilys.csproj" -c Release -o published --no-self-contained
 
-    # Étape 5 - Construction de l'image Docker optimisée
+    #- name: Set up Docker Buildx
+    #  uses: docker/setup-buildx-action@v2
+    #  with:
+    #    driver: docker-container
+    #    install: true
+
     - name: Build Docker Image
       uses: docker/build-push-action@v4
       with:
-        context: .
+        context: AppFacilys/Facilys/Facilys
         file: ./Dockerfile
         tags: |
           ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
-          ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         platforms: linux/amd64
+        push: true  # Ajout crucial
 
     # Étape 6 - Authentification sécurisée avec Workload Identity
     - name: Authenticate to Google Cloud
@@ -83,13 +86,12 @@ jobs:
           --platform=managed
           --cpu=1
           --memory=1Gi          # Minimum pour .NET
-          --concurrency=80      # Optimise le nombre de requêtes/instance
+          --concurrency=95      # Optimise le nombre de requêtes/instance
           --timeout=300s        # Évite les instances bloquées
           --min-instances=0     # Scale-to-zero
-          --max-instances=3     # Limite les coûts max
+          --max-instances=5     # Limite les coûts max
           --port=8080
           --no-traffic          # Déploiement sans coupure
-          --revision-suffix=${{ github.sha }}
 
     # Étape 9 - Nettoyage des images obsolètes (optionnel)
     - name: Clean Old Images
