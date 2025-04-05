@@ -44,6 +44,7 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPENCV_DLL_DIR
 # Copie des fichiers projet (.csproj)
 COPY *.csproj ./
 RUN dotnet restore
+RUN dotnet restore --runtime linux-x64
 
 # Copie du reste du code source
 COPY . ./
@@ -53,7 +54,7 @@ RUN dotnet add package ElectronNET.API --version 23.6.2
 
 # Publication de l'application
 RUN mkdir -p /app/publish
-RUN dotnet publish -c Release -o /app/publish --runtime linux-x64 --self-contained false
+RUN dotnet publish -c Release -o /app/publish --runtime linux-x64
 RUN ls -all
 RUN ls /app/publish
 

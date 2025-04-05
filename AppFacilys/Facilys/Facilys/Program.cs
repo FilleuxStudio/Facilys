@@ -159,14 +159,53 @@ builder.Services.AddSession(options =>
 });
 
 
-// Configuration de la base de données
-builder.Services.AddDbContextFactory<ApplicationDbContext>((services, options) =>
+builder.Services.AddScoped<UserConnectionService>();
+
+// Configuration flexible de la base de données
+if (HybridSupport.IsElectronActive)
 {
-    var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-    var facilysPath = Path.Combine(documentsPath, "Facilys", "Database");
-    Directory.CreateDirectory(facilysPath);
-    options.UseSqlite($"Data Source={Path.Combine(facilysPath, "data.db")}");
-});
+    // Mode Electron - SQLite + MariaDB dynamique
+    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    {
+        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var facilysPath = Path.Combine(documentsPath, "Facilys", "Database");
+        Directory.CreateDirectory(facilysPath);
+        options.UseSqlite($"Data Source={Path.Combine(facilysPath, "data.db")}");
+    });
+}
+else
+{
+    // Mode Web - MariaDB principale avec connexion dynamique
+    builder.Services.AddSingleton<IDbContextFactory<ApplicationDbContext>, DynamicDbContextFactory>();
+}
+
+
+//// Configuration conditionnelle des bases de données
+//if (HybridSupport.IsElectronActive)
+//{
+//    // Mode Electron - SQLite + MariaDB dynamique
+//    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+//    {
+//        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+//        var facilysPath = Path.Combine(documentsPath, "Facilys", "Database");
+//        Directory.CreateDirectory(facilysPath);
+//        options.UseSqlite($"Data Source={Path.Combine(facilysPath, "data.db")}");
+//    });
+
+//    // Pour les connexions MariaDB secondaires
+//    builder.Services.AddScoped<DynamicDbContextFactory>();
+//}
+//else
+//{
+//    // Mode Docker - MariaDB principale uniquement
+//    var mariaDbConnection = builder.Configuration.GetConnectionString("MariaDB");
+//    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+//        options.UseMySql(
+//            mariaDbConnection,
+//            ServerVersion.AutoDetect(mariaDbConnection)
+//        ));
+//}
+
 
 // Services personnalisés
 builder.Services.AddScoped<ProtectedLocalStorage>();
@@ -188,7 +227,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseRouting(); 
+app.UseRouting();
 app.UseSession();
 
 app.UseHttpsRedirection();
@@ -196,16 +235,19 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 app.UseWebSockets();
 
+if (HybridSupport.IsElectronActive) { 
+    // Initialisation des bases de données
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.EnsureCreatedAsync();
+        DbInitializer.Initialize(services);
+    }
+}
+
 app.MapRazorComponents<Facilys.Components.App>()
     .AddInteractiveServerRenderMode();
-
-// Initialisation de la base de données
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.EnsureCreatedAsync();
-    DbInitializer.Initialize(scope.ServiceProvider);
-}
 
 // Gestion du mode Electron
 if (HybridSupport.IsElectronActive)

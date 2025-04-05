@@ -95,28 +95,54 @@ class DatabaseService {
   }
 
   /**
+ * Attends jusqu'à ce que les privilèges spécifiés soient confirmés pour un utilisateur sur une base de données.
+ */
+  async waitForUserAssignment(databaseName, dbUser, retries = 10, delay = 3000) {
+    var prefixedDbName = `${this.suffix}${databaseName}`;
+    var prefixedDbUser = `${this.suffix}${dbUser}`;
+  
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await this.apiClient.get("/hosting/databases", {
+          params: {
+            id: this.worldAccountId,
+            databaseType: "MYSQL",
+          },
+        });
+  
+        const database = response.data.data.find((db) => db.name === prefixedDbName);
+        if (database) {
+          const user = database.databaseUsers.find((user) => user.name === prefixedDbUser);
+          if (user) {
+            console.log(`✅ L'utilisateur "${dbUser}" est bien assigné à la base "${databaseName}".`);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("❌ Erreur lors de la récupération des bases de données :", error);
+      }
+  
+      console.log(`⏳ En attente de l'assignation de l'utilisateur "${dbUser}" à la base "${databaseName}"... (${i + 1}/${retries})`);
+      await new Promise((res) => setTimeout(res, delay));
+    }
+  
+    throw new Error(`⛔ Timeout : L'utilisateur "${dbUser}" n'a pas été assigné à la base "${databaseName}" après plusieurs tentatives.`);
+  }
+  
+
+  /**
    * Crée une base de données, un utilisateur et leur attribue les privilèges nécessaires.
    */
   async createDatabase(userId) {
     const dbName = `user_${userId}_db`;
     const dbUser = `user_${userId}`;
-    const dbPassword = this.generateSecurePassword();
+    var dbPassword = this.generateSecurePassword();
 
     const prefixedDbName = `${this.suffix}${dbName}`;
     const prefixedDbUser = `${this.suffix}${dbUser}`;
 
     try {
-      // 1️⃣ Création de la base de données
-      console.log(`🚀 Création de la base de données "${dbName}"...`);
-      await this.apiClient.post("/hosting/database", {
-        id: this.worldAccountId,
-        name: dbName,
-        databaseType: "MYSQL",
-      });
-
-      await this.waitForDatabaseCreation(prefixedDbName);
-
-      // 2️⃣ Création de l'utilisateur
+    // 2️⃣ Création de l'utilisateur
       console.log(`🚀 Création de l'utilisateur "${dbUser}"...`);
       await this.apiClient.post("/hosting/database/user", {
         id: this.worldAccountId,
@@ -127,13 +153,23 @@ class DatabaseService {
 
       await this.waitForUserCreation(prefixedDbUser);
 
+      // 1️⃣ Création de la base de données
+      console.log(`🚀 Création de la base de données "${dbName}"...`);
+      await this.apiClient.post("/hosting/database", {
+        id: this.worldAccountId,
+        name: dbName,
+        databaseType: "MYSQL",
+      });
+
+      await this.waitForDatabaseCreation(prefixedDbName);
+
       // 3️⃣ Attribution des privilèges à l'utilisateur sur la base
       console.log(
         `🚀 Attribution des privilèges à "${dbUser}" sur "${dbName}"...`
       );
       await this.apiClient.put("/hosting/database/user/privileges", {
         databaseType: "MYSQL",
-        privileges: "ALL PRIVILEGES",
+        privileges: ["ALL PRIVILEGES"],
         id: this.worldAccountId,
         databaseName: prefixedDbName,
         databaseUsername: prefixedDbUser,
@@ -141,13 +177,20 @@ class DatabaseService {
 
       console.log(`✅ Privilèges accordés avec succès.`);
 
+      //await this.waitForUserAssignment(dbName, dbUser);
+
       // 4️⃣ Exécution du script SQL d'initialisation
-      await this.executeSQLScript({
-        host: "node117-eu.n0c.com",
+
+      const connectionConfig = {
+        host: "localhost",
         user: prefixedDbUser,
         password: dbPassword,
         database: prefixedDbName,
-      });
+        multipleStatements: true,
+        connectTimeout: 5000
+      };
+
+     await this.executeSQLScript(connectionConfig)
 
       return {
         dbUser: prefixedDbUser,
@@ -166,50 +209,76 @@ class DatabaseService {
   async executeSQLScript(connectionConfig) {
     let conn;
     try {
-      console.log(
-        `🚀 Exécution du script SQL pour "${connectionConfig.database}"...`
-      );
-
-      const scriptPath = path.join(__dirname, "..", "sql", "init_db.sql");
-      const sqlScript = await fs.readFile(scriptPath, "utf8");
-
+      console.log(`🔍 Test de connexion`);
       conn = await mariadb.createConnection(connectionConfig);
+      
+      // Vérification de la version du serveur
+      const serverVersion = await conn.query('SELECT VERSION() AS version');
+      console.log(`📌 Version MariaDB: ${serverVersion[0].version}`);
 
-      const statements = sqlScript
-        .split(/;\s*(?=(CREATE|INSERT|ALTER|DROP|UPDATE|DELETE|SELECT))/i)
-        .map((stmt) => stmt.trim())
-        .filter((stmt) => stmt.length > 0);
+      // Validation du fichier SQL
+      const scriptPath = path.join(__dirname, '../sql/', 'init_db.sql');
+      await this.validateScriptFile(scriptPath);
 
-      for (const statement of statements) {
-        await conn.query(statement);
-      }
-
-      console.log(
-        `✅ Script SQL exécuté avec succès sur "${connectionConfig.database}".`
-      );
+      // Lecture et exécution du script
+      const sqlScript = await fs.readFile(scriptPath, 'utf8');
+      console.log('🚀 Début de l\'exécution du script SQL...');
+      
+      const res = await conn.query(sqlScript);
+      console.log(`ℹ️ ${res.affectedRows} opérations effectuées`);
+      
     } catch (error) {
-      console.error("❌ Erreur lors de l'exécution du script SQL :", error);
-      throw error;
+      console.error('ERREUR DÉTAILLÉE :', {
+        code: error.code,
+        sqlState: error.sqlState,
+        fatal: error.fatal,
+        message: error.message
+      });
+      throw new Error(`Échec SQL : ${error.sql?.substring(0, 50)}...`);
     } finally {
       if (conn) await conn.end();
     }
   }
 
+    /**
+   * Valide l'existence du fichier SQL
+   * @param {string} scriptPath 
+   */
+    async validateScriptFile(scriptPath) {
+      try {
+        await fs.access(scriptPath, fs.constants.R_OK);
+        const stats = await fs.stat(scriptPath);
+        console.log(`📄 Fichier SQL trouvé (${(stats.size / 1024).toFixed(2)} Ko)`);
+      } catch (error) {
+        throw new Error(`❌ Fichier SQL inaccessible: ${error.message}`);
+      }
+    }
+
   /**
    * Génère un mot de passe sécurisé.
    */
   generateSecurePassword() {
-    const length = 8;
-    const chars =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@*$??!!+-/";
-    let password = "";
-
-    for (let i = 0; i < length; i++) {
-      const randomIndex = crypto.randomInt(0, chars.length);
-      password += chars[randomIndex];
+    const length = 14;
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const specialChars = '@*$?!+-/';
+    const allChars = lowercase + uppercase + numbers + specialChars;
+  
+    let password = '';
+    password += lowercase[crypto.randomInt(lowercase.length)];
+    password += uppercase[crypto.randomInt(uppercase.length)];
+    password += numbers[crypto.randomInt(numbers.length)];
+    password += specialChars[crypto.randomInt(specialChars.length)];
+  
+    for (let i = 4; i < length; i++) {
+      password += allChars[crypto.randomInt(allChars.length)];
     }
-
-    return password;
+  
+    return password
+      .split('')
+      .sort(() => 0.5 - Math.random())
+      .join('');
   }
 
   /**

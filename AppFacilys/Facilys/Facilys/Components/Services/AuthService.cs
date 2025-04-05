@@ -335,25 +335,38 @@ namespace Facilys.Components.Services
 {
     public class AuthService
     {
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
         private const string CookieFileName = "cookieConnect.json";
-        private readonly ApplicationDbContext _context;
         private readonly APIWebSiteService _webSiteService;
         private readonly ProtectedLocalStorage _localStorage;
+        private readonly UserConnectionService _userConnection;
         public CookieData _cookieData { get; set; } = new();
 
-        public AuthService(ApplicationDbContext context, APIWebSiteService webSiteService, ProtectedLocalStorage localStorage)
+        public AuthService(IDbContextFactory<ApplicationDbContext> contextFactory, APIWebSiteService webSiteService, ProtectedLocalStorage localStorage, UserConnectionService userConnection)
         {
-            _context = context;
+            _contextFactory = contextFactory;
             _webSiteService = webSiteService;
             _localStorage = localStorage;
+            _userConnection = userConnection;
         }
 
         public async Task<Users> AuthenticateAsync(string email, string password)
         {
+            //await using var localContext = _factory.CreateDbContext();
+            //var user = await localContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+
+            //await using var mariaContext = _factory.CreateDbContext();
+            //if (await mariaContext.Database.CanConnectAsync())
+            //{
+            //    return user;
+            //}
+            await using var _context = await _contextFactory.CreateDbContextAsync();
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user != null && Users.VerifyPassword(password, user.Password))
             {
-                await SetAuthenticatedAsync(user);
+               await SetMariaDBCredentials(user);
+               await SetAuthenticatedAsync(user);
                 return user;
             }
             else
@@ -364,10 +377,12 @@ namespace Facilys.Components.Services
                     Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                     if (userDb == null)
                     {
-                        SetUserWeb(result.UserData);
+                       SetUserWeb(result.UserData);
                         userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                     }
-                    await SetAuthenticatedAsync(userDb);
+
+                   await SetMariaDBCredentials(user);
+                   await SetAuthenticatedAsync(userDb);
                     return userDb;
                 }
             }
@@ -533,8 +548,9 @@ namespace Facilys.Components.Services
             }
         }
 
-        public void SetUserWeb(UserData user)
+        public async void SetUserWeb(UserData user)
         {
+            await using var _context = await _contextFactory.CreateDbContextAsync();
             var AddUserWeb = new Users
             {
                 Lname = user.Lname,
@@ -548,6 +564,15 @@ namespace Facilys.Components.Services
             };
             _context.Users.Add(AddUserWeb);
             _context.SaveChanges();
+        }
+
+        private async Task SetMariaDBCredentials(Users user)
+        {
+            // Exemple - adapter selon votre modèle de données
+            _userConnection.Server = "user.DbServer";
+            _userConnection.Database = "user.DbName";
+            _userConnection.UserId = "user.DbUser";
+            _userConnection.Password = "user.DbPassword";
         }
 
         /// <summary>
