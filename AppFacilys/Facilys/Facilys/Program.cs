@@ -135,6 +135,7 @@ using Facilys.Components.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
+using Renci.SshNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -160,6 +161,18 @@ builder.Services.AddSession(options =>
 
 
 builder.Services.AddScoped<UserConnectionService>();
+// Création du tunnel SSH pour se connecter à la base de données MariaDB distante
+// Les paramètres du tunnel (hôte, port, utilisateur, mot de passe) sont récupérés depuis la configuration
+var sshHost = builder.Configuration["Ssh:Host"];
+var sshPort = int.Parse(builder.Configuration["Ssh:Port"] ?? "5022");
+var sshUser = builder.Configuration["Ssh:Username"];
+var sshPassword = builder.Configuration["Ssh:Password"];
+
+var sshClient = new SshClient(sshHost, sshPort, sshUser, sshPassword);
+sshClient.Connect();
+var forwardedPort = new ForwardedPortLocal("127.0.0.1", 5022, "127.0.0.1", 3306);
+sshClient.AddForwardedPort(forwardedPort);
+forwardedPort.Start();
 
 // Configuration flexible de la base de données
 if (HybridSupport.IsElectronActive)

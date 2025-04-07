@@ -82,15 +82,15 @@ class User {
     }
   }
 
-  static async updateMariaDBInfo(userId, dbInfo) {
+  static async updateMariaDBInfo(email, dbInfo) {
     try {
       const updateData = {
-        mariadbUser: dbInfo.user,
+        mariadbUser: dbInfo.dbUser,
         mariadbPassword: dbInfo.password,
-        mariadbDb: dbInfo.name
+        mariadbDb: dbInfo.dbName
       };
 
-      const userRef = db.collection("users").doc(userId);
+      const userRef = db.collection("users").doc(email);
       
       // Utilisation d'une transaction pour plus de sécurité
       await db.runTransaction(async (transaction) => {
@@ -109,7 +109,7 @@ class User {
       
       // Log supplémentaire pour le débogage
       if (error.code === 'NOT_FOUND') {
-        console.error(`Utilisateur ${userId} introuvable`);
+        console.error(`Utilisateur ${email} introuvable`);
       } else if (error.code === 'PERMISSION_DENIED') {
         console.error("Permissions Firestore insuffisantes");
       }

@@ -154,9 +154,9 @@ exports.register = async (req, res) => {
 
       // Mettre à jour les infos de connexion à la base dans votre utilisateur
       await user.updateMariaDBInfo(user.email, {
-        user: dbInfo.user,
-        password: dbInfo.password,
-        name: dbInfo.name,
+        mariadbUser: dbInfo.dbUser,
+        mariadbPassword: dbInfo.dbName,
+        mariadbDb: dbInfo.password,
       });
     } else {
       if (pathLink.link == undefined) {
@@ -189,10 +189,10 @@ exports.register = async (req, res) => {
     console.error("Erreur lors de la création de l'utilisateur:", error);
 
     // Nettoyage en cas d'erreur après la création de l'utilisateur
-    if (user && user.id) {
+    if (user && user.email) {
       try {
-        await admin.firestore().collection("users").doc(user.id).delete();
-        await databaseService.deleteUserDatabase(user.id); // À implémenter si nécessaire
+        await admin.firestore().collection("users").doc(user.email).delete();
+        await databaseService.deleteUserDatabase(user.email); // À implémenter si nécessaire
       } catch (cleanupError) {
         console.error("Erreur lors du nettoyage:", cleanupError);
       }
