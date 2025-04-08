@@ -38,7 +38,7 @@ class User {
   }
 
   // Méthode pour récupérer un utilisateur par e-mail
-  static async findByEmail(email) {
+ static async findByEmail(email) {
     const userRef = db.collection("users").doc(email);
     const doc = await userRef.get();
 
@@ -69,7 +69,7 @@ class User {
   }
 
   // Méthode pour mettre à jour un utilisateur dans Firestore
-  static async update(email, updateData) {
+ static async update(email, updateData) {
     const userRef = db.collection("users").doc(email);
 
     try {
@@ -82,7 +82,7 @@ class User {
     }
   }
 
-  static async updateMariaDBInfo(email, dbInfo) {
+  async updateMariaDBInfo(email, dbInfo) {
     try {
       const updateData = {
         mariadbUser: dbInfo.dbUser,

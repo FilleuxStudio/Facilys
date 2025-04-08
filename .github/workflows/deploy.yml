@@ -39,6 +39,24 @@ jobs:
         mkdir -p temp_deploy
         cp -R SiteWebFacilys/. temp_deploy/
 
+    - name: Cleanong folder to PlanetHoster
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd server
+          rm -R -f node_modules/
+          rm -R -f views/
+          rm -R -f tmp/
+          rm -R -f src/
+          rm -R -f public/
+          rm -f package-lock.json
+          rm -f .env
+          exit
+
     - name: Copy files to server
       uses: appleboy/scp-action@master
       with:

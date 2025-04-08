@@ -190,7 +190,7 @@ class DatabaseService {
         connectTimeout: 5000
       };
 
-     await this.executeSQLScript(connectionConfig)
+     await this.executeSQLScript(connectionConfig) 
 
       return {
         dbUser: prefixedDbUser,

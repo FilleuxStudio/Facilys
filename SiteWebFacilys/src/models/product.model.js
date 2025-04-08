@@ -63,7 +63,7 @@ class Product {
   }
 
    // Méthode pour mettre à jour un utilisateur dans Firestore
-   static async update(id, updateData) {
+  static async update(id, updateData) {
     const productsRef = db.collection("products").doc(id);
 
     try {
@@ -77,7 +77,7 @@ class Product {
   }
 
    // Méthode pour supprimer un produit de Firestore
-   static async delete(id) {
+ static async delete(id) {
     const productRef = db.collection('products').doc(id);
 
     try {
