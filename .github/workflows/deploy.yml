@@ -39,7 +39,7 @@ jobs:
         mkdir -p temp_deploy
         cp -R SiteWebFacilys/. temp_deploy/
 
-    - name: Cleanong folder to PlanetHoster
+    - name: Cleaning folder to PlanetHoster
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -48,13 +48,9 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd server
-          rm -R -f node_modules/
-          rm -R -f views/
-          rm -R -f tmp/
-          rm -R -f src/
-          rm -R -f public/
-          rm -f package-lock.json
-          rm -f .env
+          find . -mindepth 1 -maxdepth 1 ! -name "passenger" ! -name ".git" -exec echo {} \;
+          find . -mindepth 1 -maxdepth 1 ! -name "passenger" ! -name ".git" -exec rm -rf {} \;
+          ls -all
           exit
 
     - name: Copy files to server
@@ -65,7 +61,7 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.PORT }}
         source: "temp_deploy/."
-        target: "server"
+        target: "server/"
         strip_components: 1
 
     - name: Deploy to PlanetHoster
@@ -77,8 +73,8 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd server
-          rm -R -f node_modules/
-          rm -f package-lock.json
           source /home/jmaqmsnt/nodevenv/server/22/bin/activate
-          npm install
+          npm install 
+          npm install -g
+          npm restart
           exit
