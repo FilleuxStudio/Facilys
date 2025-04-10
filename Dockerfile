@@ -44,13 +44,13 @@ COPY AppFacilys/Facilys/. .
 WORKDIR /src/Facilys
 RUN mkdir -p app/publish
 # Restauration des dépendances .NET
+RUN dotnet restore
 RUN dotnet restore --runtime linux-x64
-
 # Installation des dépendances ElectronNET
 RUN dotnet add package ElectronNET.API --version 23.6.2
 
 # Construction et publication
-RUN dotnet publish -c Release -o app/publish --runtime linux-x64 --self-contained false
+RUN dotnet publish "Facilys.csproj" -c Release -o app/publish --runtime linux-x64 --self-contained false
 
 # Étape 2: Exécution
 FROM debian:latest
