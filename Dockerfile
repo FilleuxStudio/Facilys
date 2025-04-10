@@ -50,7 +50,7 @@ RUN dotnet restore --runtime linux-x64
 RUN dotnet add package ElectronNET.API --version 23.6.2
 
 # Construction et publication
-RUN dotnet clean && dotnet build && dotnet publish -c Release --runtime linux-x64 --self-contained false
+RUN dotnet build -c Release -o app/publish
 
 # Étape 2: Exécution
 FROM debian:latest
