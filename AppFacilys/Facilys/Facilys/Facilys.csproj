@@ -29,8 +29,8 @@
    <!-- <PackageReference Include="ElectronNET.CLI" Version="23.6.2" PrivateAssets="all" />-->
 
     <!-- Blazor -->
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.14" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.15" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.15" />
 
     <!-- Entity Framework -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.14" />
