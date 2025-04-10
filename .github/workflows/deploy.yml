@@ -49,8 +49,7 @@ jobs:
         script: |
           cd server
           find . -mindepth 1 -maxdepth 1 ! -name "passenger" ! -name ".git" -exec echo {} \;
-          find . -mindepth 1 -maxdepth 1 ! -name "passenger" ! -name ".git" -exec rm -rf {} \;
-          ls -all
+          find . -mindepth 1 -maxdepth 1 ! -name "passenger" ! -name ".git" ! -name "src" -exec rm -rf {} \;
           exit
 
     - name: Copy files to server
@@ -73,8 +72,9 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd server
+          rm -f package-lock.json
+          rm -rf node_modules
           source /home/jmaqmsnt/nodevenv/server/22/bin/activate
           npm install 
           npm install -g
-          npm restart
           exit
