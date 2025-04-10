@@ -50,7 +50,7 @@ RUN dotnet restore --runtime linux-x64
 RUN dotnet add package ElectronNET.API --version 23.6.2
 
 # Construction et publication
-RUN dotnet build -c Release -o app/publish
+RUN dotnet build "Facilys.csproj" -c Release -o app/publish
 
 # Étape 2: Exécution
 FROM debian:latest
