@@ -362,28 +362,28 @@ namespace Facilys.Components.Services
             //    return user;
             //}
             await using var _context = await _contextFactory.CreateDbContextAsync();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user != null && Users.VerifyPassword(password, user.Password))
-            {
-               await SetMariaDBCredentials(user);
-               await SetAuthenticatedAsync(user);
-                return user;
+
+            var result = await _webSiteService.PostConnectionUserAsync(email, password);
+            if (result.Success){
+                Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (userDb == null)
+                {
+                    SetUserWeb(result.UserData);
+                    userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                }
+
+                await SetMariaDBCredentials(result.UserData);
+                await SetAuthenticatedAsync(userDb);
+                return userDb;
             }
             else
             {
-                var result = await _webSiteService.PostConnectionUserAsync(email, password);
-                if (result.Success)
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (user != null && Users.VerifyPassword(password, user.Password))
                 {
-                    Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-                    if (userDb == null)
-                    {
-                       SetUserWeb(result.UserData);
-                        userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-                    }
-
-                   await SetMariaDBCredentials(user);
-                   await SetAuthenticatedAsync(userDb);
-                    return userDb;
+                    await SetMariaDBCredentials(result.UserData);
+                    await SetAuthenticatedAsync(user);
+                    return user;
                 }
             }
             return null;
@@ -566,13 +566,13 @@ namespace Facilys.Components.Services
             _context.SaveChanges();
         }
 
-        private async Task SetMariaDBCredentials(Users user)
+        private async Task SetMariaDBCredentials(UserData user)
         {
             // Exemple - adapter selon votre modèle de données
-            _userConnection.Server = "user.DbServer";
-            _userConnection.Database = "user.DbName";
-            _userConnection.UserId = "user.DbUser";
-            _userConnection.Password = "user.DbPassword";
+            _userConnection.Server = "localhost";
+            _userConnection.Database = user.MariadbDb;
+            _userConnection.UserId = user.MariadbUser;
+            _userConnection.Password = user.Password;
         }
 
         /// <summary>

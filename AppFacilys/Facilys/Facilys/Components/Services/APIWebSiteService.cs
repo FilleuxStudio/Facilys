@@ -89,6 +89,9 @@ namespace Facilys.Components.Services
                     Lname = lname,
                     Role = roleUser,
                     Company = company,
+                    MariadbDb = document.RootElement.GetProperty("mariadbDb").GetString(),
+                    MariadbPassword = document.RootElement.GetProperty("mariadbPassword").GetString(),
+                    MariadbUser = document.RootElement.GetProperty("mariadbUser").GetString(),
                 };
 
                 return (true, isTeam, user);
@@ -181,6 +184,9 @@ namespace Facilys.Components.Services
         public string Lname { get; set; }
         public RoleUser Role { get; set; }
         public string Company { get; set; }
+        public string MariadbUser { get; set; }
+        public string MariadbPassword { get; set; }
+        public string MariadbDb {  get; set; }
     }
 
     public class ApiResponse

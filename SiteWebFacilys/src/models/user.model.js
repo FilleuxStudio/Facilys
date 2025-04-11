@@ -85,9 +85,9 @@ class User {
   async updateMariaDBInfo(email, dbInfo) {
     try {
       const updateData = {
-        mariadbUser: dbInfo.dbUser,
-        mariadbPassword: dbInfo.password,
-        mariadbDb: dbInfo.dbName
+        mariadbUser: dbInfo.mariadbUser,
+        mariadbPassword: dbInfo.mariadbPassword,
+        mariadbDb: dbInfo.mariadbDb
       };
 
       const userRef = db.collection("users").doc(email);

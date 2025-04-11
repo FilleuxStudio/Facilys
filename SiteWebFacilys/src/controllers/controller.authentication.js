@@ -155,8 +155,8 @@ exports.register = async (req, res) => {
       // Mettre à jour les infos de connexion à la base dans votre utilisateur
       await user.updateMariaDBInfo(user.email, {
         mariadbUser: dbInfo.dbUser,
-        mariadbPassword: dbInfo.dbName,
-        mariadbDb: dbInfo.password,
+        mariadbPassword: dbInfo.password,
+        mariadbDb: dbInfo.dbName,
       });
     } else {
       if (pathLink.link == undefined) {
