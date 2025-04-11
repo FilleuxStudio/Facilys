@@ -22,8 +22,9 @@ RUN apt-get update && \
     libleptonica-dev \
     libtesseract-dev \
     libopencv-dev \
-    tesseract-ocr-fra \
-    && rm -rf /var/lib/apt/lists/*
+    tesseract-ocr-fra
+
+RUN apt-get update && apt-get install -y openssh-client 
 
 RUN curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin \
     -Channel 8.0 \
@@ -33,6 +34,8 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin \
 
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
+
+RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
 COPY AppFacilys/Facilys/. .

@@ -18,9 +18,13 @@
     <!-- Optionnel : désactiver le traitement des warnings en tant qu'erreurs -->
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
-    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
-  </PropertyGroup>
 
+    <NoWarn>$(NoWarn);BLAZOR106</NoWarn>
+    <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+  
   <ItemGroup>
     <!-- Packages principaux -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -70,16 +74,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-    <Content Include="$(NuGetPackageRoot)microsoft.aspnetcore.components.quickgrid\**\*.js" LinkBase="_content/Microsoft.AspNetCore.Components.QuickGrid" />
+    <Content Include="$(NuGetPackageRoot)microsoft.aspnetcore.components.quickgrid\**\*.js" LinkBase="_content/Microsoft.AspNetCore.Components.QuickGrid" CopyToOutputDirectory="PreserveNewest"
+           CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
     <TrimmerRootAssembly Include="Microsoft.AspNetCore.Components.QuickGrid" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <NoWarn>$(NoWarn);BLAZOR106</NoWarn>
-  </PropertyGroup>
 
   <ItemGroup>
     <!-- Exclusion des chemins absolus spécifiques à une machine -->

@@ -6,9 +6,10 @@ const crypto = require("crypto");
 
 class DatabaseService {
   constructor() {
-    // Vérification des variables d'environnement
-    const { PLANETHOSTER_API_KEY, PLANETHOSTER_API_USER, WORLDACCOUNTS } =
-      process.env;
+    const PLANETHOSTER_API_KEY = process.env.PLANETHOSTER_API_KEY;
+    const PLANETHOSTER_API_USER = process.env.PLANETHOSTER_API_USER;
+    const WORLDACCOUNTS = process.env.WORLDACCOUNTS;
+
     if (!PLANETHOSTER_API_KEY || !PLANETHOSTER_API_USER || !WORLDACCOUNTS) {
       throw new Error(
         "Les variables d'environnement pour l'API PlanetHoster ne sont pas définies."
@@ -212,10 +213,6 @@ class DatabaseService {
       console.log(`🔍 Test de connexion`);
       conn = await mariadb.createConnection(connectionConfig);
       
-      // Vérification de la version du serveur
-      const serverVersion = await conn.query('SELECT VERSION() AS version');
-      console.log(`📌 Version MariaDB: ${serverVersion[0].version}`);
-
       // Validation du fichier SQL
       const scriptPath = path.join(__dirname, '../sql/', 'init_db.sql');
       await this.validateScriptFile(scriptPath);
@@ -223,9 +220,7 @@ class DatabaseService {
       // Lecture et exécution du script
       const sqlScript = await fs.readFile(scriptPath, 'utf8');
       console.log('🚀 Début de l\'exécution du script SQL...');
-      
       const res = await conn.query(sqlScript);
-      console.log(`ℹ️ ${res.affectedRows} opérations effectuées`);
       
     } catch (error) {
       console.error('ERREUR DÉTAILLÉE :', {
