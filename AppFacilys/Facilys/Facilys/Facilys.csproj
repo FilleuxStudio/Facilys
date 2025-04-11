@@ -15,11 +15,10 @@
     <ElectronNodeVersion>22.13.0</ElectronNodeVersion>
     <ElectronDisableHttp2>true</ElectronDisableHttp2>
     <ApplicationIcon>wwwroot\icon-256.ico</ApplicationIcon>
-
-    <!-- Ignorer le warning BLAZOR106 -->
-    <NoWarn>$(NoWarn);BLAZOR106</NoWarn>
     <!-- Optionnel : désactiver le traitement des warnings en tant qu'erreurs -->
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
   </PropertyGroup>
 
   <ItemGroup>
@@ -69,6 +68,18 @@
     <None Include="wwwroot\Tessdata\carte_grise.user-words" />
     <None Include="wwwroot\Tessdata\fra.traineddata" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <Content Include="$(NuGetPackageRoot)microsoft.aspnetcore.components.quickgrid\**\*.js" LinkBase="_content/Microsoft.AspNetCore.Components.QuickGrid" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Microsoft.AspNetCore.Components.QuickGrid" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);BLAZOR106</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <!-- Exclusion des chemins absolus spécifiques à une machine -->
