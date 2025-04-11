@@ -7,75 +7,42 @@ on:
 env:
   PROJECT_ID: "myprojectfacilys"
   SERVICE_NAME: "blazor-server-app"
-  REGION: "europe-west1" 
+  REGION: "europe-west1"
   ARTIFACT_REGISTRY: "europe-west1-docker.pkg.dev/myprojectfacilys/facilys-repo"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # Éviter les jobs longs
+    timeout-minutes: 20
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
-    # Étape 1 - Récupération du code
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # Étape 2 - Cache des dépendances .NET
-    - name: Setup .NET Cache
-      uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    # Étape 3 - Installation .NET 8
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0.x'
-
-    # Étape 4 - Build de l'application
-    - name: Build Application
-      run: |
-        cd AppFacilys/Facilys/Facilys  # Correction clé ici
-        dotnet restore "Facilys.csproj"
-        dotnet publish "Facilys.csproj" -c Release -o published --no-self-contained
-
-    #- name: Set up Docker Buildx
-    #  uses: docker/setup-buildx-action@v2
-    #  with:
-    #    driver: docker-container
-    #    install: true
-
-    - name: Build Docker Image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./
-        file: ./Dockerfile
-        tags: |
-          ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
-        platforms: linux/amd64
-        push: true  # Ajout crucial
-
-    # Étape 6 - Authentification sécurisée avec Workload Identity
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
         workload_identity_provider: 'projects/403108519742/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
         service_account: 'github-actions-deploy-2@myprojectfacilys.iam.gserviceaccount.com'
 
-    # Étape 7 - Push de l'image vers Artifact Registry
-    - name: Push Docker Image
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.REGION }}-docker.pkg.dev
-        username: _json_key
-        password: ${{ secrets.GCP_SA_KEY }}  # Alternative si WIF non configuré
-    - name: Upload Image
-      run: docker push ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-    # Étape 8 - Déploiement sur Cloud Run avec paramètres économiques
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64
+        push: true
+        tags: |
+          ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
+
     - name: Deploy to Cloud Run
       uses: google-github-actions/deploy-cloudrun@v1
       with:
@@ -85,17 +52,18 @@ jobs:
         flags: |
           --platform=managed
           --cpu=1
-          --memory=1Gi          # Minimum pour .NET
-          --concurrency=95      # Optimise le nombre de requêtes/instance
-          --timeout=300s        # Évite les instances bloquées
-          --min-instances=0     # Scale-to-zero
-          --max-instances=5     # Limite les coûts max
+          --memory=1Gi
+          --concurrency=80
+          --timeout=300s
+          --min-instances=0
+          --max-instances=5
           --port=8080
-          --no-traffic          # Déploiement sans coupure
+          --no-traffic
+          --revision-suffix=${{ github.sha }}
 
-    # Étape 9 - Nettoyage des images obsolètes (optionnel)
     - name: Clean Old Images
       if: success()
       run: |
-        gcloud artifacts docker images delete ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }} --delete-tags --quiet
-        --filter="TAGS!=latest AND createTime<$(date -d '-7 days' +%Y-%m-%d)"
+        gcloud artifacts docker images delete ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }} \
+          --delete-tags --quiet \
+          --filter="TAGS!=latest AND createTime<$(date -d '-7 days' +%Y-%m-%d)"

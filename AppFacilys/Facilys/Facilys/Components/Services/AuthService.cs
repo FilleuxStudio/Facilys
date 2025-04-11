@@ -365,6 +365,9 @@ namespace Facilys.Components.Services
 
             var result = await _webSiteService.PostConnectionUserAsync(email, password);
             if (result.Success){
+                await SetMariaDBCredentials(result.UserData);
+                _dynamicMySQLService.InitializeConnection(_userConnection);
+
                 Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (userDb == null)
                 {

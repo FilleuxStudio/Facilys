@@ -19,10 +19,10 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
 
-    <NoWarn>$(NoWarn);BLAZOR106</NoWarn>
+   <!-- <NoWarn>$(NoWarn);BLAZOR106</NoWarn>
     <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
     <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
-    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
   </PropertyGroup>
   
   <ItemGroup>
