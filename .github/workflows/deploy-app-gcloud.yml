@@ -45,21 +45,24 @@ jobs:
           ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:latest
 
     - name: Deploy to Cloud Run
-      uses: google-github-actions/deploy-cloudrun@v1
+      uses: google-github-actions/deploy-cloudrun@v2
       with:
         service: ${{ env.SERVICE_NAME }}
         image: ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
         region: ${{ env.REGION }}
+        credentials: ${{ secrets.GCP_SA_KEY }}
+        env_vars: "PORT=8080"
         flags: |
-          --platform=managed
           --cpu=1
-          --memory=1Gi
-          --concurrency=80
-          --timeout=300s
+          --memory=2Gi
           --min-instances=0
           --max-instances=5
-          --port=8080
-          --revision-suffix=${{ github.sha }}
+          --timeout=300s
+          --ingress=all
+          --revision-suffix=${{ github.sha[:7] }}
+          --labels=commit=${{ github.sha }},env=prod
+          --allow-unauthenticated
+          --port=8080  
 
     - name: Clean Old Images
       if: success()
