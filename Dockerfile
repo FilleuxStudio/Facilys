@@ -74,11 +74,12 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PORT=8080 \
+    ASPNETCORE_URLS=http://*:8080 \
     TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 
 WORKDIR /app
 
-EXPOSE $PORT
+EXPOSE 8080
 
 COPY --from=build /app/publish .
 
