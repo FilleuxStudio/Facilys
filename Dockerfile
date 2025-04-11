@@ -73,8 +73,9 @@ RUN apt-get update && \
     tesseract-ocr-fra \
     && rm -rf /var/lib/apt/lists/*
 
-ENV ASPNETCORE_URLS=http://0.0.0.0:$PORT \
-TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+ENV PORT=8080 \
+    ASPNETCORE_URLS=http://*:$PORT \
+    TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 
 WORKDIR /app
 COPY --from=build /app/publish .
