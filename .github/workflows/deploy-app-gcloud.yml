@@ -60,8 +60,6 @@ jobs:
           --ingress=all
           --revision-suffix=${{ github.sha }}
           --port=8080
-          --labels=commit=${{ github.sha }},env=prod
-          --allow-all
 
     - name: Clean Old Images
       if: success()
