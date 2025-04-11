@@ -7,7 +7,6 @@
         public string UserId { get; set; }
         public string Password { get; set; }
 
-        public string ConnectionString =>
-            $"Server={Server};Database={Database};User={UserId};Password={Password};";
+        public string ConnectionString => $"Server={Server};Database={Database};User={UserId};Password={Password};";
     }
 }

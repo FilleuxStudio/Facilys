@@ -59,7 +59,6 @@ jobs:
           --min-instances=0
           --max-instances=5
           --port=8080
-          --no-traffic
           --revision-suffix=${{ github.sha }}
 
     - name: Clean Old Images

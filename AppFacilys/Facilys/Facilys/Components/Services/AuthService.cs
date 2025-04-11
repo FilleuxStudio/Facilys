@@ -571,11 +571,11 @@ namespace Facilys.Components.Services
 
         private async Task SetMariaDBCredentials(UserData user)
         {
-            // Exemple - adapter selon votre modèle de données
+            // Utilisez les informations de connexion fournies par l'API
             _userConnection.Server = "localhost";
             _userConnection.Database = user.MariadbDb;
             _userConnection.UserId = user.MariadbUser;
-            _userConnection.Password = user.Password;
+            _userConnection.Password = user.MariadbPassword;
         }
 
         /// <summary>
