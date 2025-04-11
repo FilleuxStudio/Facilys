@@ -51,7 +51,6 @@ jobs:
         image: ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
         region: ${{ env.REGION }}
         credentials: ${{ secrets.GCP_SA_KEY }}
-        env_vars: "PORT=8080"
         flags: |
           --cpu=1
           --memory=2Gi
@@ -59,10 +58,10 @@ jobs:
           --max-instances=5
           --timeout=300s
           --ingress=all
-          --revision-suffix=${{ github.sha[:7] }}
+          --revision-suffix=${{ github.sha }}
+          --port=8080
           --labels=commit=${{ github.sha }},env=prod
-          --allow-unauthenticated
-          --port=8080  
+          --allow-all
 
     - name: Clean Old Images
       if: success()

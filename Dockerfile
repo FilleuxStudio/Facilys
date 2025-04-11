@@ -78,6 +78,8 @@ ENV PORT=8080 \
     TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 
 WORKDIR /app
+EXPOSE 8080
+
 COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "Facilys.dll"]
