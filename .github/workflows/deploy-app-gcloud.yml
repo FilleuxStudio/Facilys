@@ -60,10 +60,4 @@ jobs:
           --ingress=all
           --revision-suffix=${{ github.sha }}
           --port=8080
-
-    - name: Clean Old Images
-      if: success()
-      run: |
-        gcloud artifacts docker images delete ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }} \
-          --delete-tags --quiet \
-          --filter="TAGS!=latest AND createTime<$(date -d '-7 days' +%Y-%m-%d)"
+          --allow-unauthenticated
