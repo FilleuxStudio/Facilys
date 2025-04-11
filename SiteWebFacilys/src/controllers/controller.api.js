@@ -34,7 +34,7 @@ exports.login = async (req, res) => {
     }
 
     // Vérifiez le mot de passe
-    const match = await bcrypt.verify(user.password, password);
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(401).json({
         success: false,

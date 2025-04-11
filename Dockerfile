@@ -50,7 +50,7 @@ RUN dotnet add package ElectronNET.API --version 23.6.2
 RUN dotnet publish -c Release --self-contained true -no-restore --runtime linux-x64  -o /app/publish
 
 # Étape 2: Exécution
-FROM mcr.microsoft.com/dotnet/runtime:8.0-bullseye-slim
+FROM debian:latest
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

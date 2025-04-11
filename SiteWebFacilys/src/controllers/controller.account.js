@@ -252,7 +252,7 @@ exports.accountAddTeam = async (req, res) => {
       fname: tfname,
       lname: tlname,
       type: ttype,
-      password: await bcrypt.hash(tpassword),
+      password: await bcrypt.hash(tpassword, 10),
       team: userManager.companyName,
       manager: userManager.email,
       email: temail,

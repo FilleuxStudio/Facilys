@@ -361,13 +361,12 @@ namespace Facilys.Components.Services
             //{
             //    return user;
             //}
-            await using var _context = await _contextFactory.CreateDbContextAsync();
+
 
             var result = await _webSiteService.PostConnectionUserAsync(email, password);
             if (result.Success){
                 await SetMariaDBCredentials(result.UserData);
-                _dynamicMySQLService.InitializeConnection(_userConnection);
-
+                await using var _context = await _contextFactory.CreateDbContextAsync();
                 Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (userDb == null)
                 {
@@ -381,6 +380,7 @@ namespace Facilys.Components.Services
             }
             else
             {
+                await using var _context = await _contextFactory.CreateDbContextAsync();
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (user != null && Users.VerifyPassword(password, user.Password))
                 {

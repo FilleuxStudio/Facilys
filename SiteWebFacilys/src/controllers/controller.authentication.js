@@ -8,7 +8,7 @@ const databaseService = require("../services/databaseService");
 exports.login = async (req, res) => {
   const { _csrf, email, password, rememberMe } = req.body;
   const pathLink = req.query || null;
-
+  console.log(req.body);
   if (!req.csrfToken() || _csrf !== req.csrfToken()) {
     return res.status(403).redirect("/login?message=Erreur tocken");
   }
@@ -16,6 +16,7 @@ exports.login = async (req, res) => {
   try {
     // Rechercher l'utilisateur dans la base de données
     const user = await User.findByEmail(email);
+    console.log(user);
     if (!user) {
       if (pathLink.link == undefined) {
         return res
@@ -33,13 +34,13 @@ exports.login = async (req, res) => {
     }
 
     // Comparer le mot de passe
-    const match = await bcrypt.compareSync(user.password, password);
-
+    const match = await bcrypt.compare(password, user.password);
+    console.log(match);
     if (!match) {
       if (pathLink.link == undefined) {
-        res.redirect("/login");
+       return res.redirect("/login");
       } else {
-        res.redirect(
+       return res.redirect(
           "/shop-checkout?id=" +
             req.body.idProduct +
             "&message=Email ou mot de passe incorrect."
@@ -126,9 +127,7 @@ exports.register = async (req, res) => {
 
   const checkTerm = transformCheckboxValue(req.body.checkTerm);
   try {
-    // Hachage du mot de passe avec bcrypt
-    const saltRounds = 10;
-    var hashedPassword = await bcrypt.hash(password, saltRounds);
+    var hashedPassword = await bcrypt.hash(password, 10);
     // Créer une instance de l'utilisateur
     const user = new User({
       companyName,
