@@ -330,6 +330,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using MySqlX.XDevAPI.Common;
 
 namespace Facilys.Components.Services
 {
@@ -364,7 +365,8 @@ namespace Facilys.Components.Services
 
 
             var result = await _webSiteService.PostConnectionUserAsync(email, password);
-            if (result.Success){
+            if (result.Success)
+            {
                 await SetMariaDBCredentials(result.UserData);
                 await using var _context = await _contextFactory.CreateDbContextAsync();
                 Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -572,10 +574,16 @@ namespace Facilys.Components.Services
         private async Task SetMariaDBCredentials(UserData user)
         {
             // Utilisez les informations de connexion fournies par l'API
-            _userConnection.Server = "localhost";
-            _userConnection.Database = user.MariadbDb;
-            _userConnection.UserId = user.MariadbUser;
-            _userConnection.Password = user.MariadbPassword;
+            //_userConnection.Server = "localhost";
+            //_userConnection.Database = user.MariadbDb;
+            //_userConnection.UserId = user.MariadbUser;
+            //_userConnection.Password = user.MariadbPassword;
+
+            await _userConnection.SetCredentialsAsync(
+           user.MariadbDb,
+            user.MariadbUser,
+           user.MariadbPassword
+       );
         }
 
         /// <summary>

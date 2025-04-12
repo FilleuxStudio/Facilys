@@ -146,9 +146,6 @@ builder.Services.AddElectron();
 // Configuration des services
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
-builder.Services.AddHttpContextAccessor();
-
-
 // Ajout de la gestion des sessions et du cache en mémoire
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -159,11 +156,13 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
 });
 
+builder.Services.AddHttpContextAccessor();
+
 
 builder.Services.AddScoped<UserConnectionService>();
 // Configuration du service SSH
-builder.Services.AddSingleton<SshTunnelService>();
-builder.Services.AddHostedService(provider => provider.GetRequiredService<SshTunnelService>());
+builder.Services.AddSingleton<Facilys.Components.Services.SshTunnelService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<Facilys.Components.Services.SshTunnelService>());
 
 // Configuration flexible de la base de données
 if (HybridSupport.IsElectronActive)
@@ -180,7 +179,7 @@ if (HybridSupport.IsElectronActive)
 else
 {
     // Mode Web - MariaDB principale avec connexion dynamique
-    builder.Services.AddSingleton<IDbContextFactory<ApplicationDbContext>, DynamicDbContextFactory>();
+    builder.Services.AddScoped<IDbContextFactory<ApplicationDbContext>, DynamicDbContextFactory>();
 }
 
 
@@ -220,7 +219,7 @@ builder.Services.AddHttpClient<APIWebSiteService>(client =>
 });
 builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
-builder.Services.AddSingleton<DynamicMySQLService>();
+//builder.Services.AddSingleton<DynamicMySQLService>();
 
 var app = builder.Build();
 
