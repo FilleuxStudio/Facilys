@@ -8,9 +8,12 @@ namespace Facilys.Components.Services
         private SshClient _sshClient;
         private ForwardedPortLocal _forwardedPort;
 
+        public int LocalPort { get; private set; }
+
         public SshTunnelService(IConfiguration configuration)
         {
             _configuration = configuration;
+            LocalPort = new Random().Next(5000, 7000);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -52,10 +55,19 @@ namespace Facilys.Components.Services
                 _sshClient = new SshClient(sshHost, sshPort, sshUser, sshPassword);
                 _sshClient.Connect();
 
-                _forwardedPort = new ForwardedPortLocal("127.0.0.1", 5022, "127.0.0.1", 3306);
+                _forwardedPort = new ForwardedPortLocal("127.0.0.1", (uint)LocalPort, "127.0.0.1", 3306);
                 _sshClient.AddForwardedPort(_forwardedPort);
                 _forwardedPort.Start();
+
+                if (!_sshClient.IsConnected)
+                {
+                    throw new Exception("Échec de la connexion SSH");
+                }
+
             }
         }
+
+        public bool IsTunnelActive => _sshClient?.IsConnected == true && _forwardedPort?.IsStarted == true;
+
     }
 }

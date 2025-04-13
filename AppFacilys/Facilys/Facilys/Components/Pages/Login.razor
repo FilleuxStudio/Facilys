@@ -108,7 +108,8 @@
             {
                 // Redirigez l'utilisateur vers une page protégée ou tableau de bord
                 EnvironmentApp.EmailUserConnect = user.Email;
-                NavigationManager.NavigateTo("/dashboard", forceLoad: true);
+                //NavigationManager.NavigateTo("/dashboard", forceLoad: true);
+                NavigationManager.NavigateTo("/dashboard");
             }
             else
             {

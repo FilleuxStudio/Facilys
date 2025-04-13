@@ -161,8 +161,8 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<UserConnectionService>();
 // Configuration du service SSH
-builder.Services.AddSingleton<Facilys.Components.Services.SshTunnelService>();
-builder.Services.AddHostedService(provider => provider.GetRequiredService<Facilys.Components.Services.SshTunnelService>());
+builder.Services.AddSingleton<SshTunnelService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<SshTunnelService>());
 
 // Configuration flexible de la base de données
 if (HybridSupport.IsElectronActive)

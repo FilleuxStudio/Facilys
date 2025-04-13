@@ -13,22 +13,27 @@ namespace Facilys.Components.Pages
     {
         [Parameter]
         public string Email { get; set; }
-        CompanySettings CompanySettings;
+        CompanySettings CompanySettings =new();
         readonly ModalManagerId modalManager = new();
         private string? PreviewImageBase64 { get; set; }
         private int? UserCount { get; set; }
 
-        protected override async Task OnInitializedAsync()
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            await LoadDataHeader();
+            if (firstRender)
+            {
+                await _userConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
         }
 
         private async Task LoadDataHeader()
         {
             //CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
-            CompanySettings ??= new();
+            using var context = await DbContextFactory.CreateDbContextAsync();
 
-            UserCount = await DbContext.Users.CountAsync();
+            UserCount = await context.Users.CountAsync();
 
             if (CompanySettings.NameCompany == "" && CompanySettings.Siret == "")
             {
@@ -69,16 +74,17 @@ namespace Facilys.Components.Pages
         {
             try
             {
-                var existingCompany = await DbContext.CompanySettings.FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
+                using var context = await DbContextFactory.CreateDbContextAsync();
+                var existingCompany = await context.CompanySettings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
                 if (existingCompany == null)
                 {
-                    await DbContext.AddAsync(CompanySettings);
+                    await context.AddAsync(CompanySettings);
                 }
                 else
                 {
-                    DbContext.Update(CompanySettings);
+                    context.Update(CompanySettings);
                 }
-                await DbContext.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

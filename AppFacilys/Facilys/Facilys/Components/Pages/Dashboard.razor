@@ -3,6 +3,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject PageTitleService PageTitleService
 @*@inject DynamicDbContextFactory DBcontextFactory*@
+@inject UserConnectionService _userConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <PageTitle>Dashboard</PageTitle>
@@ -176,47 +177,30 @@
     List<TopVehicle> TopVehicleData = new();
     List<TopClient> TopClientData = new();
 
-    // private string server = "facilys.flixmail.fr";
-    // private string database = "jmaqmsnt_facilys_database_dev";
-    // private string userId = "jmaqmsnt_devuser";
-    // private string password = "nPo@*:1leX";
-
     protected override async void OnInitialized()
     {
         //StateHasChanged();
         //PageTitleService.CurrentTitle = "Dashboard";
+
         await InvokeAsync(() =>
         {
             PageTitleService.CurrentTitle = "Dashboard";
         });
-
-        await LoadDataHeader();
-
-        // try
-        // {
-        //     MySQLService.InitializeConnection(server, database, userId, password);
-        // }
-        // catch (Exception ex)
-        // {
-        // }
-
-        StateHasChanged();
     }
 
-    // private async Task TestConnection()
-    // {
-    //     try
-    //     {
-    //         var isConnected = await MySQLService.TestConnectionAsync();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //     }
-    // }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _userConnection.LoadCredentialsAsync();
+            await LoadDataHeader();
+            StateHasChanged(); // Demande un nouveau rendu du composant
+        }
+    }
 
     private async Task LoadDataHeader()
     {
-        using var context = DbContextFactory.CreateDbContext();
+        using var context = await DbContextFactory.CreateDbContextAsync();
         client = await context.Clients.CountAsync();
         vehicle = await context.Vehicles.CountAsync();
         invoice = await context.Invoices.CountAsync();

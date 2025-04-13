@@ -368,7 +368,8 @@ namespace Facilys.Components.Services
             if (result.Success)
             {
                 await SetMariaDBCredentials(result.UserData);
-                await using var _context = await _contextFactory.CreateDbContextAsync();
+
+                using var _context = await _contextFactory.CreateDbContextAsync();
                 Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (userDb == null)
                 {
@@ -376,13 +377,12 @@ namespace Facilys.Components.Services
                     userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 }
 
-                await SetMariaDBCredentials(result.UserData);
                 await SetAuthenticatedAsync(userDb);
                 return userDb;
             }
             else
             {
-                await using var _context = await _contextFactory.CreateDbContextAsync();
+                using var _context = await _contextFactory.CreateDbContextAsync();
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (user != null && Users.VerifyPassword(password, user.Password))
                 {
@@ -580,10 +580,10 @@ namespace Facilys.Components.Services
             //_userConnection.Password = user.MariadbPassword;
 
             await _userConnection.SetCredentialsAsync(
-           user.MariadbDb,
+            user.MariadbDb,
             user.MariadbUser,
-           user.MariadbPassword
-       );
+            user.MariadbPassword
+            );
         }
 
         /// <summary>

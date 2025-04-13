@@ -19,17 +19,26 @@ namespace Facilys.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadDataHeader();
+           
             editContext = new EditContext(this);
-
             modalManager.RegisterModal("OpenModalEditPicture");
+        }
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await _userConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
         }
 
         private async Task LoadDataHeader()
         {
-            User = await DbContext.Users.FindAsync(Guid.Parse(UserId));
-            CountQuotes = await DbContext.Quotes.Where(q => q.User.Id == Guid.Parse(UserId)).CountAsync();
-            CountInvoices = await DbContext.Invoices.Where(q => q.User.Id == Guid.Parse(UserId)).CountAsync();
+            using var context = await DbContextFactory.CreateDbContextAsync();
+            User = await context.Users.FindAsync(Guid.Parse(UserId));
+            CountQuotes = await context.Quotes.Where(q => q.User.Id == Guid.Parse(UserId)).CountAsync();
+            CountInvoices = await context.Invoices.Where(q => q.User.Id == Guid.Parse(UserId)).CountAsync();
         }
 
         private async Task OnFileSelected(InputFileChangeEventArgs e)
@@ -37,24 +46,26 @@ namespace Facilys.Components.Pages
             var file = e.File;
             if (file != null)
             {
+                using var context = await DbContextFactory.CreateDbContextAsync();
                 using var stream = new MemoryStream();
                 await file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5).CopyToAsync(stream); // Limite de 5 Mo
                 var base64Image = Convert.ToBase64String(stream.ToArray());
                 User.Picture = $"data:{file.ContentType};base64,{base64Image}";
 
-                DbContext.Users.Update(User);
-                await DbContext.SaveChangesAsync();
+                context.Users.Update(User);
+                await context.SaveChangesAsync();
             }
         }
 
         private async Task UserInformationSubmit()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            using var context = await DbContextFactory.CreateDbContextAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
 
-                DbContext.Users.Update(User);
-                await DbContext.SaveChangesAsync();
+                context.Users.Update(User);
+                await context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
             catch (Exception ex)
@@ -71,10 +82,10 @@ namespace Facilys.Components.Pages
                 Logger.LogError("Les mots de passe ne correspondent pas.");
                 return;
             }
-
+            using var context = await DbContextFactory.CreateDbContextAsync();
             User.Password = Users.HashPassword(PasswordA);
-            DbContext.Users.Update(User);
-            await DbContext.SaveChangesAsync();
+            context.Users.Update(User);
+            await context.SaveChangesAsync();
 
             Logger.LogError($"Nouveau mot de passe : {PasswordB}");
 

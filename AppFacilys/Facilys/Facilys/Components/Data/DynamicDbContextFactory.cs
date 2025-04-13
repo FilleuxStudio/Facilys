@@ -13,19 +13,20 @@ namespace Facilys.Components.Data
         private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _configuration;
         UserConnectionService _userConnectionService;
+        private readonly SshTunnelService _sshTunnelService;
 
-        public DynamicDbContextFactory(IServiceProvider serviceProvider, IConfiguration configuration, UserConnectionService userConnectionService)
+        public DynamicDbContextFactory(IServiceProvider serviceProvider, IConfiguration configuration, UserConnectionService userConnectionService, SshTunnelService sshTunnelService)
         {
             _serviceProvider = serviceProvider;
             _configuration = configuration;
             _userConnectionService = userConnectionService;
+            _sshTunnelService = sshTunnelService;
         }
 
         public ApplicationDbContext CreateDbContext()
         {
             // Création d'un scope pour les services scoped
             using var scope = _serviceProvider.CreateScope();
-            //var userConnectionService = scope.ServiceProvider.GetRequiredService<UserConnectionService>();
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
@@ -34,11 +35,12 @@ namespace Facilys.Components.Data
                 if (!string.IsNullOrEmpty(_userConnectionService.ConnectionString))
                 {
                     // Configuration du tunnel SSH
-                    var sshTunnel = new SshTunnelService(_configuration);
-                    sshTunnel.Start();
+                    if (!_sshTunnelService.IsTunnelActive)
+                    {
+                        _sshTunnelService.EnsureSshTunnel();
+                    }
 
-
-                    var forwardedConnectionString = _userConnectionService.ConnectionString.Replace("Server=localhost", "Server=127.0.0.1").Replace("Port=3306", $"Port={sshTunnel.LocalPort}");
+                    var forwardedConnectionString = _userConnectionService.ConnectionString.Replace("Server=localhost", "Server=127.0.0.1").Replace("Port=3306", $"Port={_sshTunnelService.LocalPort}");
 
                     var serverVersion = new MariaDbServerVersion(new Version(10, 6, 21));
 
@@ -80,46 +82,46 @@ namespace Facilys.Components.Data
     }
 
     // Service dédié pour la gestion SSH
-    public class SshTunnelService : IDisposable
-    {
-        private readonly IConfiguration _configuration;
-        private SshClient _sshClient;
-        private ForwardedPortLocal _forwardedPort;
-        public int LocalPort { get; private set; }
+    //public class SshTunnelService : IDisposable
+    //{
+    //    private readonly IConfiguration _configuration;
+    //    private SshClient _sshClient;
+    //    private ForwardedPortLocal _forwardedPort;
+    //    public int LocalPort { get; private set; }
 
-        public SshTunnelService(IConfiguration configuration)
-        {
-            _configuration = configuration;
-            LocalPort = new Random().Next(5000, 7000);
-        }
+    //    public SshTunnelService(IConfiguration configuration)
+    //    {
+    //        _configuration = configuration;
+    //        LocalPort = new Random().Next(5000, 7000);
+    //    }
 
-        public void Start()
-        {
-            var sshHost = _configuration["Ssh:Host"];
-            var sshPort = int.Parse(_configuration["Ssh:Port"] ?? "22");
-            var sshUser = _configuration["Ssh:Username"];
-            var sshPassword = _configuration["Ssh:Password"];
+    //    public void Start()
+    //    {
+    //        var sshHost = _configuration["Ssh:Host"];
+    //        var sshPort = int.Parse(_configuration["Ssh:Port"] ?? "22");
+    //        var sshUser = _configuration["Ssh:Username"];
+    //        var sshPassword = _configuration["Ssh:Password"];
 
-            _sshClient = new SshClient(sshHost, sshPort, sshUser, sshPassword);
-            _sshClient.Connect();
+    //        _sshClient = new SshClient(sshHost, sshPort, sshUser, sshPassword);
+    //        _sshClient.Connect();
 
-            _forwardedPort = new ForwardedPortLocal("127.0.0.1", (uint)LocalPort, "127.0.0.1", 3306);
-            _sshClient.AddForwardedPort(_forwardedPort);
-            _forwardedPort.Start();
+    //        _forwardedPort = new ForwardedPortLocal("127.0.0.1", (uint)LocalPort, "127.0.0.1", 3306);
+    //        _sshClient.AddForwardedPort(_forwardedPort);
+    //        _forwardedPort.Start();
 
-            if (!_sshClient.IsConnected)
-            {
-                throw new Exception("Échec de la connexion SSH");
-            }
+    //        if (!_sshClient.IsConnected)
+    //        {
+    //            throw new Exception("Échec de la connexion SSH");
+    //        }
 
-        }
+    //    }
 
-        public void Dispose()
-        {
-            _forwardedPort?.Stop();
-            _forwardedPort?.Dispose();
-            _sshClient?.Disconnect();
-            _sshClient?.Dispose();
-        }
-    }
+    //    public void Dispose()
+    //    {
+    //        _forwardedPort?.Stop();
+    //        _forwardedPort?.Dispose();
+    //        _sshClient?.Disconnect();
+    //        _sshClient?.Dispose();
+    //    }
+    //}
 }

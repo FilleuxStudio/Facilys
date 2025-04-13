@@ -1,9 +1,10 @@
 ﻿@page "/settingCompany/{Email}"
 @rendermode InteractiveServer
-@inject ApplicationDbContext DbContext
-@inject APIWebSiteService APIWebSite
 @inject IJSRuntime JSRuntime
 @inject ILogger<SettingCompany> Logger
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject APIWebSiteService APIWebSite
+@inject UserConnectionService _userConnection
 
 <div class="row justify-content-center">
     <div class="col-12">

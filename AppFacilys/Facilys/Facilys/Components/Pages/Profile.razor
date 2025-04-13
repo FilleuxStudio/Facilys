@@ -1,8 +1,9 @@
 ﻿@page "/profile/{UserId}"
 @rendermode InteractiveServer
-@inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
 @inject ILogger<Profile> Logger
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject UserConnectionService _userConnection
 
 <div class="row justify-content-center">
     <div class="col-12">
