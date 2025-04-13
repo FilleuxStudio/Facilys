@@ -2,12 +2,13 @@
 @rendermode InteractiveServer
 @inject IHttpContextAccessor HttpContextAccessor
 @inject PageTitleService PageTitleService
-@inject ApplicationDbContext DbContext
-@inject DynamicMySQLService MySQLService
+@*@inject DynamicDbContextFactory DBcontextFactory*@
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <PageTitle>Dashboard</PageTitle>
 
-@if(settingEmpty == false){
+@if (settingEmpty == false)
+{
     <!--Alerte-->
     <div class="alert alert-danger shadow-sm border-theme-white-2" role="alert">
         <div class="d-inline-flex justify-content-center align-items-center thumb-xs bg-danger rounded-circle mx-auto me-1">
@@ -215,11 +216,12 @@
 
     private async Task LoadDataHeader()
     {
-        client = await DbContext.Clients.CountAsync();
-        vehicle = await DbContext.Vehicles.CountAsync();
-        invoice = await DbContext.Invoices.CountAsync();
+        using var context = DbContextFactory.CreateDbContext();
+        client = await context.Clients.CountAsync();
+        vehicle = await context.Vehicles.CountAsync();
+        invoice = await context.Invoices.CountAsync();
 
-        var dataTopVehicle = await DbContext.HistoryParts
+        var dataTopVehicle = await context.HistoryParts
                     .Where(h => h.Vehicle != null)
                     .GroupBy(h => new { h.Vehicle.Id, h.Vehicle.Mark, h.Vehicle.Model, h.Vehicle.CirculationDate })
                     .Select(g => new TopVehicle
@@ -235,7 +237,7 @@
                     .ToListAsync();
 
 
-        var dataTopClient = await DbContext.HistoryParts
+        var dataTopClient = await context.HistoryParts
             .Where(h => h.Vehicle != null || h.OtherVehicle != null)
             .GroupBy(h => new
             {
@@ -278,7 +280,7 @@
                 });
         }
 
-        settingEmpty = await DbContext.CompanySettings.AnyAsync();
+        settingEmpty = await context.CompanySettings.AnyAsync();
     }
 
     public class TopVehicle

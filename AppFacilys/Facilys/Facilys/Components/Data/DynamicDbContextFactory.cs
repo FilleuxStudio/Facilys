@@ -34,20 +34,18 @@ namespace Facilys.Components.Data
                 if (!string.IsNullOrEmpty(_userConnectionService.ConnectionString))
                 {
                     // Configuration du tunnel SSH
-                    using var sshTunnel = new SshTunnelService(_configuration);
+                    var sshTunnel = new SshTunnelService(_configuration);
                     sshTunnel.Start();
 
-                    var forwardedConnectionString = _userConnectionService.ConnectionString
-                        .Replace("Server=localhost", "Server=localhost")
-                        .Replace("Port=3306", $"Port={sshTunnel.LocalPort}");
+
+                    var forwardedConnectionString = _userConnectionService.ConnectionString.Replace("Server=localhost", "Server=127.0.0.1").Replace("Port=3306", $"Port={sshTunnel.LocalPort}");
 
                     var serverVersion = new MariaDbServerVersion(new Version(10, 6, 21));
 
                     optionsBuilder.UseMySql(
                         forwardedConnectionString,
                         serverVersion,
-                        options => options.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)
-                    );
+                        options => options.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null));
                 }
                 else if (HybridSupport.IsElectronActive)
                 {
@@ -92,7 +90,7 @@ namespace Facilys.Components.Data
         public SshTunnelService(IConfiguration configuration)
         {
             _configuration = configuration;
-            LocalPort = new Random().Next(5000, 6000);
+            LocalPort = new Random().Next(5000, 7000);
         }
 
         public void Start()
@@ -108,6 +106,12 @@ namespace Facilys.Components.Data
             _forwardedPort = new ForwardedPortLocal("127.0.0.1", (uint)LocalPort, "127.0.0.1", 3306);
             _sshClient.AddForwardedPort(_forwardedPort);
             _forwardedPort.Start();
+
+            if (!_sshClient.IsConnected)
+            {
+                throw new Exception("Échec de la connexion SSH");
+            }
+
         }
 
         public void Dispose()

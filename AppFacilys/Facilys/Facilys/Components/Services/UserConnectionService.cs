@@ -43,7 +43,7 @@
 
             // Construire la chaîne de connexion avec les informations de connexion récupérées.
             // Vous pouvez adapter ce format selon votre fournisseur (MySQL/MariaDB ici).
-            ConnectionString = $"Server={Server};Database={Database};Uid={UserId};Pwd={Password};";
+            ConnectionString = $"Server={Server};Port=3306;Database={Database};Uid={UserId};Pwd={Password};";
 
             return Task.CompletedTask;
         }
