@@ -1,10 +1,12 @@
 ﻿using ElectronNET.API;
+using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
@@ -14,33 +16,54 @@ namespace Facilys.Components.Pages
         readonly List<ManagerClienViewtList> managerClienViewtLists = [];
         readonly ManagerClientViewModel managerClientViewModel = new();
         readonly ModalManagerId modalManager = new();
+        ApplicationDbContext DbContext;
         Guid selectClient = Guid.Empty;
 
         private string currentPhone = string.Empty, currentEmail = string.Empty;
 
-        protected override async Task OnInitializedAsync()
+        private void Init()
         {
-            await InvokeAsync(() =>
-            {
-                PageTitleService.CurrentTitle = "Gestion clients";
-            });
-
             managerClientViewModel.Client = new();
             managerClientViewModel.VehicleClient = new();
             managerClientViewModel.PhonesClients = [];
             managerClientViewModel.EmailsClients = [];
+            managerClientViewModel.Vehicles = [];
+        }
 
-            await LoadDataHeader();
+        protected override async Task OnInitializedAsync()
+        {
+            //await InvokeAsync(() =>
+            //{
+            //    PageTitleService.CurrentTitle = "Gestion clients";
+            //});
+
+            PageTitleService.CurrentTitle = "Gestion clients";
+
+            Init();
 
             modalManager.RegisterModal("OpenModalLargeAddClient");
             modalManager.RegisterModal("OpenModalLargeEditClient");
             modalManager.RegisterModal("OpenModalLargeDeleteClient");
             modalManager.RegisterModal("OpenModalLargeAddVehicle");
             modalManager.RegisterModal("OpenModaInfoVehicles");
+
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
         }
 
         private async Task LoadDataHeader()
         {
+            DbContext = await DbContextFactory.CreateDbContextAsync();
+
             managerClientViewModel.EmailsClients = await DbContext.Emails.Include(c => c.Client).ToListAsync();
             managerClientViewModel.PhonesClients = await DbContext.Phones.Include(c => c.Client).ToListAsync();
             managerClientViewModel.Vehicles = await DbContext.Vehicles.Include(c => c.Client).ToListAsync();
@@ -87,10 +110,7 @@ namespace Facilys.Components.Pages
         {
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             modalManager.OpenModal(id);
-            managerClientViewModel.Client = new();
-            managerClientViewModel.VehicleClient = new();
-            managerClientViewModel.PhonesClients = [];
-            managerClientViewModel.EmailsClients = [];
+            Init();
             StateHasChanged();
         }
 
@@ -287,6 +307,7 @@ namespace Facilys.Components.Pages
         }
         private async Task SubmitEditClient()
         {
+            var provider = DbContext.Database.ProviderName;
             using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
@@ -510,15 +531,6 @@ namespace Facilys.Components.Pages
             await InvokeAsync(StateHasChanged);
             // await InvokeAsync(StateHasChanged);
             // StateHasChanged();
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
-                //await JSRuntime.InvokeVoidAsync("loadScript", "/assets/js/pages/datatable.init.js");
-            }
         }
     }
 }

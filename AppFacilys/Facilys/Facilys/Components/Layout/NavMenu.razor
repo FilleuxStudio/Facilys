@@ -2,6 +2,7 @@
 @inject PageTitleService PageTitleService
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 <!--<div class="top-row ps-3 navbar navbar-dark">
 <div class="container-fluid">
@@ -50,7 +51,7 @@
             <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
                 <li class="dropdown">
                     <a class="nav-link dropdown-toggle arrow-none nav-icon" data-bs-toggle="dropdown" href="#" role="button"
-                    aria-haspopup="false" aria-expanded="false">
+                       aria-haspopup="false" aria-expanded="false">
                         <img src="/assets/images/flags/french_flag.jpg" alt="flag france" class="thumb-sm rounded-circle">
                     </a>
                     <div class="dropdown-menu">
@@ -60,10 +61,16 @@
                         <a class="dropdown-item" href="#"><img src="/assets/images/flags/french_flag.jpg" alt="" height="15" class="me-2">French</a>
                     </div>
                 </li>
+                <li class="topbar-item">
+                    <a class="nav-link nav-icon" href="javascript:void(0);" id="light-dark-mode">
+                        <i class="icofont-moon dark-mode"></i>
+                        <i class="icofont-sun light-mode"></i>
+                    </a>
+                </li>
 
                 <li class="dropdown topbar-item">
                     <a class="nav-link dropdown-toggle arrow-none nav-icon" data-bs-toggle="dropdown" href="#" role="button"
-                    aria-haspopup="false" aria-expanded="false">
+                       aria-haspopup="false" aria-expanded="false">
                         <img src="/assets/images/users/avatar-demo.png" alt="" class="thumb-lg rounded-circle">
                     </a>
                     <div class="dropdown-menu dropdown-menu-end py-0">
@@ -240,9 +247,17 @@
             {
                 NavigationManager.NavigateTo("/login", forceLoad: true);
             }
+            StateHasChanged();
+
+            await JSRuntime.InvokeVoidAsync("customScripts.preventDropdownClose");
+            await JSRuntime.InvokeVoidAsync("customScripts.toggleDarkLightMode");
+            await JSRuntime.InvokeVoidAsync("customScripts.toggleSidebar");
+            await JSRuntime.InvokeVoidAsync("customScripts.activateTooltipsAndPopovers");
+            await JSRuntime.InvokeVoidAsync("customScripts.stickyTopbarOnScroll");
+            await JSRuntime.InvokeVoidAsync("customScripts.initVerticalMenu");
         }
 
-        StateHasChanged();
+
     }
 
 

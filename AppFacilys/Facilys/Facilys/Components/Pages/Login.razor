@@ -108,8 +108,8 @@
             {
                 // Redirigez l'utilisateur vers une page protégée ou tableau de bord
                 EnvironmentApp.EmailUserConnect = user.Email;
-                //NavigationManager.NavigateTo("/dashboard", forceLoad: true);
-                NavigationManager.NavigateTo("/dashboard");
+                NavigationManager.NavigateTo("/dashboard", forceLoad: true);
+                //NavigationManager.NavigateTo("/dashboard");
             }
             else
             {
@@ -124,8 +124,8 @@
 
     public class LoginModel
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string Email { get; set; } = "uuuu@gmail.com";
+        public string Password { get; set; } = "uuuu2025@";
     }
 
 }

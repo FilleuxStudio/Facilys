@@ -1,9 +1,9 @@
 ﻿@page "/dashboard"
 @rendermode InteractiveServer
-@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JSRuntime
 @inject PageTitleService PageTitleService
 @*@inject DynamicDbContextFactory DBcontextFactory*@
-@inject UserConnectionService _userConnection
+@inject UserConnectionService UserConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <PageTitle>Dashboard</PageTitle>
@@ -188,15 +188,16 @@
         });
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await _userConnection.LoadCredentialsAsync();
-            await LoadDataHeader();
-            StateHasChanged(); // Demande un nouveau rendu du composant
-        }
-    }
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await UserConnection.LoadCredentialsAsync();
+    //         await LoadDataHeader();
+    //         StateHasChanged(); // Demande un nouveau rendu du composant
+    //          //await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
+    //     }
+    // }
 
     private async Task LoadDataHeader()
     {
@@ -265,6 +266,8 @@
         }
 
         settingEmpty = await context.CompanySettings.AnyAsync();
+
+        await context.DisposeAsync();
     }
 
     public class TopVehicle
@@ -282,5 +285,4 @@
         public string FirstName { get; set; }
         public int RepairCount { get; set; }
     }
-
 }

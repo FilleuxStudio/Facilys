@@ -19,20 +19,40 @@
     <HeadOutlet />
 </head>
 
-<body data-sidebar-size="collapsed">
+<body data-sidebar-size="default">
     <Routes />
-    <script>process = undefined;</script>
+
+    @*     <!-- Charge le runtime Blazor -->
     <script src="_framework/blazor.web.js"></script>
-    <script src="assets/js/scriptLoader.js"></script>
+    <!-- Si besoin, vous pouvez conserver quelques scripts globaux avant le chargement dynamique -->
+    <script>process = undefined;</script>
+
+    <script src="assets/js/scriptLoader.js"></script> 
     <script src="assets/js/modifyBodyForModal.js"></script>
     <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+    <script src="assets/data/stock-prices.js"></script> 
+    <script src="assets/libs/jsvectormap/js/jsvectormap.min.js"></script>
+    <script src="assets/libs/jsvectormap/maps/world.js"></script>
+    <script type="module" src="assets/js/pages/ecommerce-index.init.js"></script>
+    <script src="assets/js/pages/index.init.js"></script>
+    <script src="assets/js/app.js"></script>
+
+*@
+
+    <script>process = undefined;</script>
+    <script src="_framework/blazor.web.js"></script>
+    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/modifyBodyForModal.js"></script>
     <script src="assets/libs/simplebar/simplebar.min.js"></script>
     <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
     <script src="assets/data/stock-prices.js"></script>
     <script src="assets/libs/jsvectormap/js/jsvectormap.min.js"></script>
     <script src="assets/libs/jsvectormap/maps/world.js"></script>
-    <script src="assets/js/pages/ecommerce-index.init.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script type="module" src="assets/js/pages/ecommerce-index.init.js"></script>
+    <script src="assets/js/pages/index.init.js"></script>
     <script>
         window.downloadFile = function (fileName, byteArray) {
             const blob = new Blob([byteArray], { type: 'application/pdf' });
@@ -44,5 +64,5 @@
             document.body.removeChild(link);
         };
     </script>
-    </body>
+</body>
 </html>

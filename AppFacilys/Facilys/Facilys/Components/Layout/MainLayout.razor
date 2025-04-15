@@ -1,6 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @inherits LayoutComponentBase
-@inject IJSRuntime JSRuntime
 
 <NavMenu />
 
@@ -35,42 +34,3 @@
         </footer>
     </div>
 </div>
-
-@code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
-        }
-    }
-}
-
-@* <script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/libs/simplebar/simplebar.min.js"></script>
-<script src="/assets/data/stock-prices.js"></script>
-<script src="/assets/libs/jsvectormap/js/jsvectormap.min.js"></script>
-<script src="/assets/libs/jsvectormap/maps/world.js"></script>
-<script src="/assets/js/app.js"></script> *@
-
-@* <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var scripts = [
-                '/assets/libs/bootstrap/js/bootstrap.bundle.min.js',
-                '/assets/libs/simplebar/simplebar.min.js',
-                '/assets/libs/apexcharts/apexcharts.min.js',
-                '/assets/data/stock-prices.js',
-                '/assets/libs/jsvectormap/js/jsvectormap.min.js',
-                '/assets/libs/jsvectormap/maps/world.js',
-                '/assets/js/pages/index.init.js',
-                '/assets/js/app.js'
-            ];
-
-            scripts.forEach(function(src) {
-                var script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-                document.body.appendChild(script);
-            });
-        });
-</script> *@
