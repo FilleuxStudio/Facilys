@@ -1,11 +1,12 @@
 ﻿@page "/editionInvoices"
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
-@inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
 @inject AuthService AuthService
 @inject ILogger<EditionInvoice> Logger
-@inject IJSRuntime JSRuntime
-
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@attribute [StreamRendering]
 
 <div class="row">
     <div class="col-12">
@@ -104,7 +105,7 @@
                                     <option value="@item.Value">@item.Text</option>
                                 }
                             </InputSelect>
-                            <InputNumber  @bind-Value="Km" placeholder="kilometrage voiture..." class="form-control mt-1" />
+                            <InputNumber @bind-Value="Km" placeholder="kilometrage voiture..." class="form-control mt-1" />
                         </div><!-- end col -->
                     </div><!--end card-body-->
                 </div><!--end card-->
@@ -131,25 +132,25 @@
                                     <tbody>
                                         @for (int i = 0; i < managerInvoiceViewModel.Edition.PreloadedLine; i++)
                                         {
-                                            var index = i; // Création d'une variable locale pour la fermeture
-                                            <tr @key="index">
+                                            // Création d'une variable locale pour la fermeture
+                                            <tr @key="i">
                                                 <td>
-                                                    <InputText @bind-Value="invoiceData.LineRef[index]" class="form-control" id="@($"invoiceData-LineRef-{index}")" />
+                                                    <InputText @bind-Value="invoiceData.LineRef[i]" class="form-control" id="@($"invoiceData-LineRef-{i}")" />
                                                 </td>
                                                 <td>
-                                                    <InputText @bind-Value="invoiceData.LineDesc[index]" class="form-control" id="@($"invoiceData-LineDesc-{index}")" />
+                                                    <InputText @bind-Value="invoiceData.LineDesc[i]" class="form-control" id="@($"invoiceData-LineDesc-{i}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineQt[index]" class="form-control" id="@($"invoiceData-LineQt-{index}")" />
+                                                    <InputNumber @bind-Value="invoiceData.LineQt[i]" class="form-control" id="@($"invoiceData-LineQt-{i}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LinePrice[index]" @oninput="(e) => OnLinePriceChanged(e.Value, index)" class="form-control" id="@($"invoiceData-LinePrice-{index}")" />
+                                                    <InputNumber @bind-Value="invoiceData.LinePrice[i]" @oninput="(e) => OnLinePriceChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LinePrice-{i}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineDisc[index]" @oninput="(e) => OnLineDiscChanged(e.Value, index)" class="form-control" id="@($"invoiceData-LineDisc-{index}")" />
+                                                    <InputNumber @bind-Value="invoiceData.LineDisc[i]" @oninput="(e) => OnLineDiscChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LineDisc-{i}")" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineMo[index]" class="form-control no-spinner" id="@($"invoiceData-LineMo-{index}")" readonly />
+                                                    <InputNumber @bind-Value="invoiceData.LineMo[i]" class="form-control no-spinner" id="@($"invoiceData-LineMo-{i}")" readonly />
                                                 </td>
                                             </tr>
                                         }

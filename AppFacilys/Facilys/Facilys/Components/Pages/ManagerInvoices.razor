@@ -1,9 +1,10 @@
 ﻿@page "/managerInvoices"
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
-@inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
 @inject ILogger<ManagerInvoices> Logger
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <div class="row">
     <div class="col-12">

@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IJSRuntime JSRuntime
 @inject PageTitleService PageTitleService
+@attribute [StreamRendering]
 @*@inject DynamicDbContextFactory DBcontextFactory*@
 @inject UserConnectionService UserConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
@@ -18,7 +19,6 @@
         <strong>Oh !</strong> Les paramètres de l'entreprise n'ont pas été renseignés. Veuillez les compléter.
     </div>
 }
-
 
 <!--header-->
 <div class="row justify-content-center">
@@ -188,16 +188,16 @@
         });
     }
 
-    // protected override async Task OnAfterRenderAsync(bool firstRender)
-    // {
-    //     if (firstRender)
-    //     {
-    //         await UserConnection.LoadCredentialsAsync();
-    //         await LoadDataHeader();
-    //         StateHasChanged(); // Demande un nouveau rendu du composant
-    //          //await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
-    //     }
-    // }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UserConnection.LoadCredentialsAsync();
+            await LoadDataHeader();
+            StateHasChanged(); // Demande un nouveau rendu du composant
+             //await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
+        }
+    }
 
     private async Task LoadDataHeader()
     {

@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models.ViewModels;
+﻿using Facilys.Components.Data;
+using Facilys.Components.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Facilys.Components.Pages
@@ -6,7 +7,7 @@ namespace Facilys.Components.Pages
     public partial class SettingsInvoice
     {
         readonly ManagerInvoiceViewModel managerInvoiceViewModel = new();
-
+        ApplicationDbContext DbContext;
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
@@ -14,13 +15,22 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Paramétrages de Facturation";
             });
 
-            await LoadDataHeader();
-
             managerInvoiceViewModel.Edition ??= new();
         }
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
+        }
+
 
         private async Task LoadDataHeader()
         {
+            DbContext = await DbContextFactory.CreateDbContextAsync();
             managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync();
         }
 

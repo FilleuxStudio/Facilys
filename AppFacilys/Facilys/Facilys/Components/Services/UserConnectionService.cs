@@ -65,11 +65,14 @@ namespace Facilys.Components.Services
             try
             {
                 var result = await _localStorage.GetAsync<dynamic>(StorageKey);
-                if (result.Success && result.Value != null)
+                if (result.Success)
                 {
-                    Database = result.Value.Database;
-                    UserId = result.Value.UserId;
-                    Password = result.Value.Password;
+                    var json = result.Value;
+
+                    Database = json.GetProperty("database").GetString();
+                    UserId = json.GetProperty("userId").GetString();
+                    Password = json.GetProperty("password").GetString();
+
                     ConnectionString = $"Server={Server};Port=3306;Database={Database};Uid={UserId};Pwd={Password};";
                 }
             }

@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models;
+﻿using Facilys.Components.Data;
+using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ namespace Facilys.Components.Pages
         List<Inventorys> InventorysLists = [];
         Inventorys inventory = new();
         readonly ModalManagerId modalManager = new();
+        ApplicationDbContext DbContext;
         private IBrowserFile selectedFile;
 
         protected override async Task OnInitializedAsync()
@@ -20,15 +22,24 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Gestion inventaires";
             });
 
-            await LoadDataHeader();
-
             modalManager.RegisterModal("OpenModalLargeAddInventory");
             modalManager.RegisterModal("OpenModalLargeEditInventory");
             modalManager.RegisterModal("OpenModalDeleteInventory");
         }
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
+        }
+
         private async Task LoadDataHeader()
         {
+            DbContext = await DbContextFactory.CreateDbContextAsync();
             InventorysLists = await DbContext.Inventorys.ToListAsync();
         }
         private async void OpenModal(string id)

@@ -13,7 +13,8 @@ namespace Facilys.Components.Pages
     {
         [Parameter]
         public string Email { get; set; }
-        CompanySettings CompanySettings =new();
+        CompanySettings CompanySettings = new();
+        ApplicationDbContext DbContext;
         readonly ModalManagerId modalManager = new();
         private string? PreviewImageBase64 { get; set; }
         private int? UserCount { get; set; }
@@ -22,7 +23,7 @@ namespace Facilys.Components.Pages
         {
             if (firstRender)
             {
-                await _userConnection.LoadCredentialsAsync();
+                await UserConnection.LoadCredentialsAsync();
                 await LoadDataHeader();
                 StateHasChanged(); // Demande un nouveau rendu du composant
             }
@@ -30,10 +31,10 @@ namespace Facilys.Components.Pages
 
         private async Task LoadDataHeader()
         {
-            //CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
-            using var context = await DbContextFactory.CreateDbContextAsync();
+            DbContext = await DbContextFactory.CreateDbContextAsync();
 
-            UserCount = await context.Users.CountAsync();
+            CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
+            UserCount = await DbContext.Users.CountAsync();
 
             if (CompanySettings.NameCompany == "" && CompanySettings.Siret == "")
             {
@@ -74,17 +75,16 @@ namespace Facilys.Components.Pages
         {
             try
             {
-                using var context = await DbContextFactory.CreateDbContextAsync();
-                var existingCompany = await context.CompanySettings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
+                var existingCompany = await DbContext.CompanySettings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
                 if (existingCompany == null)
                 {
-                    await context.AddAsync(CompanySettings);
+                    await DbContext.AddAsync(CompanySettings);
                 }
                 else
                 {
-                    context.Update(CompanySettings);
+                    DbContext.Update(CompanySettings);
                 }
-                await context.SaveChangesAsync();
+                await DbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

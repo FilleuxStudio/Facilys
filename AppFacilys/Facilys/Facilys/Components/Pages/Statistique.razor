@@ -1,9 +1,10 @@
 ﻿@page "/statistique"
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
-@inject ApplicationDbContext DbContext
-@inject ILogger<Statistique> Logger
 @inject IJSRuntime JSRuntime
+@inject ILogger<Statistique> Logger
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 
 <div class="row">

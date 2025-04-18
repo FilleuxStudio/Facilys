@@ -55,7 +55,7 @@ namespace Facilys.Components.Pages
             {
                 await UserConnection.LoadCredentialsAsync();
                 await LoadDataHeader();
-                await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
+                //await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
                 StateHasChanged(); // Demande un nouveau rendu du composant
             }
         }

@@ -1,4 +1,4 @@
-﻿modifyBodyForModal: (isModalOpen) => {
+﻿window.modifyBodyForModal = function (isModalOpen) {
     try {
         const body = document.body;
 
@@ -11,5 +11,7 @@
             body.style.overflow = "";
             body.style.paddingRight = "";
         }
-    } catch (e) { }
-}
+    } catch (e) {
+        console.error("Error in modifyBodyForModal:", e);
+    }
+};

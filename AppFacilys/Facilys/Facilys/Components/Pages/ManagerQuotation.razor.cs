@@ -1,5 +1,6 @@
 ﻿using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
+using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
 {
@@ -13,10 +14,16 @@ namespace Facilys.Components.Pages
             {
                 PageTitleService.CurrentTitle = "Gestion des devis";
             });
+        }
 
-            await LoadDataHeader();
-
-            StateHasChanged();
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
         }
 
         private async Task LoadDataHeader()

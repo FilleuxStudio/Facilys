@@ -1,7 +1,9 @@
 ﻿using ElectronNET.API;
+using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
+using Facilys.Migrations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +23,7 @@ namespace Facilys.Components.Pages
         private short actionType;
         private readonly ManagerInvoiceViewModel managerInvoiceViewModel = new();
         private readonly InvoiceData invoiceData = new();
+        ApplicationDbContext DbContext;
 
         protected override async Task OnInitializedAsync()
         {
@@ -35,11 +38,33 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.ClientItems = [];
             managerInvoiceViewModel.VehicleItems = [];
 
-            await LoadDataHeader();
+            if (managerInvoiceViewModel.Edition.PreloadedLine > 0)
+            {
+                invoiceData.LineRef = [.. Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine)];
+                invoiceData.LineDesc = [.. Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine)];
+                invoiceData.LineQt = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
+                invoiceData.LinePrice = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
+                invoiceData.LineDisc = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
+                invoiceData.LineMo = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
+            }
         }
 
+      
+
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
+        }
         private async Task LoadDataHeader()
         {
+            DbContext = await DbContextFactory.CreateDbContextAsync();
+
             managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync();
             managerInvoiceViewModel.Invoice = await DbContext.Invoices.OrderByDescending(d => d.InvoiceNumber).FirstOrDefaultAsync();
             managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
@@ -72,7 +97,6 @@ namespace Facilys.Components.Pages
             invoiceData.LinePrice = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
             invoiceData.LineDisc = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
             invoiceData.LineMo = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-
             var user = await AuthService.GetAuthenticatedAsync();
             IdUser = user.Id;
         }

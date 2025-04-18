@@ -1,9 +1,10 @@
 ﻿@page "/managerQuotes"
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
-@inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
 @inject ILogger<ManagerQuotation> Logger
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 
 @code {

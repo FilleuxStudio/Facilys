@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models;
+﻿using Facilys.Components.Data;
+using Facilys.Components.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
@@ -14,6 +15,7 @@ namespace Facilys.Components.Pages
         private readonly double[] monthlyInvoiceTotals = new double[12];
         private int[] paymentData = [];
         private string[] paymentLabels = [];
+        ApplicationDbContext DbContext;
         public List<string> LastFiveYearsRevenue { get; set; } = [];
         protected override async Task OnInitializedAsync()
         {
@@ -21,14 +23,43 @@ namespace Facilys.Components.Pages
             {
                 PageTitleService.CurrentTitle = "Statistique";
             });
+        }
 
-            await LoadDataHeader();
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
 
-            StateHasChanged();
+                try
+                {
+                    // Vérification du chemin
+                    string modulePath = "assets/js/pages/ecommerce-index.init.js";
+
+                    chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", modulePath);
+
+                    // Attendre le rendu complet du DOM
+                    await Task.Delay(100);
+
+                    await chartModule.InvokeVoidAsync("initMonthlyIncomeChart", monthlyInvoiceTotals);
+                    await chartModule.InvokeVoidAsync("initPaymentChart", paymentData, paymentLabels);
+
+                    isChartInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erreur d'initialisation: {ex.Message}");
+                }
+
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
         }
 
         private async Task LoadDataHeader()
         {
+            DbContext = await DbContextFactory.CreateDbContextAsync();
+
             totaAmountAnnualInvoice = await DbContext.Invoices.Where(i => i.DateAdded.Year == DateTime.Now.Year).SumAsync(i => i.TotalAmount);
             var invoicesByYear = await DbContext.Invoices.Where(i => i.DateAdded.Year == DateTime.Now.Year).GroupBy(i => i.DateAdded.Month).Select(g => new { Month = g.Key, Count = g.Count() }).ToListAsync();
             await LoadDataInvoicesByMonth();
@@ -120,32 +151,6 @@ namespace Facilys.Components.Pages
             foreach (var item in invoicesByMonth)
             {
                 monthlyInvoiceTotals[item.Month - 1] = Math.Round(item.Total); // Mois -1 car index du tableau commence à 0
-            }
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender && !isChartInitialized)
-            {
-                try
-                {
-                    // Vérification du chemin
-                    string modulePath = "./assets/js/pages/ecommerce-index.init.js";
-
-                    chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", modulePath);
-
-                    // Attendre le rendu complet du DOM
-                    await Task.Delay(100);
-
-                    await chartModule.InvokeVoidAsync("initMonthlyIncomeChart", monthlyInvoiceTotals);
-                    await chartModule.InvokeVoidAsync("initPaymentChart", paymentData, paymentLabels);
-
-                    isChartInitialized = true;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erreur d'initialisation: {ex.Message}");
-                }
             }
         }
 

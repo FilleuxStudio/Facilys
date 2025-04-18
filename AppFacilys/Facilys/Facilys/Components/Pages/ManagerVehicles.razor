@@ -1,10 +1,11 @@
 ﻿@page "/managerVehicles"
 @rendermode InteractiveServer
 @inject PageTitleService PageTitleService
-@inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
 @inject ILogger<ManagerVehicles> Logger
 @inject VINDecoderService VINDecoder
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <div class="row">
     <div class="col-12">

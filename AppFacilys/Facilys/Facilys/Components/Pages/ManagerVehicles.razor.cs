@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models;
+﻿using Facilys.Components.Data;
+using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
@@ -14,6 +15,7 @@ namespace Facilys.Components.Pages
         readonly List<ManagerOtherVehicleViewList> managerOtherVehicleViewLists = [];
         readonly ManagerVehicleViewModel managerVehicleViewModel = new();
         readonly ModalManagerId modalManager = new();
+        ApplicationDbContext DbContext;
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
         readonly VehicleRegistrationDocumentAnalyzer documentAnalyzer = new();
@@ -32,8 +34,6 @@ namespace Facilys.Components.Pages
             managerVehicleViewModel.Invoices = new();
             managerVehicleViewModel.HistoryPart = new();
 
-            await LoadDataHeader();
-
             modalManager.RegisterModal("OpenModalLargeAddVehicle");
             modalManager.RegisterModal("OpenModaSmallInfoVin");
             modalManager.RegisterModal("OpenModalLargeEditVehicle");
@@ -44,9 +44,20 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalDataOCR");
         }
 
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
+        }
+
         private async Task LoadDataHeader()
         {
-
+            DbContext = await DbContextFactory.CreateDbContextAsync();
             var vehicles = await DbContext.Vehicles.Include(c => c.Client).Where(v => v.StatusDataView != StatusData.Delete).ToListAsync();
             foreach (var vehicle in vehicles)
             {

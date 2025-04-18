@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Models;
+﻿using Facilys.Components.Data;
+using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace Facilys.Components.Pages
     {
         readonly ManagerInvoiceViewModel managerInvoiceViewModel = new();
         readonly ModalManagerId modalManager = new();
+        ApplicationDbContext DbContext;
         readonly Guid selectInvoice = Guid.Empty;
         private string searchInvoice = string.Empty;
 
@@ -21,12 +23,24 @@ namespace Facilys.Components.Pages
             });
 
             managerInvoiceViewModel.Invoice = new();
-            await LoadDataHeader();
+            managerInvoiceViewModel.Invoices = [];
             modalManager.RegisterModal("OpenModaDeleteInvoice");
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UserConnection.LoadCredentialsAsync();
+                await LoadDataHeader();
+                //await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
+                StateHasChanged(); // Demande un nouveau rendu du composant
+            }
         }
 
         private async Task LoadDataHeader()
         {
+            DbContext = await DbContextFactory.CreateDbContextAsync();
             managerInvoiceViewModel.Invoices = await DbContext.Invoices.Include(v => v.Vehicle).Include(ov => ov.OtherVehicle).Take(10).OrderByDescending(d => d.DateAdded).ToListAsync();
         }
 
@@ -35,7 +49,6 @@ namespace Facilys.Components.Pages
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             managerInvoiceViewModel.Invoice = await DbContext.Invoices.FindAsync(idInvoice);
             modalManager.OpenModal(idModal);
-
 
             StateHasChanged();
         }
@@ -101,14 +114,6 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.Invoices.Clear();
             await LoadDataHeader();
             await InvokeAsync(StateHasChanged);
-        }
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-                await JSRuntime.InvokeVoidAsync("loadScript", "/assets/libs/simple-datatables/umd/simple-datatables.js");
-                //await JSRuntime.InvokeVoidAsync("loadScript", "/assets/js/pages/datatable.init.js");
-            }
         }
     }
 }
