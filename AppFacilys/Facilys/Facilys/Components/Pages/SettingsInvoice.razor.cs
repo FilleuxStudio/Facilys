@@ -15,7 +15,7 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Paramétrages de Facturation";
             });
 
-            managerInvoiceViewModel.Edition ??= new();
+            managerInvoiceViewModel.Edition = new();
         }
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -31,7 +31,7 @@ namespace Facilys.Components.Pages
         private async Task LoadDataHeader()
         {
             DbContext = await DbContextFactory.CreateDbContextAsync();
-            managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync();
+            managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync() ?? new();
         }
 
         private async Task SubmitSaveSettingInvoice()

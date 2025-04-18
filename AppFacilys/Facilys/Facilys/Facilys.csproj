@@ -28,6 +28,8 @@
   <ItemGroup>
     <!-- Packages principaux -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="ElectronNET.API" Version="23.6.2" />
    <!-- <PackageReference Include="ElectronNET.CLI" Version="23.6.2" PrivateAssets="all" />-->
 
@@ -74,8 +76,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-    <Content Include="$(NuGetPackageRoot)microsoft.aspnetcore.components.quickgrid\**\*.js" LinkBase="_content/Microsoft.AspNetCore.Components.QuickGrid" CopyToOutputDirectory="PreserveNewest"
-           CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(NuGetPackageRoot)microsoft.aspnetcore.components.quickgrid\**\*.js" LinkBase="_content/Microsoft.AspNetCore.Components.QuickGrid" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

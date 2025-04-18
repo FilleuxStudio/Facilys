@@ -65,7 +65,7 @@ namespace Facilys.Components.Pages
         {
             DbContext = await DbContextFactory.CreateDbContextAsync();
 
-            managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync();
+            managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync() ?? new();
             managerInvoiceViewModel.Invoice = await DbContext.Invoices.OrderByDescending(d => d.InvoiceNumber).FirstOrDefaultAsync();
             managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
             managerInvoiceViewModel.Clients = await DbContext.Clients.ToListAsync();

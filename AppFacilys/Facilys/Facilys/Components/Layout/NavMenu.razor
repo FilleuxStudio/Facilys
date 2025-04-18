@@ -175,7 +175,7 @@
                         </NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="/exports" title="Exportation">
+                        <NavLink class="nav-link" href="/export" title="Exportation">
                             <i class="iconoir-database-export menu-icon"></i>
                             <span>Exportation des données</span>
                         </NavLink>
@@ -256,10 +256,7 @@
             await JSRuntime.InvokeVoidAsync("customScripts.stickyTopbarOnScroll");
             await JSRuntime.InvokeVoidAsync("customScripts.initVerticalMenu");
         }
-
-
     }
-
 
     public void Dispose()
     {

@@ -158,7 +158,6 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-
 builder.Services.AddScoped<UserConnectionService>();
 // Configuration du service SSH
 builder.Services.AddSingleton<SshTunnelService>();
@@ -221,6 +220,12 @@ builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
 //builder.Services.AddSingleton<DynamicMySQLService>();
 
+// Notre service d'export
+builder.Services.AddScoped<ExportService>();
+
+// Controllers
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 // Pipeline HTTP
@@ -231,6 +236,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.MapControllers();
 app.UseSession();
 
 app.UseHttpsRedirection();

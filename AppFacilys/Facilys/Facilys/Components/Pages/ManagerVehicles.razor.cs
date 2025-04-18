@@ -33,6 +33,7 @@ namespace Facilys.Components.Pages
             managerVehicleViewModel.OtherVehicle = new();
             managerVehicleViewModel.Invoices = new();
             managerVehicleViewModel.HistoryPart = new();
+            managerVehicleViewModel.Clients = [];
 
             modalManager.RegisterModal("OpenModalLargeAddVehicle");
             modalManager.RegisterModal("OpenModaSmallInfoVin");
