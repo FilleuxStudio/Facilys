@@ -21,7 +21,7 @@ namespace Facilys.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
-           
+
             editContext = new EditContext(this);
             modalManager.RegisterModal("OpenModalEditPicture");
         }

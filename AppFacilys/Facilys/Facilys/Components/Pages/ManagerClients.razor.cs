@@ -6,7 +6,6 @@ using Facilys.Components.Models.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
@@ -139,7 +138,7 @@ namespace Facilys.Components.Pages
             await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
             modalManager.OpenModal(idModal);
             managerClientViewModel.Client = await DbContext.Clients.Where(i => i.Id == idClient).FirstOrDefaultAsync();
-            managerClientViewModel.Vehicles = await DbContext.Vehicles.Include(c => c.Client).Where(u => u.Client.Id == idClient) .ToListAsync();
+            managerClientViewModel.Vehicles = await DbContext.Vehicles.Include(c => c.Client).Where(u => u.Client.Id == idClient).ToListAsync();
             StateHasChanged();
         }
 

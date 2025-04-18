@@ -20,18 +20,18 @@
 
         public void OpenModal(string id)
         {
-            if (modals.ContainsKey(id))
+            if (modals.TryGetValue(id, out Modal? value))
             {
-                modals[id].OpenModal(id);
+                value.OpenModal(id);
                 IsBackdropVisible = true; // Activer le fond grisé
             }
         }
 
         public void CloseModal(string id)
         {
-            if (modals.ContainsKey(id))
+            if (modals.TryGetValue(id, out Modal? value))
             {
-                modals[id].CloseModal(id);
+                value.CloseModal(id);
                 IsBackdropVisible = modals.Any(m => m.Value.IsOpen);
             }
         }

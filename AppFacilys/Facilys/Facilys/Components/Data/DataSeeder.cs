@@ -18,8 +18,8 @@ namespace Facilys.Components.Data
 
         private async Task SeedClientssAsync()
         {
-            List<Clients> Clientss = new()
-            {
+            List<Clients> Clientss =
+            [
             new Clients { Id = Guid.NewGuid(), Lname = "Dupont", Fname = "Jean", Address = "123 Rue de la Paix", City = "Paris", PostalCode = "75001", Type = TypeClient.Client, AdditionalInformation = "Clients fidèle depuis 2010", DateCreated = DateTime.Parse("2025-02-05 21:00:00") },
             new Clients { Id = Guid.NewGuid(), Lname = "Martin", Fname = "Sophie", Address = "45 Avenue des Champs-Élysées", City = "Paris", PostalCode = "75008", Type = TypeClient.Client, AdditionalInformation = "Préfère le contact par email", DateCreated = DateTime.Parse("2025-02-05 21:01:00") },
             new Clients { Id = Guid.NewGuid(), Lname = "Dubois", Fname = "Pierre", Address = "78 Rue du Commerce", City = "Lyon", PostalCode = "69002", Type = TypeClient.ClientProfessional, AdditionalInformation = "Entreprise de plomberie", DateCreated = DateTime.Parse("2025-02-05 21:02:00") },
@@ -30,7 +30,7 @@ namespace Facilys.Components.Data
             new Clients { Id = Guid.NewGuid(), Lname = "Vincent", Fname = "Isabelle", Address = "12 Place du Capitole", City = "Toulouse", PostalCode = "31000", Type = TypeClient.Client, AdditionalInformation = "Préfère être contactée le soir", DateCreated = DateTime.Parse("2025-02-05 21:07:00") },
             new Clients { Id = Guid.NewGuid(), Lname = "Mercier", Fname = "Thomas", Address = "34 Rue Nationale", City = "Lille", PostalCode = "59000", Type = TypeClient.ClientProfessional, AdditionalInformation = "Société de consulting", DateCreated = DateTime.Parse("2025-02-05 21:08:00") },
             new Clients { Id = Guid.NewGuid(), Lname = "Chevalier", Fname = "Emma", Address = "5 Cours Mirabeau", City = "Aix-en-Provence", PostalCode = "13100", Type = TypeClient.Client, AdditionalInformation = "Clientse VIP", DateCreated = DateTime.Parse("2025-02-05 21:09:00") }
-            };
+            ];
 
             foreach (var Client in Clientss)
             {

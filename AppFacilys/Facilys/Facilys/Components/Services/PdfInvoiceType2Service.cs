@@ -62,7 +62,7 @@ namespace Facilys.Components.Services
         }
 
 
-        private byte[] PictureToStream(string logo)
+        private static byte[] PictureToStream(string logo)
         {
             // Convertir la chaîne base64 en tableau de bytes
             string base64Image = logo.Split(',')[1];
@@ -73,14 +73,14 @@ namespace Facilys.Components.Services
 
         }
 
-        private double DrawHeader(XGraphics gfx, Invoices invoice, ManagerInvoiceViewModel company, int km, XFont titleFont, XFont normalFont, double yPosition)
+        private static double DrawHeader(XGraphics gfx, Invoices invoice, ManagerInvoiceViewModel company, int km, XFont titleFont, XFont normalFont, double yPosition)
         {
             double newHeight = 0;
 
             try
             {
                 byte[] imageBytes = PictureToStream(company.CompanySettings.Logo);
-                using (MemoryStream ms = new MemoryStream(imageBytes, 0, imageBytes.Length, true, true))
+                using (MemoryStream ms = new(imageBytes, 0, imageBytes.Length, true, true))
                 {
                     XImage logo = XImage.FromStream(ms);
 
@@ -106,7 +106,7 @@ namespace Facilys.Components.Services
             yPosition += newHeight + LineHeight;
 
             // Title
-            XRect rect = new XRect(LeftMargin, yPosition, PageWidth - LeftMargin - RightMargin, LineHeight);
+            XRect rect = new(LeftMargin, yPosition, PageWidth - LeftMargin - RightMargin, LineHeight);
             gfx.DrawString("FACTURE", titleFont, XBrushes.Black, rect, XStringFormats.TopRight);
 
             yPosition += LineHeight;
@@ -156,7 +156,7 @@ namespace Facilys.Components.Services
         }
 
 
-        private double DrawCustomerInfo(XGraphics gfx, ManagerInvoiceViewModel client, PhonesClients phones, XFont normalFont, double yPosition)
+        private static double DrawCustomerInfo(XGraphics gfx, ManagerInvoiceViewModel client, PhonesClients phones, XFont normalFont, double yPosition)
         {
             // Sauvegardez la position verticale initiale
             double initialYPosition = yPosition;
@@ -166,27 +166,27 @@ namespace Facilys.Components.Services
             double rectHeight = LineHeight * 7; // Ajustez selon le nombre de lignes
 
             // Créez le rectangle
-            XRect rect = new XRect(LeftMargin, yPosition, rectWidth, rectHeight);
+            XRect rect = new(LeftMargin, yPosition, rectWidth, rectHeight);
 
             // Dessinez le rectangle avec une bordure noire de 2px
-            XPen pen = new XPen(XColors.Black, 1);
+            XPen pen = new(XColors.Black, 1);
             gfx.DrawRectangle(pen, rect);
 
             // Centrez le titre "CLIENT"
-            XRect titleRect = new XRect(rect.Left, yPosition, rectWidth, LineHeight);
+            XRect titleRect = new(rect.Left, yPosition, rectWidth, LineHeight);
             gfx.DrawString("CLIENT", normalFont, XBrushes.Black, titleRect, XStringFormats.Center);
             yPosition += LineHeight * 1.5; // Espace après le titre
 
             // Dessinez les informations du client
-            string[][] clientInfo = new string[][]
-{
-    new[] {"Nom:", client.Client.Lname},
-    new[] {"Prénom:", client.Client.Fname},
-    new[] {"Rue:", client.Client.Address},
-    new[] {"Code postal:", client.Client.PostalCode},
-    new[] {"Ville:", client.Client.City},
-    new[] {"Téléphone:", phones.Phone}
-};
+            string[][] clientInfo =
+[
+    ["Nom:", client.Client.Lname],
+    ["Prénom:", client.Client.Fname],
+    ["Rue:", client.Client.Address],
+    ["Code postal:", client.Client.PostalCode],
+    ["Ville:", client.Client.City],
+    ["Téléphone:", phones.Phone]
+];
 
             // Trouvez la largeur maximale des labels
             double maxLabelWidth = 0;
@@ -215,7 +215,7 @@ namespace Facilys.Components.Services
             return yPosition;
         }
 
-        private double DrawVehicleInfo(XGraphics gfx, ManagerInvoiceViewModel vehicle, XFont normalFont, double yPosition)
+        private static double DrawVehicleInfo(XGraphics gfx, ManagerInvoiceViewModel vehicle, XFont normalFont, double yPosition)
         {
             // Sauvegardez la position verticale initiale
             double initialYPosition = yPosition;
@@ -225,14 +225,14 @@ namespace Facilys.Components.Services
             double rectHeight = LineHeight * 7; // Ajustez selon le nombre de lignes
 
             // Créez le rectangle pour le véhicule (à droite)
-            XRect rect = new XRect(PageWidth - RightMargin - rectWidth, yPosition, rectWidth, rectHeight);
+            XRect rect = new(PageWidth - RightMargin - rectWidth, yPosition, rectWidth, rectHeight);
 
             // Dessinez le rectangle avec une bordure noire de 1px
-            XPen pen = new XPen(XColors.Black, 1);
+            XPen pen = new(XColors.Black, 1);
             gfx.DrawRectangle(pen, rect);
 
             // Centrez le titre "VEHICULE"
-            XRect titleRect = new XRect(rect.Left, yPosition, rectWidth, LineHeight);
+            XRect titleRect = new(rect.Left, yPosition, rectWidth, LineHeight);
             gfx.DrawString("VEHICULE", normalFont, XBrushes.Black, titleRect, XStringFormats.Center);
             yPosition += LineHeight * 1.5; // Espace après le titre
 
@@ -241,23 +241,23 @@ namespace Facilys.Components.Services
 
             if (vehicle.Vehicle != null)
             {
-                vehicleInfo = new string[][]{
-                new[] { "Marque:", vehicle.Vehicle.Mark },
-        new[] { "Modèle:", vehicle.Vehicle.Model },
-        new[] { "Immatriculation:", vehicle.Vehicle.Immatriculation },
-        new[] { "VIN:", vehicle.Vehicle.VIN },
-        new[] { "Type:", vehicle.Vehicle.Type },
-        new[] { "Mise en circulation:", vehicle.Vehicle.CirculationDate.ToString("dd/MM/yyyy") }
-            };
+                vehicleInfo = [
+                ["Marque:", vehicle.Vehicle.Mark],
+        ["Modèle:", vehicle.Vehicle.Model],
+        ["Immatriculation:", vehicle.Vehicle.Immatriculation],
+        ["VIN:", vehicle.Vehicle.VIN],
+        ["Type:", vehicle.Vehicle.Type],
+        ["Mise en circulation:", vehicle.Vehicle.CirculationDate.ToString("dd/MM/yyyy")]
+            ];
             }
             else
             {
-                vehicleInfo = new string[][]{
-                new[] { "Marque:", vehicle.OtherVehicle.Mark },
-        new[] { "Modèle:", vehicle.OtherVehicle.Model},
-        new[] { "Numéro :", vehicle.OtherVehicle.SerialNumber },
-        new[] { "Type:", vehicle.OtherVehicle.Type },
-            };
+                vehicleInfo = [
+                ["Marque:", vehicle.OtherVehicle.Mark],
+        ["Modèle:", vehicle.OtherVehicle.Model],
+        ["Numéro :", vehicle.OtherVehicle.SerialNumber],
+        ["Type:", vehicle.OtherVehicle.Type],
+            ];
             }
 
             // Trouvez la largeur maximale des labels
@@ -285,24 +285,24 @@ namespace Facilys.Components.Services
             return initialYPosition + rectHeight;
         }
 
-        private double DrawServiceTable(XGraphics gfx, ManagerInvoiceViewModel historyParts, XFont strongFont, XFont normalFont, double yPosition)
+        private static double DrawServiceTable(XGraphics gfx, ManagerInvoiceViewModel historyParts, XFont strongFont, XFont normalFont, double yPosition)
         {
             // Définir les largeurs de colonnes (ajustées pour tenir dans la page)
-            double[] columnWidths = { 295, 55, 75, 55, 75 };
+            double[] columnWidths = [295, 55, 75, 55, 75];
             double tableWidth = columnWidths.Sum();
             double tableStartX = Margin;
             double tableStartY = yPosition;
             double cellPadding = 5; // Espace à l'intérieur des cellules
 
             // Créer un stylo pour les lignes
-            XPen tablePen = new XPen(XColors.Black, 1);
+            XPen tablePen = new(XColors.Black, 1);
 
             // Dessiner l'en-tête du tableau
-            string[] headers = { "Description", "Quantité", "Prix Unitaire", "Remise", "Montant HT" };
+            string[] headers = ["Description", "Quantité", "Prix Unitaire", "Remise", "Montant HT"];
             for (int i = 0; i < headers.Length; i++)
             {
                 double columnX = tableStartX + columnWidths.Take(i).Sum();
-                XRect headerRect = new XRect(columnX, yPosition, columnWidths[i], LineHeight + cellPadding * 2);
+                XRect headerRect = new(columnX, yPosition, columnWidths[i], LineHeight + cellPadding * 2);
 
                 // Dessiner la cellule de l'en-tête (avec toutes les bordures)
                 gfx.DrawRectangle(tablePen, headerRect);
@@ -322,20 +322,14 @@ namespace Facilys.Components.Services
             // Dessiner les lignes du tableau
             foreach (var item in historyParts.HistoryParts)
             {
-                string[] rowData = {
-        "- " + item.Description,
-        item.Quantity.ToString(),
-        item.Price.ToString("C"),
-        item.Discount.ToString() + " %",
-        ((item.Quantity * item.Price) * (1 - item.Discount / 100)).ToString("C")
-    };
+                string[] rowData = ["- " + item.Description, item.Quantity.ToString(), item.Price.ToString("C"), item.Discount.ToString() + " %", ((item.Quantity * item.Price) * (1 - item.Discount / 100)).ToString("C")];
 
                 double rowStartY = yPosition;
 
                 for (int i = 0; i < rowData.Length; i++)
                 {
                     double columnX = tableStartX + columnWidths.Take(i).Sum();
-                    XRect cellRect = new XRect(columnX, yPosition, columnWidths[i], LineHeight + cellPadding * 2);
+                    XRect cellRect = new(columnX, yPosition, columnWidths[i], LineHeight + cellPadding * 2);
 
                     // Aligner le texte à gauche dans la cellule (sauf pour les nombres)
                     XStringFormat format = i == 0 ? XStringFormats.CenterLeft : XStringFormats.TopRight;
@@ -363,7 +357,7 @@ namespace Facilys.Components.Services
 
         }
 
-        private double DrawRequiredInformation(XGraphics gfx, ManagerInvoiceViewModel invoiceInformation, XFont normalFont, double yPosition)
+        private static double DrawRequiredInformation(XGraphics gfx, ManagerInvoiceViewModel invoiceInformation, XFont normalFont, double yPosition)
         {
             // Sauvegardez la position verticale initiale
             double initialYPosition = yPosition;
@@ -373,14 +367,14 @@ namespace Facilys.Components.Services
             double rectHeight = LineHeight * 4; // Ajustez selon le nombre de lignes
 
             // Créez le rectangle pour l'information
-            XRect rect = new XRect(LeftMargin, yPosition, rectWidth, rectHeight);
+            XRect rect = new(LeftMargin, yPosition, rectWidth, rectHeight);
 
             // Dessinez le rectangle avec une bordure noire de 1px
-            XPen pen = new XPen(XColors.Black, 1);
+            XPen pen = new(XColors.Black, 1);
             gfx.DrawRectangle(pen, rect);
 
             // Centrez le titre "INTERVENTION A PREVOIR"
-            XRect titleRect = new XRect(rect.X, rect.Y, rect.Width, LineHeight);
+            XRect titleRect = new(rect.X, rect.Y, rect.Width, LineHeight);
             gfx.DrawString("INTERVENTION A PREVOIR", normalFont, XBrushes.Black, titleRect, XStringFormats.Center);
 
             // Dessinez le texte à l'intérieur du rectangle
@@ -393,7 +387,7 @@ namespace Facilys.Components.Services
 
         }
 
-        private double DrawTotal(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
+        private static double DrawTotal(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
         {
             // Définir les dimensions et la position du rectangle
             double rectWidth = 190; // Ajustez selon vos besoins
@@ -402,17 +396,17 @@ namespace Facilys.Components.Services
             double rectY = yPosition;
 
             // Créer le rectangle principal
-            XRect mainRect = new XRect(rectX, rectY, rectWidth, rectHeight);
+            XRect mainRect = new(rectX, rectY, rectWidth, rectHeight);
             gfx.DrawRectangle(new XPen(XColors.Black, 1), mainRect);
 
             // Dessiner les lignes et le texte
-            string[] labels = { "SOUS-TOTAL HT :", "TAUX DE T.V.A :", "T.V.A :", "TOTAL TTC :" };
-            string[] values = {
+            string[] labels = ["SOUS-TOTAL HT :", "TAUX DE T.V.A :", "T.V.A :", "TOTAL TTC :"];
+            string[] values = [
     invoiceData.InvoiceData.HT.ToString("C"),
     $"{invoiceData.Edition.TVA}%",
     invoiceData.InvoiceData.TVA.ToString("C"),
     invoiceData.InvoiceData.TTC.ToString("C")
-};
+];
 
             for (int i = 0; i < 4; i++)
             {
@@ -425,7 +419,7 @@ namespace Facilys.Components.Services
                 }
 
                 // Dessiner le texte
-                XRect textRect = new XRect(rectX + 5, lineY, rectWidth - 10, LineHeight * ((2 + i) + i));
+                XRect textRect = new(rectX + 5, lineY, rectWidth - 10, LineHeight * ((2 + i) + i));
                 gfx.DrawString(labels[i], i == 0 || i == 3 ? headerFont : normalFont, XBrushes.Black, textRect, XStringFormats.CenterLeft);
                 gfx.DrawString(values[i], i == 0 || i == 3 ? headerFont : normalFont, XBrushes.Black, textRect, XStringFormats.CenterRight);
             }
@@ -444,19 +438,19 @@ namespace Facilys.Components.Services
             return yPosition;
         }
 
-        private double DrawLegalMentions(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
+        private static double DrawLegalMentions(XGraphics gfx, ManagerInvoiceViewModel invoiceData, XFont headerFont, XFont normalFont, double yPosition)
         {
             // Calcul de la position de départ depuis le bas de page
             double startY = PageHeight - BottomMargin - (LineHeight * 6);
 
             // 1. Première phrase centrée
-            XStringFormat centerFormat = new XStringFormat
+            XStringFormat centerFormat = new()
             {
                 Alignment = XStringAlignment.Center,
                 LineAlignment = XLineAlignment.Near
             };
 
-            XRect firstTextRect = new XRect(LeftMargin, startY, PageWidth - 2 * LeftMargin, LineHeight);
+            XRect firstTextRect = new(LeftMargin, startY, PageWidth - 2 * LeftMargin, LineHeight);
             gfx.DrawString(invoiceData.Edition.SentenceInformationBottom, normalFont, XBrushes.Black, firstTextRect, centerFormat);
             startY += LineHeight;
 
@@ -465,7 +459,7 @@ namespace Facilys.Components.Services
             double redBoxHeight = 3 * LineHeight + padding * 2;
 
             // Positionnement du rectangle
-            XRect redRect = new XRect(
+            XRect redRect = new(
                 LeftMargin,
                 startY,
                 PageWidth - 2 * LeftMargin,
@@ -477,7 +471,7 @@ namespace Facilys.Components.Services
             // Texte dans le rectangle
             string[] redBoxLines = invoiceData.Edition.SentenceBottom.Split('.');
 
-            XStringFormat redBoxFormat = new XStringFormat
+            XStringFormat redBoxFormat = new()
             {
                 Alignment = XStringAlignment.Center,
                 LineAlignment = XLineAlignment.Center
@@ -486,7 +480,7 @@ namespace Facilys.Components.Services
             double textY = startY + padding;
             foreach (string line in redBoxLines)
             {
-                XRect lineRect = new XRect(LeftMargin, textY, PageWidth - 2 * LeftMargin, LineHeight);
+                XRect lineRect = new(LeftMargin, textY, PageWidth - 2 * LeftMargin, LineHeight);
                 gfx.DrawString(line, normalFont, XBrushes.Black, lineRect, redBoxFormat);
                 textY += LineHeight;
             }
@@ -494,14 +488,14 @@ namespace Facilys.Components.Services
             startY += redBoxHeight + LineHeight;
 
             // 3. Message de remerciement en bas de page
-            XRect footerRect = new XRect(
+            XRect footerRect = new(
                 0,
                 PageHeight - BottomMargin,
                 PageWidth,
                 LineHeight
             );
 
-            XStringFormat footerFormat = new XStringFormat
+            XStringFormat footerFormat = new()
             {
                 Alignment = XStringAlignment.Center,
                 LineAlignment = XLineAlignment.Far

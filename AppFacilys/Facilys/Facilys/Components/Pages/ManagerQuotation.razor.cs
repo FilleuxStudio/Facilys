@@ -1,6 +1,5 @@
 ﻿using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
-using Microsoft.JSInterop;
 
 namespace Facilys.Components.Pages
 {

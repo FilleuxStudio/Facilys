@@ -93,7 +93,7 @@ namespace Facilys.Components.Pages
             try
             {
 
-               DbContext.Invoices.Remove(managerInvoiceViewModel.Invoice);
+                DbContext.Invoices.Remove(managerInvoiceViewModel.Invoice);
                 await DbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -106,7 +106,7 @@ namespace Facilys.Components.Pages
             {
                 Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données de facture");
             }
-     
+
         }
 
         private async Task RefreshInvoiceList()

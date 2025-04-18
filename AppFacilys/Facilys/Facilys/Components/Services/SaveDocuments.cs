@@ -1,6 +1,4 @@
-﻿using ElectronNET.API.Entities;
-using ElectronNET.API;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Facilys.Components.Services
 {

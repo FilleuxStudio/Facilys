@@ -1,10 +1,6 @@
 ﻿using ElectronNET.API;
 using Facilys.Components.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Pomelo.EntityFrameworkCore.MySql.Storage;
-using Renci.SshNet;
 
 namespace Facilys.Components.Data
 {
@@ -12,7 +8,7 @@ namespace Facilys.Components.Data
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _configuration;
-        UserConnectionService _userConnectionService;
+        private readonly UserConnectionService _userConnectionService;
         private readonly SshTunnelService _sshTunnelService;
 
         public DynamicDbContextFactory(IServiceProvider serviceProvider, IConfiguration configuration, UserConnectionService userConnectionService, SshTunnelService sshTunnelService)

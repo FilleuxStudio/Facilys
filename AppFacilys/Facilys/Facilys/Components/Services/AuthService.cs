@@ -312,25 +312,14 @@
 //}
 
 using ElectronNET.API;
-using ElectronNET.API.Entities;
 using Facilys.Components.Constants;
 using Facilys.Components.Data;
 using Facilys.Components.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
-using OpenCvSharp;
-using System;
-using System.IO;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using MySqlX.XDevAPI.Common;
 
 namespace Facilys.Components.Services
 {
@@ -420,7 +409,7 @@ namespace Facilys.Components.Services
         {
             if (HybridSupport.IsElectronActive)
             {
-                var appDataPath = await GetAppDataPathAsync();
+                var appDataPath = GetAppDataPath();
                 var directoryPath = Path.Combine(appDataPath, EnvironmentApp.FolderData);
                 var filePath = Path.Combine(directoryPath, CookieFileName);
                 try
@@ -432,7 +421,7 @@ namespace Facilys.Components.Services
                             File.Delete(filePath);
                         return;
                     }
-                    var json = JsonSerializer.Serialize(cookieData, new JsonSerializerOptions { WriteIndented = true });
+                    string json = JsonSerializer.Serialize(cookieData, new JsonSerializerOptions { WriteIndented = true });
                     await File.WriteAllTextAsync(filePath, json);
                 }
                 catch (Exception ex)
@@ -444,10 +433,10 @@ namespace Facilys.Components.Services
             await _localStorage.SetAsync("cookieData", _cookieData);
         }
 
-        public static async Task EnsureApplicationFolderExists()
+        public static void EnsureApplicationFolderExists()
         {
             // Obtient le chemin des documents utilisateur via Electron
-            var documentsPath = await GetAppDataPathAsync();
+            var documentsPath = GetAppDataPath();
 
             // Combine le chemin pour inclure le dossier "Facilys"
             var facilysFolderPath = Path.Combine(documentsPath, "Facilys");
@@ -484,7 +473,7 @@ namespace Facilys.Components.Services
         {
             if (HybridSupport.IsElectronActive)
             {
-                await DeleteCookieDataAsync();
+                DeleteCookieData();
             }
 
             _cookieData = new CookieData();
@@ -501,7 +490,7 @@ namespace Facilys.Components.Services
             {
                 if (HybridSupport.IsElectronActive)
                 {
-                    var appDataPath = await GetAppDataPathAsync();
+                    var appDataPath = GetAppDataPath();
                     var filePath = Path.Combine(appDataPath, EnvironmentApp.FolderData, CookieFileName);
 
                     if (!File.Exists(filePath))
@@ -532,11 +521,11 @@ namespace Facilys.Components.Services
         /// <summary>
         /// Supprime les données du cookie.
         /// </summary>
-        private async Task DeleteCookieDataAsync()
+        private static void DeleteCookieData()
         {
             if (HybridSupport.IsElectronActive)
             {
-                var appDataPath = await GetAppDataPathAsync();
+                var appDataPath = GetAppDataPath();
                 var directoryPath = Path.Combine(appDataPath, EnvironmentApp.FolderData);
                 var filePath = Path.Combine(directoryPath, CookieFileName);
                 try
@@ -589,7 +578,7 @@ namespace Facilys.Components.Services
         /// <summary>
         /// Génère un hash SHA256 à partir d'une chaîne d'entrée.
         /// </summary>
-        private string GenerateSha256(string input)
+        private static string GenerateSha256(string input)
         {
             using (SHA256 sha256 = SHA256.Create())
             {
@@ -603,7 +592,7 @@ namespace Facilys.Components.Services
         /// </summary>
         public static async Task EnsureApplicationFolderExistsAsync()
         {
-            var documentsPath = await GetAppDataPathAsync();
+            var documentsPath = GetAppDataPath();
             var facilysFolderPath = Path.Combine(documentsPath, "Facilys");
             if (!Directory.Exists(facilysFolderPath))
             {
@@ -614,7 +603,7 @@ namespace Facilys.Components.Services
         /// <summary>
         /// Récupère le chemin AppData (ici, les documents) selon l'environnement (Electron ou non).
         /// </summary>
-        private static async Task<string> GetAppDataPathAsync()
+        private static string GetAppDataPath()
         {
             if (HybridSupport.IsElectronActive)
             {

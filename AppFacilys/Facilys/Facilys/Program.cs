@@ -132,10 +132,8 @@ using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Facilys.Components.Data;
 using Facilys.Components.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
-using Renci.SshNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -244,7 +242,8 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 app.UseWebSockets();
 
-if (HybridSupport.IsElectronActive) { 
+if (HybridSupport.IsElectronActive)
+{
     // Initialisation des bases de données
     using (var scope = app.Services.CreateScope())
     {
@@ -261,7 +260,7 @@ app.MapRazorComponents<Facilys.Components.App>()
 // Gestion du mode Electron
 if (HybridSupport.IsElectronActive)
 {
-    await AuthService.EnsureApplicationFolderExists();
+    AuthService.EnsureApplicationFolderExists();
 
     await Task.Run(async () =>
     {

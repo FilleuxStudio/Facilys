@@ -1,7 +1,5 @@
 ﻿using Facilys.Components.Constants;
 using Facilys.Components.Models;
-using PdfSharp.Snippets;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
 namespace Facilys.Components.Services
@@ -103,7 +101,7 @@ namespace Facilys.Components.Services
             }
         }
 
-        public async Task<(bool Success,  CompanySettings companySettings)> PostGetCompanyUserAsync(string email)
+        public async Task<(bool Success, CompanySettings companySettings)> PostGetCompanyUserAsync(string email)
         {
             // Création du FormData
             var formContent = new MultipartFormDataContent
@@ -186,7 +184,7 @@ namespace Facilys.Components.Services
         public string Company { get; set; }
         public string MariadbUser { get; set; }
         public string MariadbPassword { get; set; }
-        public string MariadbDb {  get; set; }
+        public string MariadbDb { get; set; }
     }
 
     public class ApiResponse
