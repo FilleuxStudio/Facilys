@@ -2,7 +2,7 @@ name: Deploy Blazor Server to Cloud Run
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
   PROJECT_ID: "myprojectfacilys"
@@ -50,14 +50,13 @@ jobs:
         service: ${{ env.SERVICE_NAME }}
         image: ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
         region: ${{ env.REGION }}
-        credentials: ${{ secrets.GCP_SA_KEY }}
-        flags: |
-          --cpu=1
-          --memory=2Gi
-          --min-instances=0
-          --max-instances=5
-          --timeout=300s
-          --ingress=all
-          --revision-suffix=${{ github.sha }}
-          --port=8080
-          --allow-unauthenticated
+        cpu: 1
+        memory: 2Gi
+        min_instances: 0
+        max_instances: 5
+        timeout: 300s
+        ingress: all
+        port: 8080
+        allow_unauthenticated: true
+        revision_suffix: ${{ github.sha }}
+        labels: "managed-by=github-actions,commit-sha=${{ github.sha }}"

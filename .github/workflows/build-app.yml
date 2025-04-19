@@ -1,8 +1,10 @@
 name: Build and Deploy Electron.NET App
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["Deploy Node.js App to PlanetHoster"]
+    types:
+      - completed
 
 jobs:
   build:
