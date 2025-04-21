@@ -65,8 +65,8 @@ namespace Facilys.Components.Pages
             DbContext = await DbContextFactory.CreateDbContextAsync();
 
             managerInvoiceViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync() ?? new();
-            managerInvoiceViewModel.Invoice = await DbContext.Invoices.OrderByDescending(d => d.InvoiceNumber).FirstOrDefaultAsync();
-            managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
+            managerInvoiceViewModel.Invoice = await DbContext.Invoices.AsNoTracking().OrderByDescending(d => d.InvoiceNumber).FirstOrDefaultAsync();
+            managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.AsNoTracking().FirstOrDefaultAsync();
             managerInvoiceViewModel.Clients = await DbContext.Clients.ToListAsync();
 
             if (managerInvoiceViewModel.Invoice == null)
@@ -468,6 +468,11 @@ namespace Facilys.Components.Pages
             }
 
             StateHasChanged();
+        }
+
+        public void Dispose()
+        {
+            DbContext.Dispose();
         }
     }
 }

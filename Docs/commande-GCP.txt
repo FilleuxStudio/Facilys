@@ -1,0 +1,7 @@
+gcloud auth login
+
+gcloud projects list
+
+gcloud config set project VOTRE_PROJECT_ID
+
+gcloud artifacts repositories create facilys-repo --repository-format=docker --location=europe-west1 --description="Dépôt Docker pour le projet Facilys"

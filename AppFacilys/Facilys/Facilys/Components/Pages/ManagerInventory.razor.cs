@@ -40,7 +40,7 @@ namespace Facilys.Components.Pages
         private async Task LoadDataHeader()
         {
             DbContext = await DbContextFactory.CreateDbContextAsync();
-            InventorysLists = await DbContext.Inventorys.ToListAsync();
+            InventorysLists = await DbContext.Inventorys.AsNoTracking().ToListAsync();
         }
         private async void OpenModal(string id)
         {
@@ -165,6 +165,11 @@ namespace Facilys.Components.Pages
             byte[] fileBytes = memoryStream.ToArray();
             string base64String = Convert.ToBase64String(fileBytes);
             return $"data:{file.ContentType};base64,{base64String}";
+        }
+
+        public void Dispose()
+        {
+            DbContext.Dispose();
         }
     }
 }

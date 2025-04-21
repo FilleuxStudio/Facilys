@@ -194,17 +194,21 @@
         {
             await UserConnection.LoadCredentialsAsync();
             await LoadDataHeader();
-            StateHasChanged(); // Demande un nouveau rendu du composant
+             StateHasChanged(); // Demande un nouveau rendu du composant
              //await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
         }
     }
 
+
     private async Task LoadDataHeader()
     {
         using var context = await DbContextFactory.CreateDbContextAsync();
-        client = await context.Clients.CountAsync();
-        vehicle = await context.Vehicles.CountAsync();
-        invoice = await context.Invoices.CountAsync();
+
+        settingEmpty = await context.CompanySettings.AnyAsync();
+
+        client = await context.Clients.AsNoTracking().CountAsync();
+        vehicle = await context.Vehicles.AsNoTracking().CountAsync();
+        invoice = await context.Invoices.AsNoTracking().CountAsync();
 
         var dataTopVehicle = await context.HistoryParts
                     .Where(h => h.Vehicle != null)
@@ -219,6 +223,7 @@
                         })
                     .OrderByDescending(x => x.RepairCount)
                     .Take(10)
+                    .AsNoTracking()
                     .ToListAsync();
 
 
@@ -239,6 +244,7 @@
                 })
             .OrderByDescending(x => x.RepairCount)
             .Take(10)
+            .AsNoTracking()
             .ToListAsync();
 
 
@@ -264,8 +270,6 @@
                     RepairCount = clientObject.RepairCount,
                 });
         }
-
-        settingEmpty = await context.CompanySettings.AnyAsync();
 
         await context.DisposeAsync();
     }

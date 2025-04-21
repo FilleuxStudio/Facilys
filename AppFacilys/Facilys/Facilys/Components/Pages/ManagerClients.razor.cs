@@ -531,5 +531,10 @@ namespace Facilys.Components.Pages
             // await InvokeAsync(StateHasChanged);
             // StateHasChanged();
         }
+
+        public void Dispose()
+        {
+           DbContext.Dispose();
+        }
     }
 }

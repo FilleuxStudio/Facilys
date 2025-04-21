@@ -90,5 +90,10 @@ namespace Facilys.Components.Pages
                 Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
             }
         }
+
+        public void Dispose()
+        {
+            DbContext.Dispose();
+        }
     }
 }

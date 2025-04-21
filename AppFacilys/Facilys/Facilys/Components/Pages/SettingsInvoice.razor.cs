@@ -55,5 +55,10 @@ namespace Facilys.Components.Pages
                 Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
             }
         }
+
+        public void Dispose()
+        {
+            DbContext.Dispose();
+        }
     }
 }

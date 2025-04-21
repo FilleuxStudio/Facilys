@@ -168,6 +168,10 @@ namespace Facilys.Components.Pages
             await UpdateChartData(monthlyInvoiceTotals);
         }
 
+        public void Dispose()
+        {
+            DbContext.Dispose();
+        }
     }
 
     public class InvoiceDto

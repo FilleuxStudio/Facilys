@@ -93,5 +93,10 @@ namespace Facilys.Components.Pages
             PasswordA = string.Empty;
             PasswordB = string.Empty;
         }
+
+        public void Dispose()
+        {
+            DbContext.Dispose();
+        }
     }
 }
