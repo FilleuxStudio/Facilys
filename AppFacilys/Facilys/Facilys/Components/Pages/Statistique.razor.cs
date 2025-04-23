@@ -60,7 +60,10 @@ namespace Facilys.Components.Pages
         {
             DbContext = await DbContextFactory.CreateDbContextAsync();
 
-            totaAmountAnnualInvoice = await DbContext.Invoices.Where(i => i.DateAdded.Year == DateTime.Now.Year).SumAsync(i => i.TotalAmount);
+            totaAmountAnnualInvoice = await DbContext.Invoices
+    .Where(i => i.DateAdded.Year == DateTime.Now.Year)
+    .SumAsync(i => (float?)i.TotalAmount) ?? 0.0f;
+
             var invoicesByYear = await DbContext.Invoices.Where(i => i.DateAdded.Year == DateTime.Now.Year).GroupBy(i => i.DateAdded.Month).Select(g => new { Month = g.Key, Count = g.Count() }).ToListAsync();
             await LoadDataInvoicesByMonth();
 
@@ -69,23 +72,42 @@ namespace Facilys.Components.Pages
                 totalInvoiceAvgMonth = (int)invoicesByYear.Average(g => g.Count);
             }
 
-            todayRevenue = await DbContext.Invoices.Where(i => i.DateAdded.Date == DateTime.Today).SumAsync(i => i.TotalAmount);
+            // Revenus aujourd’hui
+            todayRevenue = await DbContext.Invoices
+                .Where(i => i.DateAdded.Date == DateTime.Today)
+                .SumAsync(i => (float?)i.TotalAmount) ?? 0.0f;
 
-            monthlyRevenue = await DbContext.Invoices.Where(i => i.DateAdded.Year == DateTime.Now.Year && i.DateAdded.Month == DateTime.Now.Month).AverageAsync(i => i.TotalAmount);
+            // Revenus du mois
+            monthlyRevenue = await DbContext.Invoices
+                .Where(i => i.DateAdded.Year == DateTime.Now.Year && i.DateAdded.Month == DateTime.Now.Month)
+                .AverageAsync(i => (float?)i.TotalAmount) ?? 0.0f;
 
-            maxInvoice = await DbContext.Invoices.OrderByDescending(i => i.TotalAmount).Select(i => i.TotalAmount).FirstOrDefaultAsync();
+            // Max
+            maxInvoice = await DbContext.Invoices
+                .OrderByDescending(i => i.TotalAmount)
+                .Select(i => (float?)i.TotalAmount)
+                .FirstOrDefaultAsync() ?? 0.0f;
 
-            minInvoice = await DbContext.Invoices.OrderBy(i => i.TotalAmount).Select(i => i.TotalAmount).FirstOrDefaultAsync();
+            // Min
+            minInvoice = await DbContext.Invoices
+                .OrderBy(i => i.TotalAmount)
+                .Select(i => (float?)i.TotalAmount)
+                .FirstOrDefaultAsync() ?? 0.0f;
 
-            RecentInvoice = await DbContext.Invoices.OrderByDescending(i => i.DateAdded).Take(5).Select(i => new InvoiceDto
-            {
-                InvoiceId = i.Id,
-                OrderNumber = i.OrderNumber,
-                TotalAmount = i.TotalAmount,
-                DateAdded = i.DateAdded,
-                ClientFirstName = i.Vehicle != null ? i.Vehicle.Client.Fname : (i.OtherVehicle != null ? i.OtherVehicle.Client.Fname : "N/A"),
-                ClientLastName = i.Vehicle != null ? i.Vehicle.Client.Lname : (i.OtherVehicle != null ? i.OtherVehicle.Client.Lname : "N/A")
-            }).ToListAsync();
+            // Dernières factures
+            RecentInvoice = await DbContext.Invoices
+                .OrderByDescending(i => i.DateAdded)
+                .Take(5)
+                .Select(i => new InvoiceDto
+                {
+                    InvoiceId = i.Id,
+                    OrderNumber = i.OrderNumber,
+                    TotalAmount = i.TotalAmount,
+                    DateAdded = i.DateAdded,
+                    ClientFirstName = i.Vehicle != null ? i.Vehicle.Client.Fname : (i.OtherVehicle != null ? i.OtherVehicle.Client.Fname : "N/A"),
+                    ClientLastName = i.Vehicle != null ? i.Vehicle.Client.Lname : (i.OtherVehicle != null ? i.OtherVehicle.Client.Lname : "N/A")
+                })
+                .ToListAsync();
 
             var paymentMethodTotals = await DbContext.Invoices
        .GroupBy(i => i.Payment)

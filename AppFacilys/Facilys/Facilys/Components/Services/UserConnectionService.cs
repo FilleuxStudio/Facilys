@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+﻿using ElectronNET.API;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace Facilys.Components.Services
 {
@@ -20,7 +21,7 @@ namespace Facilys.Components.Services
         /// <summary>
         /// Nom de la base de données ciblée.
         /// </summary>
-        public string Database { get; private set; } 
+        public string Database { get; private set; }
 
         /// <summary>
         /// Identifiant de l'utilisateur.
@@ -64,21 +65,23 @@ namespace Facilys.Components.Services
         {
             try
             {
-                if(Database == null)
+                if (HybridSupport.IsElectronActive == false)
                 {
-                    var result = await _localStorage.GetAsync<dynamic>(StorageKey);
-                    if (result.Success)
+                    if (Database == null)
                     {
-                        var json = result.Value;
+                        var result = await _localStorage.GetAsync<dynamic>(StorageKey);
+                        if (result.Success)
+                        {
+                            var json = result.Value;
 
-                        Database = json.GetProperty("database").GetString();
-                        UserId = json.GetProperty("userId").GetString();
-                        Password = json.GetProperty("password").GetString();
+                            Database = json.GetProperty("database").GetString();
+                            UserId = json.GetProperty("userId").GetString();
+                            Password = json.GetProperty("password").GetString();
 
-                        ConnectionString = $"Server={Server};Port=3306;Database={Database};Uid={UserId};Pwd={Password};";
+                            ConnectionString = $"Server={Server};Port=3306;Database={Database};Uid={UserId};Pwd={Password};";
+                        }
                     }
                 }
-                
             }
             catch (Exception ex)
             {
