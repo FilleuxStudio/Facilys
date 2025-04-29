@@ -7,5 +7,6 @@ router.post("/login", apiController.login);
 router.post("/getlogindatabse", apiController.loginDatabase);
 router.post("/company", apiController.company);
 router.post("/query", apiController.executeQuery);
+router.put("/update-company", apiController.updateCompany);
 
 module.exports = router;

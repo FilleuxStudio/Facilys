@@ -1,5 +1,6 @@
 ﻿using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Facilys.Components.Pages
 {
@@ -20,16 +21,7 @@ namespace Facilys.Components.Pages
             if (firstRender)
             {
                 await UserConnection.LoadCredentialsAsync();
-                await LoadDataHeader();
-                StateHasChanged(); // Demande un nouveau rendu du composant
             }
         }
-
-        private async Task LoadDataHeader()
-        {
-
-        }
-
-
     }
 }

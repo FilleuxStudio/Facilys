@@ -194,8 +194,10 @@
         {
             await UserConnection.LoadCredentialsAsync();
             await LoadDataHeader();
-             StateHasChanged(); // Demande un nouveau rendu du composant
-             //await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
+
+            
+            StateHasChanged(); // Demande un nouveau rendu du composant
+            //await JSRuntime.InvokeVoidAsync("loadScript", "assets/js/scriptLoader.js");
         }
     }
 

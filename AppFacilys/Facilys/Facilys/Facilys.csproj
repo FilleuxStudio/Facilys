@@ -71,6 +71,7 @@
   <ItemGroup>
     <!-- Configuration Tesseract -->
     <None Include="Components\Services\AuthService.cs" />
+    <None Include="Components\Services\UserConnectionService.cs" />
     <None Include="wwwroot\Tessdata\carte_grise.user-words" />
     <None Include="wwwroot\Tessdata\fra.traineddata" />
   </ItemGroup>

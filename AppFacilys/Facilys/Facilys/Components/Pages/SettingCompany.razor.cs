@@ -2,6 +2,7 @@
 using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
+using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,7 @@ namespace Facilys.Components.Pages
             CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
             UserCount = await DbContext.Users.CountAsync();
 
-            if (CompanySettings.NameCompany == "" && CompanySettings.Siret == "")
+            if (CompanySettings == null || CompanySettings.Siret == "null")
             {
                 var (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
                 if (Success)
@@ -74,6 +75,9 @@ namespace Facilys.Components.Pages
         {
             try
             {
+
+               await APIWebSite.PutUpdateCompanyAsync(CompanySettings);
+
                 var existingCompany = await DbContext.CompanySettings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
                 if (existingCompany == null)
                 {

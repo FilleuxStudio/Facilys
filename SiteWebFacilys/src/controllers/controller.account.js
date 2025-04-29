@@ -218,20 +218,31 @@ exports.accoutUpdate = async (req, res) => {
       logoDataUrl = req.body.imagelogo;
     }
 
-    await User.update(req.body.email, {
+    // Préparation des données de base
+    const updateData = {
       companyName: req.body.companyName,
       logo: logoDataUrl,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-      email: req.body.email,
       siret: req.body.siret,
-      address: req.body.addressclient,
-      phone: req.body.phone,
-    });
+      addressclient: req.body.addressclient,
+      phone: req.body.phone
+    };
 
-    res
-      .status(200)
-      .redirect(
+    // Gestion du mot de passe
+    if (req.body.password && req.body.passwordConfirm) {
+      if (req.body.password !== req.body.passwordConfirm) {
+        return res.status(400).redirect("/account?error=Les mots de passe ne correspondent pas");
+      }
+      
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
+      updateData.password = hashedPassword;
+    }
+
+    // Mise à jour Firestore
+    await User.update(req.body.email, updateData);
+
+    res.status(200).redirect(
         "/account?message=Vos informations ont été mises à jour avec succès."
       );
   } catch (err) {

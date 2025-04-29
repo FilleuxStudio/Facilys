@@ -1,5 +1,6 @@
 ﻿using Facilys.Components.Constants;
 using Facilys.Components.Models;
+using System.Text;
 using System.Text.Json;
 
 namespace Facilys.Components.Services
@@ -155,6 +156,82 @@ namespace Facilys.Components.Services
             catch (JsonException ex)
             {
                 Console.WriteLine($"Erreur de désérialisation : {ex.Message}");
+                return (false, null);
+            }
+        }
+
+        public async Task<(bool Success, CompanySettings companySettings)> PutUpdateCompanyAsync(CompanySettings updatedSettings)
+        {
+            // Création du payload avec les nouvelles données
+            var updateData = new
+            {
+                companyName = updatedSettings.NameCompany,
+                logo = updatedSettings.Logo,
+                siret = updatedSettings.Siret,
+                addressclient = updatedSettings.HeadOfficeAddress,
+                firstName = updatedSettings.ManagerName.Split(' ').FirstOrDefault(),
+                lastName = updatedSettings.ManagerName.Split(' ').LastOrDefault(),
+                phone = updatedSettings.Phone,
+            };
+
+            // Sérialisation sécurisée
+            using var jsonContent = new StringContent(
+                JsonSerializer.Serialize(updateData),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            // Configuration des headers
+            var request = new HttpRequestMessage(HttpMethod.Put, "api/updateCompany")
+            {
+                Content = jsonContent
+            };
+
+            request.Headers.Add("x-csrf-token", EnvironmentApp.AccessToken);
+            request.Headers.Add("Origin", "https://facilys.flixmail.fr");
+
+            // Envoi sécurisé avec gestion d'erreurs améliorée
+            try
+            {
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                    return (false, null);
+
+                // Lecture du résultat
+                var content = await response.Content.ReadFromJsonAsync<ApiResponse>();
+
+                if (content?.Success != true)
+                    return (false, null);
+
+                var document = JsonDocument.Parse(content.Data.GetRawText());
+
+                CompanySettings company = new()
+                {
+
+                    NameCompany = document.RootElement.GetProperty("companyName").GetString(),
+                    Logo = document.RootElement.GetProperty("logo").GetString(),
+                    TVA = "NULL",
+                    Siret = document.RootElement.GetProperty("siret").GetString(),
+                    RIB = "NULL",
+                    HeadOfficeAddress = document.RootElement.GetProperty("addressclient").GetString(),
+                    BillingAddress = document.RootElement.GetProperty("addressclient").GetString(),
+                    LegalStatus = "NULL",
+                    RMNumber = "NULL",
+                    RCS = "NULL",
+                    RegisteredCapital = 1000f,
+                    CodeNAF = "NULL",
+                    ManagerName = document.RootElement.GetProperty("lastName").GetString().ToUpper() + " " + document.RootElement.GetProperty("firstName").ToString(),
+                    Phone = document.RootElement.GetProperty("phone").GetString(),
+                    Email = document.RootElement.GetProperty("email").GetString(),
+                    WebSite = "NULL",
+                };
+
+                return (true, company);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or JsonException)
+            {
+                Console.WriteLine($"Erreur de mise à jour : {ex.Message}");
                 return (false, null);
             }
         }
