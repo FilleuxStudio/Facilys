@@ -134,6 +134,7 @@ using Facilys.Components.Data;
 using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -216,7 +217,18 @@ builder.Services.AddHttpClient<APIWebSiteService>(client =>
 });
 builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
-//builder.Services.AddSingleton<DynamicMySQLService>();
+
+if (HybridSupport.IsElectronActive)
+{
+    builder.Services.AddHttpClient("SyncApi", client =>
+{
+    client.BaseAddress = new Uri("https://facilys.flixmail.fr");
+    client.DefaultRequestHeaders.Accept
+          .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+}
+builder.Services.AddScoped<SyncServiceAPISQL>();
+
 
 // Notre service d'export
 builder.Services.AddScoped<ExportService>();

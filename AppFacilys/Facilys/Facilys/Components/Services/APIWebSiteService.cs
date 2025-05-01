@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Constants;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Facilys.Components.Constants;
 using Facilys.Components.Models;
 using System.Text;
 using System.Text.Json;
@@ -165,6 +166,8 @@ namespace Facilys.Components.Services
             // Création du payload avec les nouvelles données
             var updateData = new
             {
+                _csrf = EnvironmentApp.AccessToken,
+                email = updatedSettings.Email, // important !
                 companyName = updatedSettings.NameCompany,
                 logo = updatedSettings.Logo,
                 siret = updatedSettings.Siret,
@@ -181,8 +184,9 @@ namespace Facilys.Components.Services
                 "application/json"
             );
 
+    
             // Configuration des headers
-            var request = new HttpRequestMessage(HttpMethod.Put, "api/updateCompany")
+            var request = new HttpRequestMessage(HttpMethod.Put, "api/update-company")
             {
                 Content = jsonContent
             };

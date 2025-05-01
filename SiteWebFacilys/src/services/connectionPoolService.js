@@ -1,36 +1,40 @@
 const mariadb = require('mariadb');
 const schedule = require('node-schedule');
-const User = require('../models/user.model'); // Assurez-vous que le chemin est correct
 
 class ConnectionPoolService {
   constructor() {
     this.pools = new Map();
   }
 
-  async getPool(user) {
+  getPool(user) {
     if (!this.pools.has(user.email)) {
       const pool = mariadb.createPool({
-        host: process.env.DB_HOST,
+        host: 'node117-eu.n0c.com',
         user: user.mariadbUser,
         password: user.mariadbPassword,
         database: user.mariadbDb,
-        connectionLimit: 10,
-        acquireTimeout: 10000,
-        validateConnection: true 
+        connectionLimit: 5, // Limite de connexions simultanées
+        acquireTimeout: 5000,
       });
+
       this.pools.set(user.email, pool);
     }
+
     return this.pools.get(user.email);
   }
 
   async executeQuery(user, query, params = []) {
-    const pool = await this.getPool(user);
+    const pool = this.getPool(user);
     let conn;
     try {
       conn = await pool.getConnection();
-      return await conn.query(query, params);
+      const result = await conn.query(query, params);
+      return result;
+    } catch (err) {
+      console.error("Erreur lors de l'exécution de la requête :", err);
+      throw err;
     } finally {
-      if (conn) conn.release();
+      if (conn) conn.release(); // Rend la connexion au pool
     }
   }
 
@@ -44,7 +48,11 @@ class ConnectionPoolService {
 
   async close() {
     for (const pool of this.pools.values()) {
-      await pool.end();
+      try {
+        await pool.end(); // Ferme proprement chaque pool
+      } catch (e) {
+        console.warn("Erreur lors de la fermeture d'un pool :", e);
+      }
     }
     this.pools.clear();
   }

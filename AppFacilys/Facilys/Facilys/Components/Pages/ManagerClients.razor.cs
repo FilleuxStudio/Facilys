@@ -280,6 +280,14 @@ namespace Facilys.Components.Pages
                     }
 
                     await DbContext.SaveChangesAsync();
+
+                    if (HybridSupport.IsElectronActive)
+                    {
+                        await SyncService.PushChangesAsync("api/query/addclient", new[] { managerClientViewModel.Client });
+                        await SyncService.PushChangesAsync("api/query/addphone", new[] { managerClientViewModel.Client });
+                        await SyncService.PushChangesAsync("api/query/addemail", new[] { managerClientViewModel.Client });
+                    }
+
                     ResetForm();
 
                     CloseModal("OpenModalLargeAddClient");

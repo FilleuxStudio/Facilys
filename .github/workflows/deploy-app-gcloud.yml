@@ -60,3 +60,11 @@ jobs:
         allow_unauthenticated: true
         revision_suffix: ${{ github.sha }}
         labels: "managed-by=github-actions,commit-sha=${{ github.sha }}"
+
+    - name: Ensure public access to Cloud Run
+      run: |
+        gcloud run services add-iam-policy-binding ${{ env.SERVICE_NAME }} \
+          --region=${{ env.REGION }} \
+          --project=${{ env.PROJECT_ID }} \
+          --member="allUsers" \
+          --role="roles/run.invoker"

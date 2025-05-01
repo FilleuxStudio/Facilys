@@ -102,22 +102,8 @@ exports.company =  async (req, res) => {
     const { email } = req.body;
 
     // Vérifiez si l'utilisateur existe
-    let company = await User.findByEmail(email);
-
-    if (!company) {
-      // Si l'utilisateur n'existe pas, vérifiez si c'est une équipe
-      user = await Team.findByEmail(email);
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "Ni utilisateur ni équipe trouvés avec cet email",
-          data: null,
-        });
-      }
-
-      company = await User.findByEmail(user.manager);
-    }
-
+    let company = await findUserOrTeamByEmail(email);
+    
     // Réponse en fonction du type d'utilisateur
     return res.status(200).json({
       success: true,
@@ -133,50 +119,49 @@ exports.company =  async (req, res) => {
   }
 };
 
-exports.updateCompany =  async (req, res) => {
+exports.updateCompany = async (req, res) => {
   try {
-    const { email } = req.body;
+    const {
+      email,
+      companyName,
+      logo,
+      siret,
+      addressclient,
+      firstName,
+      lastName,
+      phone
+    } = req.body;
 
-    // Vérifiez si l'utilisateur existe
-    let company = await User.findByEmail(email);
+    // 1. Chercher l'utilisateur ou l'équipe
+    let company = await findUserOrTeamByEmail(email);
 
-    if (!company) {
-      // Si l'utilisateur n'existe pas, vérifiez si c'est une équipe
-      user = await Team.findByEmail(email);
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "Ni utilisateur ni équipe trouvés avec cet email",
-          data: null,
-        });
-      }
+    // 2. Mettre à jour les données dans Firestore
+    const updateData = {
+      companyName,
+      logo,
+      firstName,
+      lastName,
+      siret,
+      addressclient,
+      phone,
+      email 
+    };
 
-      company = await User.findByEmail(user.manager);
-
-      const updateData = {
-        companyName: req.body.companyName,
-        logo: logoDataUrl,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        siret: req.body.siret,
-        addressclient: req.body.addressclient,
-        phone: req.body.phone
-      };
-
-      await User.update(company.email, updateData);
+    const success = await User.update(email, updateData);
+    if (!success) {
+      throw new Error("Échec de la mise à jour dans Firestore");
     }
 
-    // Réponse en fonction du type d'utilisateur
+    const updatedUser = await User.findByEmail(email);
     return res.status(200).json({
       success: true,
-      data: company,
+      data: updatedUser,
     });
   } catch (error) {
-    console.error("Erreur lors de la connexion :", error);
+    console.error("Erreur lors de la mise à jour :", error);
     return res.status(500).json({
       success: false,
-      message: "Une erreur interne est survenue",
-      data: null,
+      message: "Erreur serveur lors de la mise à jour",
     });
   }
 };
@@ -229,3 +214,174 @@ exports.executeQuery = async (req, res) => {
     });
   }
 };
+
+exports.executeQueryAddClient = async (req, res) => {
+  try {
+    console.log(req.body);
+    const { usermail, changes } = req.body;
+    const user = await findUserOrTeamByEmail(usermail)
+    const parsedChanges = JSON.parse(changes);
+    const clientData = parsedChanges[0]?.Client;
+
+    if (!clientData) {
+      return res.status(400).json({
+        success: false,
+        message: "Aucune donnée Client valide fournie",
+      });
+    }
+
+    const table = "Clients";
+    const query = `INSERT INTO ${table} SET ?`;
+
+    const params = [clientData];
+
+    const result = await ConnectionPoolService.executeQuery(user, query, params);
+
+    res.status(200).json({
+      success: true,
+      message: "Client inséré avec succès",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'exécution de la requête :", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur est survenue lors de l'exécution de la requête",
+    });
+  }
+};
+
+exports.executeQueryAddPhone = async (req, res) => {
+  try {
+    const { usermail, changes } = req.body;
+    const user = await findUserOrTeamByEmail(usermail);
+
+    const parsedChanges = JSON.parse(changes);
+    const phones = parsedChanges[0]?.PhonesClients;
+
+    if (!phones || phones.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Aucun numéro de téléphone fourni",
+      });
+    }
+
+    const table = "PhonesClients";
+    const results = [];
+
+    for (const phoneEntry of phones) {
+      const clientId = phoneEntry.Client?.Id;
+      const phone = phoneEntry.Phone;
+
+      if (!clientId || !phone) continue;
+
+      const data = {
+        Id: phoneEntry.Id,
+        IdClient: clientId,
+        Phone: phone
+      };
+
+      const query = `INSERT INTO ${table} SET ?`;
+      const params = [data];
+
+      const result = await ConnectionPoolService.executeQuery(user, query, params);
+      results.push(result);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Téléphones insérés avec succès",
+      data: results,
+    });
+
+  } catch (error) {
+    console.error("Erreur lors de l'insertion des téléphones :", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de l'insertion des téléphones",
+    });
+  }
+};
+
+exports.executeQueryAddEmail = async (req, res) => {
+  try {
+    const { usermail, changes } = req.body;
+    const user = await findUserOrTeamByEmail(usermail);
+
+    const parsedChanges = JSON.parse(changes);
+    const emails = parsedChanges[0]?.EmailsClients;
+
+    if (!emails || emails.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Aucun email fourni",
+      });
+    }
+
+    const table = "EmailsClients";
+    const results = [];
+
+    for (const emailEntry of emails) {
+      const clientId = emailEntry.Client?.Id;
+      const email = emailEntry.Email;
+
+      if (!clientId || !email) continue;
+
+      const data = {
+        Id: emailEntry.Id,
+        IdClient: clientId,
+        Email: email
+      };
+
+      const query = `INSERT INTO ${table} SET ?`;
+      const params = [data];
+
+      const result = await ConnectionPoolService.executeQuery(user, query, params);
+      results.push(result);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Emails insérés avec succès",
+      data: results,
+    });
+
+  } catch (error) {
+    console.error("Erreur lors de l'insertion des emails :", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de l'insertion des emails",
+    });
+  }
+};
+
+
+async function findUserOrTeamByEmail(email) {
+  try {
+    // Recherche de l'utilisateur par e-mail
+    let user = await User.findByEmail(email);
+
+    if (user) {
+      return user;
+    }
+
+    // Si l'utilisateur n'est pas trouvé, recherche de l'équipe par e-mail
+    const team = await Team.findByEmail(email);
+
+    if (!team) {
+      throw new Error("Ni utilisateur ni équipe trouvés avec cet e-mail.");
+    }
+
+    // Récupération de l'utilisateur manager de l'équipe
+    user = await User.findByEmail(team.manager);
+
+    if (!user) {
+      throw new Error("Manager de l'équipe introuvable.");
+    }
+
+    return user;
+  } catch (error) {
+    // Gestion des erreurs
+    throw new Error(error.message);
+  }
+}

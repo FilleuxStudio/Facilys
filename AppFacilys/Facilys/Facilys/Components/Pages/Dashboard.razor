@@ -208,6 +208,7 @@
 
         settingEmpty = await context.CompanySettings.AnyAsync();
 
+
         client = await context.Clients.AsNoTracking().CountAsync();
         vehicle = await context.Vehicles.AsNoTracking().CountAsync();
         invoice = await context.Invoices.AsNoTracking().CountAsync();
