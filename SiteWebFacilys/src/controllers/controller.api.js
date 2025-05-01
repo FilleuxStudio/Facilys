@@ -217,12 +217,9 @@ exports.executeQuery = async (req, res) => {
 
 exports.executeQueryAddClient = async (req, res) => {
   try {
-    console.log(req.body);
     const { usermail, changes } = req.body;
     const user = await findUserOrTeamByEmail(usermail)
-    const parsedChanges = JSON.parse(changes);
-    const clientData = parsedChanges[0]?.Client;
-
+    const clientData = JSON.parse(changes)[0];
     if (!clientData) {
       return res.status(400).json({
         success: false,
@@ -232,8 +229,6 @@ exports.executeQueryAddClient = async (req, res) => {
 
     const table = "Clients";
     const query = `INSERT INTO ${table} SET ?`;
-
-    const params = [clientData];
 
     const result = await ConnectionPoolService.executeQuery(user, query, params);
 
@@ -256,8 +251,7 @@ exports.executeQueryAddPhone = async (req, res) => {
     const { usermail, changes } = req.body;
     const user = await findUserOrTeamByEmail(usermail);
 
-    const parsedChanges = JSON.parse(changes);
-    const phones = parsedChanges[0]?.PhonesClients;
+    const phones = JSON.parse(changes)[0];
 
     if (!phones || phones.length === 0) {
       return res.status(400).json({
@@ -308,8 +302,7 @@ exports.executeQueryAddEmail = async (req, res) => {
     const { usermail, changes } = req.body;
     const user = await findUserOrTeamByEmail(usermail);
 
-    const parsedChanges = JSON.parse(changes);
-    const emails = parsedChanges[0]?.EmailsClients;
+    const emails = JSON.parse(changes)[0];
 
     if (!emails || emails.length === 0) {
       return res.status(400).json({

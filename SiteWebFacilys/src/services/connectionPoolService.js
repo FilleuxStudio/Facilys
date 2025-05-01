@@ -29,12 +29,12 @@ class ConnectionPoolService {
     try {
       conn = await pool.getConnection();
       const result = await conn.query(query, params);
+      if (conn) conn.release(); 
       return result;
     } catch (err) {
+      if (conn) conn.release(); 
       console.error("Erreur lors de l'exécution de la requête :", err);
       throw err;
-    } finally {
-      if (conn) conn.release(); // Rend la connexion au pool
     }
   }
 

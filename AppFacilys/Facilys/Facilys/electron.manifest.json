@@ -20,7 +20,7 @@
       "icon": "../../../wwwroot/icon-256.ico"
     },
     "linux": {
-      "icon": "../../../wwwroot/icon-256/png"
+      "icon": "../../../wwwroot/icon-256.png"
     },
     "extraResources": [
       {
