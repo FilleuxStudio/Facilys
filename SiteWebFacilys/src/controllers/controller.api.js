@@ -3,6 +3,7 @@ const Team = require("../models/team.model");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const ConnectionPoolService = require("../services/connectionPoolService");
+const logger = require("../utils/logger");
 
 exports.getVersion = (req, res) => {
   res.status(200).json({
@@ -53,6 +54,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
+    logger.error("Erreur lors de la connexion", error);
     return res.status(500).json({
       success: false,
       message: "Une erreur interne est survenue",
@@ -88,7 +90,8 @@ exports.loginDatabase = async (req, res) => {
       data: database,
     });
   } catch (error) {
-    console.error("Erreur lors de la connexion :", error);
+    console.error("Erreur login database :", error);
+    logger.error("Erreur login database", error);
     return res.status(500).json({
       success: false,
       message: "Une erreur interne est survenue",
@@ -110,7 +113,8 @@ exports.company =  async (req, res) => {
       data: company,
     });
   } catch (error) {
-    console.error("Erreur lors de la connexion :", error);
+    console.error("Erreur récupération des données company :", error);
+    logger.error("Erreur récupération des données company", error);
     return res.status(500).json({
       success: false,
       message: "Une erreur interne est survenue",
@@ -159,6 +163,7 @@ exports.updateCompany = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur lors de la mise à jour :", error);
+    logger.error("Erreur lors de la mise à jour", error);
     return res.status(500).json({
       success: false,
       message: "Erreur serveur lors de la mise à jour",
@@ -208,6 +213,7 @@ exports.executeQuery = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur lors de l'exécution de la requête :", error);
+    logger.error("Erreur lors de l'exécution de la requête", error);
     res.status(500).json({
       success: false,
       message: "Une erreur est survenue lors de l'exécution de la requête",
@@ -229,6 +235,7 @@ exports.executeQueryAddClient = async (req, res) => {
 
     const table = "Clients";
     const query = `INSERT INTO ${table} SET ?`;
+    const params = [ clientData ]; 
 
     const result = await ConnectionPoolService.executeQuery(user, query, params);
 
@@ -238,7 +245,8 @@ exports.executeQueryAddClient = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error("Erreur lors de l'exécution de la requête :", error);
+    console.error("Erreur lors de l'exécution de la requête client :", error);
+    logger.error("Erreur lors de l'exécution de la requête client ", error);
     res.status(500).json({
       success: false,
       message: "Une erreur est survenue lors de l'exécution de la requête",
@@ -290,6 +298,7 @@ exports.executeQueryAddPhone = async (req, res) => {
 
   } catch (error) {
     console.error("Erreur lors de l'insertion des téléphones :", error);
+    logger.error("Erreur lors de l'insertion des téléphones ", error);
     res.status(500).json({
       success: false,
       message: "Erreur lors de l'insertion des téléphones",
@@ -341,6 +350,7 @@ exports.executeQueryAddEmail = async (req, res) => {
 
   } catch (error) {
     console.error("Erreur lors de l'insertion des emails :", error);
+    logger.error("Erreur lors de l'insertion des email ", error);
     res.status(500).json({
       success: false,
       message: "Erreur lors de l'insertion des emails",

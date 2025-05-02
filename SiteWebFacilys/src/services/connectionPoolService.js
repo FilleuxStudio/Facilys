@@ -1,5 +1,6 @@
 const mariadb = require('mariadb');
 const schedule = require('node-schedule');
+const logger = require("../utils/logger");
 
 class ConnectionPoolService {
   constructor() {
@@ -29,20 +30,24 @@ class ConnectionPoolService {
     try {
       conn = await pool.getConnection();
       const result = await conn.query(query, params);
-      if (conn) conn.release(); 
       return result;
     } catch (err) {
-      if (conn) conn.release(); 
       console.error("Erreur lors de l'exécution de la requête :", err);
+      logger.error("Erreur lors de l'exécution de la requête :", err);
       throw err;
+    } finally {
+      if (conn) conn.release();
     }
   }
+  
 
   schedulePoolClosure() {
     schedule.scheduleJob('30 1 * * *', async () => {
       console.log('Fermeture programmée des pools de connexions');
+      logger.info('Fermeture programmée des pools de connexions');
       await this.close();
       console.log('Tous les pools de connexions ont été fermés');
+      logger.error('Tous les pools de connexions ont été fermés');
     });
   }
 
@@ -52,6 +57,7 @@ class ConnectionPoolService {
         await pool.end(); // Ferme proprement chaque pool
       } catch (e) {
         console.warn("Erreur lors de la fermeture d'un pool :", e);
+        logger.error("Erreur lors de la fermeture d'un pool :", e);
       }
     }
     this.pools.clear();

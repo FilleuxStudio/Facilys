@@ -3,12 +3,14 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
+const logger = require("../utils/logger");
 
 exports.shoppingGetAllProducts = async (req, res) => {
     try {
       return await Product.findAll();
     } catch (error) {
       console.error("Erreur lors de la récupération du produit", error);
+      logger.error("Erreur lors de la récupération du produit", error);
       res.status(500).send("Erreur lors de la récupération du produit");
     }
   };
@@ -22,6 +24,7 @@ exports.shoppingGetAllProducts = async (req, res) => {
       return product;
     } catch (error) {
       console.error("Erreur lors de la récupération du produit", error);
+      logger.error("Erreur lors de la récupération du produit", error);
       return res.status(500).json({ message: "Erreur lors de la récupération du produit" });
     }
   };

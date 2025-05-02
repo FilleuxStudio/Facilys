@@ -9,6 +9,7 @@ const dotenv = require('dotenv');
 const helmet = require('helmet');
 const compression = require('compression');
 const { doubleCsrf } = require('csrf-csrf');
+const logger = require('./utils/logger');
 
 const app = express();
 
@@ -128,6 +129,7 @@ app.use((err, req, res, next) => {
 // Démarrage du serveur
 app.listen(port, hostname, () => {
   console.log(`Server running on port ${port}`);
+  logger.info(`Server running on port ${port}`);
 });
 
 module.exports =  app;  // Exporte correctement les deux éléments

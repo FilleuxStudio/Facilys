@@ -1,5 +1,6 @@
 const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
 const { v4: uuidv4 } = require('uuid');
+const logger = require("../utils/logger");
 
 class Team {
   constructor(data) {
@@ -48,6 +49,7 @@ class Team {
 
       if (snapshot.empty) {
         console.log(`Aucun collaborateur trouvée pour l'utilisateur avec idUser: ${idUser}`);
+        logger.info(`Aucun collaborateur trouvée pour l'utilisateur avec idUser: ${idUser}`);
         return [];
       }
 
@@ -55,6 +57,7 @@ class Team {
       return snapshot.docs.map(doc => doc.data());
     } catch (error) {
       console.error('Erreur lors de la récupération des collaborateur par idUser:', error);
+      logger.error('Erreur lors de la récupération des collaborateur par idUser:', error);
       throw error;
     }
   }
@@ -78,6 +81,7 @@ class Team {
 
       if (snapshot.empty) {
         console.log('Aucune team trouvé.');
+        logger.info("Aucune team trouvé");
         return [];
       }
 
@@ -86,6 +90,7 @@ class Team {
       }));
     } catch (error) {
       console.error('Erreur lors de la récupération de la team:', error);
+      logger.error('Erreur lors de la récupération de la team:', error);
       throw error;
     }
   }
@@ -97,9 +102,11 @@ class Team {
     try {
       await teamRef.update(updateData);
       console.log("Document successfully updated");
+      logger.info("Document successfully updated");
       return true;
     } catch (error) {
       console.error("Error updating document: ", error);
+      logger.error("Error updating document: ", error);
       return false;
     }
   }
@@ -111,9 +118,11 @@ class Team {
     try {
       await teamRef.delete();
       console.log("Document successfully deleted");
+      logger.info("Document successfully deleted");
       return true;
     } catch (error) {
       console.error("Error deleting document: ", error);
+      logger.error("Error deleting document: ", error);
       return false;
     }
   }

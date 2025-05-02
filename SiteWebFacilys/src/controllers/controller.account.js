@@ -6,6 +6,7 @@ const Product = require("../models/product.model");
 const Order = require("../models/order.model");
 const Invoice = require("../models/invoice.model");
 const Team = require("../models/team.model");
+const logger = require("../utils/logger");
 
 const now = new Date().getFullYear();
 
@@ -43,6 +44,7 @@ exports.account = async (req, res) => {
     }
   } catch (err) {
     console.error("Erreur lors de l'accès au compte :", err);
+    logger.error("Erreur lors de l'accès au compte :", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -83,7 +85,8 @@ exports.accountOrders = async (req, res) => {
       return res.redirect("/login");
     }
   } catch (err) {
-    console.error("Erreur lors de l'accès au compte :", err);
+    console.error("Erreur lors de l'accès au commande :", err);
+    logger.error("Erreur lors de l'accès au commande :", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -120,11 +123,13 @@ exports.accountInvoices = async (req, res) => {
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
+      logger.error("Token invalide ou expiré:", error);
       res.clearCookie("authToken");
       return res.redirect("/login");
     }
   } catch (err) {
-    console.error("Erreur lors de l'accès au compte :", err);
+    console.error("Erreur lors de l'accès au facture :", err);
+    logger.error("Erreur lors de l'accès au facture :", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -161,11 +166,13 @@ exports.accountTeams = async (req, res) => {
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
+      logger.error("Token invalide ou expiré:", error);
       res.clearCookie("authToken");
       return res.redirect("/login");
     }
   } catch (err) {
-    console.error("Erreur lors de l'accès au compte :", err);
+    console.error("Erreur lors de l'accès a l'équipe :", err);
+    logger.error("Erreur lors de l'accès a l'équipe :", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -198,11 +205,13 @@ exports.accountDownload = async (req, res) => {
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
+      logger.error("Token invalide ou expiré:", error);
       res.clearCookie("authToken");
       return res.redirect("/login");
     }
   } catch (err) {
-    console.error("Erreur lors de l'accès au compte :", err);
+    console.error("Erreur lors de l'accès au téléchargement :", err);
+    logger.error("Erreur lors de l'accès au téléchargement :", err);
     res.status(500).send("Erreur serveur");
   }
 }
@@ -246,10 +255,8 @@ exports.accoutUpdate = async (req, res) => {
         "/account?message=Vos informations ont été mises à jour avec succès."
       );
   } catch (err) {
-    console.error(
-      "Erreur lors de la récupération des informations du compte:",
-      err
-    );
+    console.error("Erreur lors de la récupération des informations du compte:",err );
+    logger.error("Erreur lors de la récupération des informations du compte:",err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 };
@@ -273,7 +280,8 @@ exports.accountAddTeam = async (req, res) => {
 
     res.status(201).redirect("/account-teams");
   } catch (error) {
-    console.error("Erreur lors de l'ajout du produit", error);
+    console.error("Erreur lors de l'ajout d'un utilisateur client team", error);
+    logger.error("Erreur lors de l'ajout d'un utilisateur client team", error);
     res.status(500).send("Erreur lors de l'ajout du produit");
   }
 };
@@ -287,6 +295,7 @@ exports.accountDeleteMember = async (req, res) => {
     }
   } catch (error) {
     console.error('Erreur lors de la suppression', error);
+    logger.error("Erreur lors de la suppression", error);
     req.flash('error', 'Erreur lors de la suppression');
     res.redirect('/account-teams');
   }

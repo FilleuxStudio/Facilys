@@ -1,5 +1,6 @@
 const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
 const { v4: uuidv4 } = require('uuid');
+const logger = require("../utils/logger");
 
 class Order {
   constructor(data) {
@@ -46,6 +47,7 @@ class Order {
 
       if (snapshot.empty) {
         console.log('Aucune commande trouvé.');
+        logger.info("Aucune commande trouvé.");
         return [];
       }
 
@@ -54,6 +56,7 @@ class Order {
       }));
     } catch (error) {
       console.error('Erreur lors de la récupération des commandes:', error);
+      logger.error('Erreur lors de la récupération des commandes:', error);
       throw error;
     }
   }
@@ -65,6 +68,7 @@ class Order {
 
       if (snapshot.empty) {
         console.log(`Aucune commande trouvée pour l'utilisateur avec idUser: ${idUser}`);
+        logger.info(`Aucune commande trouvée pour l'utilisateur avec idUser: ${idUser}`);
         return [];
       }
 
@@ -72,6 +76,7 @@ class Order {
       return snapshot.docs.map(doc => doc.data());
     } catch (error) {
       console.error('Erreur lors de la récupération des commandes par idUser:', error);
+      logger.error('Erreur lors de la récupération des commandes par idUser:', erro);
       throw error;
     }
   }
@@ -83,9 +88,11 @@ class Order {
     try {
       await ordertoRef.update(updateData);
       console.log("Document successfully updated");
+      logger.info("Document successfully updated");
       return true;
     } catch (error) {
-      console.error("Error updating document: ", error);
+      logger.error('Erreur lors de la récupération des commandes par idUser:', erro);
+      console.error('Erreur lors de la récupération des commandes par idUser:', erro);
       return false;
     }
   }
@@ -97,8 +104,10 @@ class Order {
     try {
       await ordertoRef.delete();
       console.log("Document successfully deleted");
+      console.error("Document successfully deleted");
       return true;
     } catch (error) {
+      console.error("Error deleting document: ", error);
       console.error("Error deleting document: ", error);
       return false;
     }

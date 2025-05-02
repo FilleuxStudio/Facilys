@@ -461,7 +461,7 @@ namespace Facilys.Components.Services
             }
 
             var cookieData = await GetAuthenticatedAsync();
-            EnvironmentApp.EmailUserConnect = cookieData.Email;
+           
             return cookieData != null &&
                    cookieData.IsConnected &&
                    DateTime.UtcNow < cookieData.ExpirationDate;
@@ -501,7 +501,9 @@ namespace Facilys.Components.Services
                     if (string.IsNullOrWhiteSpace(json))
                         return null;
 
-                    return JsonSerializer.Deserialize<CookieData>(json);
+                    var CookieData = JsonSerializer.Deserialize<CookieData>(json);
+                    EnvironmentApp.EmailUserConnect = CookieData.Email;
+                    return CookieData;
                 }
 
                 var result = await _localStorage.GetAsync<CookieData>("cookieData");

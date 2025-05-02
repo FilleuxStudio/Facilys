@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const User = require("../models/user.model");
 const Product = require("../models/product.model");
+const logger = require("../utils/logger");
 
 const now = new Date().getFullYear();
 
@@ -41,11 +42,13 @@ exports.managerProducts = async (req, res) => {
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
+      logger.error("Token invalide ou expiré:", error);
       res.clearCookie("authToken");
       return res.redirect("/login");
     }
   } catch (err) {
-    console.error("Erreur lors de l'accès au compte :", err);
+    console.error("Erreur lors de l'accès au produit :", err);
+    logger.error("Erreur lors de l'accès au produit :", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -85,11 +88,13 @@ exports.managerClients = async (req, res) => {
     } catch (error) {
       // Si le token est invalide ou expiré
       console.error("Token invalide ou expiré:", error);
+      logger.error("Token invalide ou expiré:", error);
       res.clearCookie("authToken");
       return res.redirect("/login");
     }
   } catch (err) {
-    console.error("Erreur lors de l'accès au compte :", err);
+    console.error("Erreur lors de l'accès au client :", err);
+    logger.error("Erreur lors de l'accès au client :", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -123,6 +128,7 @@ exports.managerAddProduct = async (req, res) => {
     
   } catch (error) {
     console.error("Erreur lors de l'ajout du produit", error);
+    logger.error("Erreur lors de l'ajout du produit", error);
     res.status(500).send("Erreur lors de l'ajout du produit");
   }
 };
@@ -136,6 +142,7 @@ exports.managerGetProduct = async (req, res) => {
     return res.status(200).json(product);
   } catch (error) {
     console.error("Erreur lors de la récupération du produit", error);
+    logger.error("Erreur lors de la récupération du produit", error);
     return res.status(500).json({ message: "Erreur lors de la récupération du produit" });
   }
 };
@@ -145,6 +152,7 @@ exports.managerGetAllProducts = async (req, res) => {
     return await Product.findAll();
   } catch (error) {
     console.error("Erreur lors de la récupération du produit", error);
+    logger.error("Erreur lors de la récupération du produit", error);
     res.status(500).send("Erreur lors de la récupération du produit");
   }
 };
@@ -194,6 +202,7 @@ exports.managerEditProduct = async (req, res) => {
     }
   } catch (error) {
     console.error("Erreur lors de la modification du produit", error);
+    logger.error("Erreur lors de la modification du produit", error);
     res.status(500).send("Erreur lors de la modification du produit");
   }
 };
@@ -208,6 +217,7 @@ exports.managerDeleteProduct = async (req, res) => {
     }
   } catch (error) {
     console.error("Erreur lors de la suppression du produit", error);
+    logger.error("Erreur lors de la suppression du produit", error);
     res.status(500).send("Erreur lors de la suppression du produit");
   }
 };

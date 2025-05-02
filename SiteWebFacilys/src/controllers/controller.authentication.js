@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { createCanvas } = require("canvas");
 const databaseService = require("../services/databaseService");
+const logger = require("../utils/logger");
 
 exports.login = async (req, res) => {
   const { _csrf, email, password, rememberMe } = req.body;
@@ -83,6 +84,7 @@ exports.login = async (req, res) => {
     }
   } catch (err) {
     console.error("Erreur lors de la connexion :", err);
+    logger.error("Erreur lors de la connexion", err);
     res.status(500).send("Erreur serveur");
   }
 };
@@ -186,7 +188,7 @@ exports.register = async (req, res) => {
     }
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur:", error);
-
+    logger.error("Erreur lors de la création de l'utilisateur:", error);
     // Nettoyage en cas d'erreur après la création de l'utilisateur
     if (user && user.email) {
       try {

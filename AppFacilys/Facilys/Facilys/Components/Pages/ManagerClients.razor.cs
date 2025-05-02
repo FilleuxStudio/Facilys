@@ -284,8 +284,8 @@ namespace Facilys.Components.Pages
                     if (HybridSupport.IsElectronActive)
                     {
                         await SyncService.PushChangesAsync("api/query/addclient", new[] { managerClientViewModel.Client });
-                        await SyncService.PushChangesAsync("api/query/addphone", new[] { managerClientViewModel.Client });
-                        await SyncService.PushChangesAsync("api/query/addemail", new[] { managerClientViewModel.Client });
+                        await SyncService.PushChangesAsync("api/query/addphone", new[] { managerClientViewModel.PhonesClients });
+                        await SyncService.PushChangesAsync("api/query/addemail", new[] { managerClientViewModel.EmailsClients });
                     }
 
                     ResetForm();

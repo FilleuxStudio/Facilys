@@ -1,4 +1,6 @@
-const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
+const { db } = require('../config/firestore'); 
+const logger = require("../utils/logger");
+
 
 class User {
   constructor(data) {
@@ -55,6 +57,7 @@ class User {
 
       if (snapshot.empty) {
         console.log('Aucun client trouvé.');
+        logger.info('Aucun client trouvé.');
         return [];
       }
 
@@ -64,6 +67,7 @@ class User {
       }));
     } catch (error) {
       console.error('Erreur lors de la récupération des client:', error);
+      logger.error('Erreur lors de la récupération des client:', error);
       throw error;
     }
   }
@@ -75,9 +79,11 @@ class User {
     try {
       await userRef.update(updateData);
       console.log("Document successfully updated");
+      logger.info("Document successfully updated");
       return true;
     } catch (error) {
       console.error("Error updating document: ", error);
+      logger.error("Error updating document: ", error);
       return false;
     }
   }
@@ -103,10 +109,11 @@ class User {
       });
 
       console.log("Informations MariaDB mises à jour avec succès");
+      logger.info("Informations MariaDB mises à jour avec succès");
       return true;
     } catch (error) {
       console.error("Erreur lors de la mise à jour MariaDB :", error);
-      
+      logger.error("Erreur lors de la mise à jour MariaDB :", error);
       // Log supplémentaire pour le débogage
       if (error.code === 'NOT_FOUND') {
         console.error(`Utilisateur ${email} introuvable`);

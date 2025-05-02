@@ -83,23 +83,23 @@
         <task id="0" uid="6f8f6c149386400891d3f2ff165959d6" name="Documents de présentation du Projet" color="#ff0000" meeting="false" start="2024-09-13" duration="4" complete="100" webLink="https%3A%2F%2Fpedag.u-picardie.fr%2Fmoodle%2Fupjv%2Fcourse%2Fview.php%3Fid%3D13247" expand="true">
             <depend id="1" type="2" difference="0" hardness="Strong"/>
         </task>
-        <task id="8" uid="0b8c3d47105944c58edca5a6486ac248" name="PHASE 1 Site WEB" meeting="false" start="2024-09-18" duration="51" complete="58" expand="true">
-            <task id="1" uid="2a39c6e736f84897b1814339e69ebf77" name="Développement Site web BackEnd" color="#6666ff" meeting="false" start="2024-09-18" duration="48" complete="60" expand="true"/>
-            <task id="2" uid="189eee1ac3d7464d8c0b8a477b0282f6" name="Développement Site web Frontend" color="#009999" meeting="false" start="2024-10-18" duration="25" complete="90" expand="true">
+        <task id="8" uid="0b8c3d47105944c58edca5a6486ac248" name="PHASE 1 Site WEB" meeting="false" start="2024-09-18" duration="61" complete="92" expand="true">
+            <task id="1" uid="2a39c6e736f84897b1814339e69ebf77" name="Développement Site web BackEnd" color="#6666ff" meeting="false" start="2024-09-18" duration="52" complete="90" expand="true"/>
+            <task id="2" uid="189eee1ac3d7464d8c0b8a477b0282f6" name="Développement Site web Frontend" color="#009999" meeting="false" start="2024-10-18" duration="35" complete="95" expand="true">
                 <depend id="4" type="2" difference="0" hardness="Strong"/>
             </task>
-            <task id="3" uid="982e93a7923c41bc9d0daadf0127e85c" name="API du Site web" color="#00ffff" meeting="false" start="2024-10-19" duration="15" complete="0" expand="true"/>
+            <task id="3" uid="982e93a7923c41bc9d0daadf0127e85c" name="API du Site web" color="#00ffff" meeting="false" start="2024-10-19" duration="15" complete="95" expand="true"/>
         </task>
-        <task id="9" uid="107976e5de8247dc92ef78bb57e1d7b0" name="PHASE 2 App" meeting="false" start="2024-11-19" duration="75" complete="28" expand="true">
-            <task id="4" uid="a7fcf99ec9f14413abe65d6b1fcfc55c" name="Développement de l'application Facilys" color="#ff9900" meeting="false" start="2024-11-19" duration="75" complete="33" priority="2" expand="true">
+        <task id="9" uid="107976e5de8247dc92ef78bb57e1d7b0" name="PHASE 2 App" meeting="false" start="2024-11-30" duration="90" complete="61" expand="true">
+            <task id="4" uid="a7fcf99ec9f14413abe65d6b1fcfc55c" name="Développement de l'application Facilys" color="#ff9900" meeting="false" start="2024-11-30" duration="90" complete="70" priority="2" expand="true">
                 <depend id="5" type="2" difference="0" hardness="Strong"/>
             </task>
             <task id="7" uid="770ef3f89f3c4d29b9e446b01d0273ce" name="PWA" color="#ff33ff" meeting="false" start="2025-01-15" duration="12" complete="0" expand="true"/>
         </task>
-        <task id="5" uid="15b29a8a939a4d7b885dd6d0cfd63d42" name="Cloud VM Scalable" color="#ffff33" meeting="false" start="2025-02-17" duration="10" complete="0" expand="true">
+        <task id="5" uid="15b29a8a939a4d7b885dd6d0cfd63d42" name="Cloud VM Scalable" color="#ffff33" meeting="false" start="2025-03-18" duration="10" complete="100" webLink="https%3A%2F%2Fblazor-server-app-403108519742.europe-west1.run.app" expand="true">
             <depend id="6" type="2" difference="0" hardness="Strong"/>
         </task>
-        <task id="6" uid="3325fd8e2e864d34962cca5510151931" name="Application Mobile Kotlin" color="#33ff00" meeting="false" start="2025-02-28" duration="15" complete="0" expand="true"/>
+        <task id="6" uid="3325fd8e2e864d34962cca5510151931" name="Application Mobile Kotlin" color="#33ff00" meeting="false" start="2025-03-29" duration="15" complete="0" expand="true"/>
     </tasks>
     <resources/>
     <allocations/>

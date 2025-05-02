@@ -1,5 +1,6 @@
 const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
 const { v4: uuidv4 } = require('uuid');
+const logger = require("../utils/logger");
 
 class Invoice {
   constructor(data) {
@@ -54,6 +55,7 @@ class Invoice {
       }));
     } catch (error) {
       console.error('Erreur lors de la récupération des factures:', error);
+      logger.error('Erreur lors de la récupération des factures:', error);
       throw error;
     }
   }
@@ -72,6 +74,7 @@ class Invoice {
       return snapshot.docs.map(doc => doc.data());
     } catch (error) {
       console.error('Erreur lors de la récupération des factures par idUser:', error);
+      logger.error('Erreur lors de la récupération des factures par idUser:', error);
       throw error;
     }
   }
@@ -83,9 +86,11 @@ class Invoice {
     try {
       await invoicetoRef.update(updateData);
       console.log("Document successfully updated");
+      logger.info("Document successfully updated");
       return true;
     } catch (error) {
       console.error("Error updating document: ", error);
+      logger.error("Error updating document: ", error);
       return false;
     }
   }
@@ -97,9 +102,11 @@ class Invoice {
     try {
       await invoicetoRef.delete();
       console.log("Document successfully deleted");
+      logger.info("Document successfully deleted");
       return true;
     } catch (error) {
       console.error("Error deleting document: ", error);
+      logger.error("Error deleting document: ", error);
       return false;
     }
   }

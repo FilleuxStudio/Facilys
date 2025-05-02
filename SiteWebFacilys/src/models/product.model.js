@@ -1,5 +1,6 @@
 const { db } = require('../config/firestore'); // Assurez-vous que ce chemin est correct
 const { v4: uuidv4 } = require('uuid');
+const logger = require("../utils/logger");
 
 class Product {
   constructor(data) {
@@ -50,6 +51,7 @@ class Product {
 
       if (snapshot.empty) {
         console.log('Aucun produit trouvé.');
+        logger.info('Aucun produit trouvé.');
         return [];
       }
 
@@ -58,6 +60,7 @@ class Product {
       }));
     } catch (error) {
       console.error('Erreur lors de la récupération des produits:', error);
+      logger.error('Erreur lors de la récupération des produits:', error);
       throw error;
     }
   }
@@ -69,9 +72,11 @@ class Product {
     try {
       await productsRef.update(updateData);
       console.log("Document successfully updated");
+      logger.info("Document successfully updated");
       return true;
     } catch (error) {
       console.error("Error updating document: ", error);
+      logger.error("Error updating document: ", error);
       return false;
     }
   }
@@ -83,9 +88,11 @@ class Product {
     try {
       await productRef.delete();
       console.log("Document successfully deleted");
+      logger.info("Document successfully deleted");
       return true;
     } catch (error) {
       console.error("Error deleting document: ", error);
+      logger.error("Error deleting document: ", error);
       return false;
     }
   }
