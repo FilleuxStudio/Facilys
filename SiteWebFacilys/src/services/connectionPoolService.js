@@ -24,12 +24,15 @@ class ConnectionPoolService {
     return this.pools.get(user.email);
   }
 
-  async executeQuery(user, query, params = []) {
+  async executeQuery(user, query) {
+    console.log(user);
     const pool = this.getPool(user);
     let conn;
     try {
       conn = await pool.getConnection();
-      const result = await conn.query(query, params);
+      
+      const result = await conn.query(query); 
+  
       return result;
     } catch (err) {
       console.error("Erreur lors de l'exécution de la requête :", err);
