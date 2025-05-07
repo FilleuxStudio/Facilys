@@ -534,7 +534,6 @@ namespace Facilys.Components.Services
                 var filePath = Path.Combine(directoryPath, CookieFileName);
                 try
                 {
-                    Directory.CreateDirectory(directoryPath);
                     if (File.Exists(filePath))
                         File.Delete(filePath);
                 }

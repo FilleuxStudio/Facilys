@@ -335,7 +335,7 @@ exports.executeQueryAddPhone = async (req, res) => {
       });
     }
 
-    const table = "PhonesClients";
+    const table = "Phones";
     const results = [];
 
     for (const phoneEntry of changesParsed) {
@@ -408,7 +408,7 @@ exports.executeQueryAddEmail = async (req, res) => {
       });
     }
 
-    const table = "EmailsClients";
+    const table = "Emails";
     const results = [];
 
     for (const emailEntry of emails) {
