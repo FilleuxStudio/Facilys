@@ -222,20 +222,93 @@ exports.executeQuery = async (req, res) => {
   }
 };
 
-exports.executeQueryAddClient = async (req, res) => {
+exports.executeQueryAddClient = (req, res) =>
+  handleGenericInsertOneOrMany(req, res, {
+    tableName: "Clients",
+    successMessage: "Client inséré avec succès",
+  });
+
+exports.executeQueryAddVehicle = (req, res) =>
+  handleGenericInsertOneOrMany(req, res, {
+    tableName: "Vehicles",
+    successMessage: "Véhicule ajouté avec succès",
+  });
+
+exports.executeQueryAddOtherVehicle = (req, res) =>
+  handleGenericInsertOneOrMany(req, res, {
+    tableName: "OtherVehicles",
+    successMessage: "Autre véhicule ajouté avec succès",
+  });
+
+exports.executeQueryAddInvoice = (req, res) =>
+  handleGenericInsertOneOrMany(req, res, {
+    tableName: "Invoices",
+    successMessage: "Facture ajoutée avec succès",
+  });
+
+exports.executeQueryAddQuote = (req, res) =>
+  handleGenericInsertOneOrMany(req, res, {
+    tableName: "Quotes",
+    successMessage: "Devis ajouté avec succès",
+  });
+
+exports.executeQueryAddPhone = (req, res) => {
+  handleGenericInsert(req, res, {
+    tableName: "Phones",
+    fields: ["Id", "ClientId", "Phone"],
+    successMessage: "Téléphones insérés avec succès",
+  });
+};
+exports.executeQueryAddEmail = (req, res) => {
+  handleGenericInsert(req, res, {
+    tableName: "Emails",
+    fields: ["Id", "ClientId", "Email"],
+    successMessage: "Emails insérés avec succès",
+  });
+};
+
+exports.executeQueryUpdateClient = (req, res) => {
+  handleGenericUpdateWithCascadeDelete(req, res, {
+    tableName: "Clients",
+    cascadeDeleteConfigs: [
+      { table: "Phones", foreignKey: "IdClient" },
+      { table: "Emails", foreignKey: "IdClient" },
+    ],
+    successMessage: "Client mis à jour avec succès",
+  });
+};
+
+exports.executeQueryUpdateVehicle = (req, res) => {
+  handleGenericUpdateWithCascadeDelete(req, res, {
+    tableName: "Vehicles",
+    cascadeDeleteConfigs: [],
+    successMessage: "Véhicule mis à jour avec succès",
+  });
+};
+
+exports.executeQueryUpdateInvoice = (req, res) => {
+  handleGenericUpdateWithCascadeDelete(req, res, {
+    tableName: "Invoices",
+    cascadeDeleteConfigs: [],
+    successMessage: "Facture mise à jour avec succès",
+  });
+};
+
+const handleGenericUpdateWithCascadeDelete = async (req, res, options) => {
+  const { tableName, cascadeDeleteConfigs, successMessage } = options;
+
   try {
     const { usermail, changes } = req.body;
 
-    // 🔍 Récupération de l'utilisateur
+    // 🔐 Auth
     const user = await findUserOrTeamByEmail(usermail);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Utilisateur introuvable",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur introuvable" });
     }
 
-    // 🔄 Parsing intelligent du champ `changes`
+    // 🧠 Parsing JSON
     let changesParsed;
     try {
       changesParsed = JSON.parse(changes);
@@ -249,7 +322,6 @@ exports.executeQueryAddClient = async (req, res) => {
       });
     }
 
-    // 🧪 Validation de l'entrée
     if (!Array.isArray(changesParsed) || changesParsed.length === 0) {
       return res.status(400).json({
         success: false,
@@ -257,63 +329,78 @@ exports.executeQueryAddClient = async (req, res) => {
       });
     }
 
-    let clientData = changesParsed[0];
+    const entity = changesParsed[0];
 
     if (
-      !clientData ||
-      typeof clientData !== "object" ||
-      Array.isArray(clientData)
+      !entity ||
+      typeof entity !== "object" ||
+      Array.isArray(entity) ||
+      !entity.Id
     ) {
       return res.status(400).json({
         success: false,
-        message: "Données client invalides",
+        message: `Entrée invalide pour la table ${tableName}`,
       });
     }
 
-    const table = "Clients";
-    const keys = Object.keys(clientData);
-    const values = Object.values(clientData);
-
-    // Convertir les dates avant escape
-    const safeValues = values.map(formatDateForMariaDB);
-    const columns = keys.map((key) => `\`${key}\``).join(", ");
-    const escapedValues = safeValues
-      .map((val) => SqlString.escape(val))
+    // 🔄 Construction de la requête UPDATE
+    const keys = Object.keys(entity).filter((k) => k !== "Id");
+    const updateSet = keys
+      .map(
+        (k) => `\`${k}\` = ${SqlString.escape(formatDateForMariaDB(entity[k]))}`
+      )
       .join(", ");
+    const updateQuery = `UPDATE \`${tableName}\` SET ${updateSet} WHERE \`Id\` = ${SqlString.escape(
+      entity.Id
+    )};`;
 
-    const query = `INSERT INTO \`${table}\` (${columns}) VALUES (${escapedValues});`;
-    
-    const result = await ConnectionPoolService.executeQuery(user, query);
+    await ConnectionPoolService.executeQuery(user, updateQuery);
+
+    // ❌ Suppressions en cascade
+    for (const { table, foreignKey, matchId } of cascadeDeleteConfigs) {
+      const idToDelete = matchId ?? entity.Id;
+      const deleteQuery = `DELETE FROM \`${table}\` WHERE \`${foreignKey}\` = ${SqlString.escape(
+        idToDelete
+      )};`;
+      await ConnectionPoolService.executeQuery(user, deleteQuery);
+    }
 
     res.status(200).json({
       success: true,
-      message: "Client inséré avec succès",
-      data: result,
+      message: successMessage,
+      data: { updatedId: entity.Id },
     });
   } catch (error) {
-    console.error("Erreur lors de l'exécution de la requête client :", error);
-    logger.error("Erreur lors de l'exécution de la requête client ", error);
+    console.error(
+      `Erreur lors de la mise à jour de ${options.tableName} :`,
+      error
+    );
+    logger.error(
+      `Erreur lors de la mise à jour de ${options.tableName}`,
+      error
+    );
     res.status(500).json({
       success: false,
-      message: "Une erreur est survenue lors de l'exécution de la requête",
+      message: `Erreur lors de la mise à jour de ${options.tableName}`,
     });
   }
 };
 
-exports.executeQueryAddPhone = async (req, res) => {
+const handleGenericInsertOneOrMany = async (req, res, options) => {
+  const { tableName, successMessage } = options;
+
   try {
     const { usermail, changes } = req.body;
 
-    // 🔍 Récupération de l'utilisateur
+    // 🔐 Auth
     const user = await findUserOrTeamByEmail(usermail);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Utilisateur introuvable",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur introuvable" });
     }
 
-    // 🔄 Parsing intelligent du champ `changes`
+    // 📦 JSON parsing
     let changesParsed;
     try {
       changesParsed = JSON.parse(changes);
@@ -327,7 +414,79 @@ exports.executeQueryAddPhone = async (req, res) => {
       });
     }
 
-    // 🧪 Validation de l'entrée
+    const entries = Array.isArray(changesParsed)
+      ? changesParsed
+      : [changesParsed];
+    if (entries.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "'changes' doit contenir au moins une entrée",
+      });
+    }
+
+    const results = [];
+
+    for (const entry of entries) {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+
+      const keys = Object.keys(entry);
+      const values = Object.values(entry).map(formatDateForMariaDB);
+
+      const escapedValues = values.map(SqlString.escape).join(", ");
+      const columns = keys.map((key) => `\`${key}\``).join(", ");
+
+      const query = `INSERT INTO \`${tableName}\` (${columns}) VALUES (${escapedValues});`;
+
+      const result = await ConnectionPoolService.executeQuery(user, query);
+      results.push(result);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: successMessage,
+      data: results,
+    });
+  } catch (error) {
+    console.error(
+      `Erreur lors de l'insertion dans ${options.tableName} :`,
+      error
+    );
+    logger.error(`Erreur lors de l'insertion dans ${options.tableName}`, error);
+    res.status(500).json({
+      success: false,
+      message: `Erreur lors de l'insertion dans ${options.tableName}`,
+    });
+  }
+};
+
+const handleGenericInsert = async (req, res, options) => {
+  const { tableName, fields, successMessage } = options;
+
+  try {
+    const { usermail, changes } = req.body;
+
+    // 🔍 Auth
+    const user = await findUserOrTeamByEmail(usermail);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur introuvable" });
+    }
+
+    // 🔄 JSON parsing
+    let changesParsed;
+    try {
+      changesParsed = JSON.parse(changes);
+      while (typeof changesParsed === "string") {
+        changesParsed = JSON.parse(changesParsed);
+      }
+    } catch {
+      return res.status(400).json({
+        success: false,
+        message: "Format de 'changes' invalide",
+      });
+    }
+
     if (!Array.isArray(changesParsed) || changesParsed.length === 0) {
       return res.status(400).json({
         success: false,
@@ -335,22 +494,19 @@ exports.executeQueryAddPhone = async (req, res) => {
       });
     }
 
-    const table = "Phones";
     const results = [];
 
-    for (const phoneEntry of changesParsed) {
-      const clientId = phoneEntry.Client?.Id;
-      const phone = phoneEntry.Phone;
-      const id = phoneEntry.Id;
+    for (const entry of changesParsed) {
+      const values = fields.map((f) => entry[f]);
+      if (values.some((v) => v === undefined || v === null || v === ""))
+        continue;
 
-      // Vérification des données minimales requises
-      if (!id || !clientId || !phone) continue;
+      const escaped = values.map((v) => SqlString.escape(v)).join(", ");
+      const columns = fields
+        .map((f) => `\`${f === "ClientId" ? "IdClient" : f}\``)
+        .join(", ");
 
-      // Requête SQL générée manuellement
-      const query = `
-        INSERT INTO \`${table}\` (\`Id\`, \`IdClient\`, \`Phone\`)
-        VALUES (${SqlString.escape(id)}, ${SqlString.escape(clientId)}, ${SqlString.escape(phone)});
-      `;
+      const query = `INSERT INTO \`${tableName}\` (${columns}) VALUES (${escaped});`;
 
       const result = await ConnectionPoolService.executeQuery(user, query);
       results.push(result);
@@ -358,87 +514,21 @@ exports.executeQueryAddPhone = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Téléphones insérés avec succès",
+      message: successMessage,
       data: results,
     });
-
   } catch (error) {
-    console.error("Erreur lors de l'insertion des téléphones :", error);
-    logger.error("Erreur lors de l'insertion des téléphones ", error);
+    console.error(
+      `Erreur lors de l'insertion dans ${options.tableName} :`,
+      error
+    );
+    logger.error(
+      `Erreur lors de l'insertion dans ${options.tableName} :`,
+      error
+    );
     res.status(500).json({
       success: false,
-      message: "Erreur lors de l'insertion des téléphones",
-    });
-  }
-};
-
-exports.executeQueryAddEmail = async (req, res) => {
-  try {
-    const { usermail, changes } = req.body;
-
-    // 🔍 Vérification de l'utilisateur
-    const user = await findUserOrTeamByEmail(usermail);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Utilisateur introuvable",
-      });
-    }
-
-    // 🔄 Parsing robuste de `changes`
-    let changesParsed;
-    try {
-      changesParsed = JSON.parse(changes);
-      while (typeof changesParsed === "string") {
-        changesParsed = JSON.parse(changesParsed);
-      }
-    } catch (err) {
-      return res.status(400).json({
-        success: false,
-        message: "Format de 'changes' invalide",
-      });
-    }
-
-    // 🧪 Validation
-    const emails = changesParsed[0];
-    if (!Array.isArray(emails) || emails.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Aucun email fourni ou format incorrect",
-      });
-    }
-
-    const table = "Emails";
-    const results = [];
-
-    for (const emailEntry of emails) {
-      const id = emailEntry.Id;
-      const clientId = emailEntry.Client?.Id;
-      const email = emailEntry.Email;
-
-      if (!id || !clientId || !email) continue;
-
-      const query = `
-        INSERT INTO \`${table}\` (\`Id\`, \`IdClient\`, \`Email\`)
-        VALUES (${SqlString.escape(id)}, ${SqlString.escape(clientId)}, ${SqlString.escape(email)});
-      `;
-
-      const result = await ConnectionPoolService.executeQuery(user, query);
-      results.push(result);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Emails insérés avec succès",
-      data: results,
-    });
-
-  } catch (error) {
-    console.error("Erreur lors de l'insertion des emails :", error);
-    logger.error("Erreur lors de l'insertion des emails", error);
-    res.status(500).json({
-      success: false,
-      message: "Erreur lors de l'insertion des emails",
+      message: `Erreur lors de l'insertion dans ${options.tableName}`,
     });
   }
 };

@@ -32,7 +32,7 @@ namespace Facilys.Components.Services
                 // Ajout des headers CSRF et Origin
                 var token = await GetKeyAccessApp();
                 client.DefaultRequestHeaders.Add("x-csrf-token", token);
-                client.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
+                client.DefaultRequestHeaders.Add("Origin", "http://localhost:8056");
 
                 // Préparation du contenu multipart/form-data
                 var formContent = new MultipartFormDataContent();
@@ -46,6 +46,7 @@ namespace Facilys.Components.Services
 
                 // Sérialisation des changements en JSON et ajout
                 var jsonChanges = JsonSerializer.Serialize(changes);
+                Console.WriteLine(jsonChanges);
                 formContent.Add(new StringContent(jsonChanges, Encoding.UTF8, "application/json"), "changes");
 
                 // Envoi de la requête

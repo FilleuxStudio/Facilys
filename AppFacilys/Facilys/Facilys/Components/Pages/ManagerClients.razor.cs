@@ -283,9 +283,17 @@ namespace Facilys.Components.Pages
 
                     if (HybridSupport.IsElectronActive)
                     {
-                        await SyncService.PushChangesAsync("api/query/addclient", new[] { managerClientViewModel.Client });
-                        await SyncService.PushChangesAsync("api/query/addphone", new[] { managerClientViewModel.PhonesClients });
-                        await SyncService.PushChangesAsync("api/query/addemail", new[] { managerClientViewModel.EmailsClients });
+                        // Envoi vers l'API Node.js avec les DTOs
+                        if (HybridSupport.IsElectronActive)
+                        {
+                            var clientDto = managerClientViewModel.Client.ToDto();
+                            var phonesDto = managerClientViewModel.PhonesClients.Select(p => p.ToDto()).ToArray();
+                            var emailsDto = managerClientViewModel.EmailsClients.Select(e => e.ToDto()).ToArray();
+
+                            await SyncService.PushChangesAsync("api/query/addclient", new[] { clientDto });
+                            await SyncService.PushChangesAsync("api/query/addphone", phonesDto);
+                            await SyncService.PushChangesAsync("api/query/addemail", emailsDto);
+                        }
                     }
 
                     ResetForm();
@@ -344,6 +352,21 @@ namespace Facilys.Components.Pages
 
                 await DbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                if (HybridSupport.IsElectronActive)
+                {
+                    // Envoi vers l'API Node.js avec les DTOs
+                    if (HybridSupport.IsElectronActive)
+                    {
+                        var clientDto = managerClientViewModel.Client.ToDto();
+                        var phonesDto = managerClientViewModel.PhonesClients.Select(p => p.ToDto()).ToArray();
+                        var emailsDto = managerClientViewModel.EmailsClients.Select(e => e.ToDto()).ToArray();
+
+                        await SyncService.PushChangesAsync("api/query/updateclient", new[] { clientDto });
+                        await SyncService.PushChangesAsync("api/query/addphone", phonesDto);
+                        await SyncService.PushChangesAsync("api/query/addemail", emailsDto);
+                    }
+                }
 
                 ResetForm();
                 CloseModal("OpenModalLargeEditClient");

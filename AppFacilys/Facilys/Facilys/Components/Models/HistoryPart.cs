@@ -24,5 +24,42 @@ namespace Facilys.Components.Models
         [Required]
         public float Quantity { get; set; } = 0.0f;
         public int? KMMounted { get; set; } = 0;
+
+        public HistoryPartDto ToDto()
+        {
+            return new HistoryPartDto
+            {
+                Id = this.Id,
+                InvoiceId = this.Invoice?.Id ?? Guid.Empty,
+                VehicleId = this.Vehicle?.Id,
+                OtherVehicleId = this.OtherVehicle?.Id,
+                PartNumber = this.PartNumber,
+                PartName = this.PartName,
+                PartBrand = this.PartBrand,
+                Description = this.Description,
+                Discount = this.Discount,
+                Price = this.Price,
+                Quantity = this.Quantity,
+                KMMounted = this.KMMounted
+            };
+        }
+    }
+
+    public class HistoryPartDto
+    {
+        public Guid Id { get; set; }
+        public Guid InvoiceId { get; set; }
+        public Guid? VehicleId { get; set; }
+        public Guid? OtherVehicleId { get; set; }
+
+        public string PartNumber { get; set; } = string.Empty;
+        public string? PartName { get; set; } = string.Empty;
+        public string? PartBrand { get; set; } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
+
+        public float Discount { get; set; } = 0.0f;
+        public float Price { get; set; } = 0.0f;
+        public float Quantity { get; set; } = 0.0f;
+        public int? KMMounted { get; set; }
     }
 }

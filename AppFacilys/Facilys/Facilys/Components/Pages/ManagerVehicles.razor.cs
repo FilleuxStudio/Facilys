@@ -1,4 +1,5 @@
-﻿using Facilys.Components.Data;
+﻿using ElectronNET.API;
+using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
@@ -168,6 +169,17 @@ namespace Facilys.Components.Pages
                 managerVehicleViewModel.Vehicle.Client = await DbContext.Clients.FindAsync(selectClient);
                 await DbContext.Vehicles.AddAsync(managerVehicleViewModel.Vehicle);
                 await DbContext.SaveChangesAsync();
+
+                if (HybridSupport.IsElectronActive)
+                {
+                    // Envoi vers l'API Node.js avec les DTOs
+                    if (HybridSupport.IsElectronActive)
+                    {
+                        var vehicleDto = managerVehicleViewModel.Vehicle.ToDto();
+
+                        await SyncService.PushChangesAsync("api/query/addvehicle", new[] { vehicleDto });
+                    }
+                }
 
                 ResetForm();
 

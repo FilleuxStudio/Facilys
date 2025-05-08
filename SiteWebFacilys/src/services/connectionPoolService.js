@@ -10,11 +10,11 @@ class ConnectionPoolService {
   getPool(user) {
     if (!this.pools.has(user.email)) {
       const pool = mariadb.createPool({
-        host: 'node117-eu.n0c.com',
+        host: 'localhost',
         user: user.mariadbUser,
         password: user.mariadbPassword,
         database: user.mariadbDb,
-        connectionLimit: 5, // Limite de connexions simultanées
+        connectionLimit: 100, // Limite de connexions simultanées
         acquireTimeout: 5000,
       });
 
