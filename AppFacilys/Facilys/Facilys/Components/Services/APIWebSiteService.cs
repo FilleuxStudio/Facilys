@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Facilys.Components.Constants;
+﻿using Facilys.Components.Constants;
 using Facilys.Components.Models;
 using System.Text;
 using System.Text.Json;
@@ -13,7 +12,7 @@ namespace Facilys.Components.Services
         public APIWebSiteService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:8056");
+            _httpClient.BaseAddress = new Uri("https://facilys.flixmail.fr");
         }
 
         public async Task<string> GetKeyAccessApp()
@@ -39,7 +38,7 @@ namespace Facilys.Components.Services
 
             // Ajout du header CSRF
             _httpClient.DefaultRequestHeaders.Add("x-csrf-token", EnvironmentApp.AccessToken);
-            _httpClient.DefaultRequestHeaders.Add("Origin", "http://localhost:8056");
+            _httpClient.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
 
             var response = await _httpClient.PostAsync("api/login", formContent);
 
@@ -114,7 +113,7 @@ namespace Facilys.Components.Services
 
             // Ajout du header CSRF
             _httpClient.DefaultRequestHeaders.Add("x-csrf-token", EnvironmentApp.AccessToken);
-            _httpClient.DefaultRequestHeaders.Add("Origin", "http://localhost:8056");
+            _httpClient.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
 
             var response = await _httpClient.PostAsync("api/company", formContent);
 
@@ -184,7 +183,7 @@ namespace Facilys.Components.Services
                 "application/json"
             );
 
-    
+
             // Configuration des headers
             var request = new HttpRequestMessage(HttpMethod.Put, "api/update-company")
             {
@@ -192,7 +191,7 @@ namespace Facilys.Components.Services
             };
 
             request.Headers.Add("x-csrf-token", EnvironmentApp.AccessToken);
-            request.Headers.Add("Origin", "http://localhost:8056");
+            request.Headers.Add("Origin", "https://facilys.flixmail.fr");
 
             // Envoi sécurisé avec gestion d'erreurs améliorée
             try

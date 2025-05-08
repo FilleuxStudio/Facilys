@@ -565,7 +565,7 @@ namespace Facilys.Components.Pages
 
         public void Dispose()
         {
-           DbContext.Dispose();
+            DbContext.Dispose();
         }
     }
 }

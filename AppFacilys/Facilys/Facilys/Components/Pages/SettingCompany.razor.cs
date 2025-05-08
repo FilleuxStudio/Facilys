@@ -2,7 +2,6 @@
 using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
-using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
@@ -76,7 +75,7 @@ namespace Facilys.Components.Pages
             try
             {
 
-               await APIWebSite.PutUpdateCompanyAsync(CompanySettings);
+                await APIWebSite.PutUpdateCompanyAsync(CompanySettings);
 
                 var existingCompany = await DbContext.CompanySettings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
                 if (existingCompany == null)

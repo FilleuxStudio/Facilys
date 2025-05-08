@@ -461,7 +461,7 @@ namespace Facilys.Components.Services
             }
 
             var cookieData = await GetAuthenticatedAsync();
-           
+
             return cookieData != null &&
                    cookieData.IsConnected &&
                    DateTime.UtcNow < cookieData.ExpirationDate;

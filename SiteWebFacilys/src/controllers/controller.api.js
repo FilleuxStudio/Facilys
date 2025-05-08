@@ -286,6 +286,14 @@ exports.executeQueryUpdateVehicle = (req, res) => {
   });
 };
 
+exports.executeQueryUpdateOtherVehicle = (req, res) => {
+  handleGenericUpdateWithCascadeDelete(req, res, {
+    tableName: "OtherVehicles",
+    cascadeDeleteConfigs: [],
+    successMessage: "Véhicule mis à jour avec succès",
+  });
+};
+
 exports.executeQueryUpdateInvoice = (req, res) => {
   handleGenericUpdateWithCascadeDelete(req, res, {
     tableName: "Invoices",

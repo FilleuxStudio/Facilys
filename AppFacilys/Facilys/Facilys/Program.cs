@@ -32,7 +32,7 @@
 //builder.Services.AddScoped<AuthService>();
 //builder.Services.AddHttpClient<APIWebSiteService>(client =>
 //{
-//    client.BaseAddress = new Uri("http://localhost:8056");
+//    client.BaseAddress = new Uri("https://facilys.flixmail.fr");
 //});
 
 //builder.Services.AddSingleton<PageTitleService>();
@@ -213,7 +213,7 @@ builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient<APIWebSiteService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8056");
+    client.BaseAddress = new Uri("https://facilys.flixmail.fr");
 });
 builder.Services.AddSingleton<PageTitleService>();
 builder.Services.AddScoped<VINDecoderService>();
@@ -222,7 +222,7 @@ if (HybridSupport.IsElectronActive)
 {
     builder.Services.AddHttpClient("SyncApi", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8056");
+    client.BaseAddress = new Uri("https://facilys.flixmail.fr");
     client.DefaultRequestHeaders.Accept
           .Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });

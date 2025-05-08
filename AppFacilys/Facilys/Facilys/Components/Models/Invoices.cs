@@ -1,5 +1,4 @@
-﻿using Facilys.Components.Pages;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Facilys.Components.Models
