@@ -22,6 +22,17 @@ const isProduction = process.env.NODE_ENV === 'production';
 const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
 const sessionSecret = crypto.createHash("sha256").update("Facilys-2025-session").digest("base64");
 
+app.set('trust proxy', 1);
+
+if (isProduction) {
+  app.use((req, res, next) => {
+    if (req.protocol !== 'https') {
+      return res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
+  });
+}
+
 // Configuration du moteur de vue EJS
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "views"));
