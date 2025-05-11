@@ -10,9 +10,12 @@ namespace Facilys.Components.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
+        [ForeignKey("IdVehicle")]
+        public Vehicles Vehicle { get; set; }
         [Required]
         public string QuoteNumber { get; set; } = string.Empty;
         public float? TotalAmount { get; set; } = 0.00f;
+        public string? Observations { get; set; } = string.Empty;
         public StatusQuote Status { get; set; } = StatusQuote.waiting;
         public Users? User { get; set; }
         public DateTime? DateAccepted { get; set; } = DateTime.Now;

@@ -262,7 +262,7 @@ if (HybridSupport.IsElectronActive)
         var services = scope.ServiceProvider;
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.EnsureCreatedAsync();
-        DbInitializer.Initialize(services);
+        //DbInitializer.Initialize(services); //test
     }
 }
 

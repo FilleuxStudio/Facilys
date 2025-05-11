@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `Clients` (
     `Address` VARCHAR(255) NOT NULL,
     `City` VARCHAR(255) NOT NULL,
     `PostalCode` VARCHAR(20) NOT NULL,
-    `Type` INTEGER NOT NULL,
+    `Type` INT NOT NULL,
     `AdditionalInformation` TEXT,
     `DateCreated` VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `CompanySettings` (
     `LegalStatus` VARCHAR(255) NOT NULL,
     `RMNumber` VARCHAR(255) NOT NULL,
     `RCS` VARCHAR(255),
-    `RegisteredCapital` DECIMAL(15, 2),
+    `RegisteredCapital` DECIMAL(15,2),
     `CodeNAF` VARCHAR(50),
     `ManagerName` VARCHAR(255),
     `Phone` VARCHAR(20) NOT NULL,
@@ -38,20 +38,20 @@ CREATE TABLE IF NOT EXISTS `EditionSettings` (
     `PathSaveFile` VARCHAR(255) NOT NULL,
     `PathSaveInvociePrepare` VARCHAR(255) NOT NULL,
     `Picture` TEXT,
-    `TypeDesign` INTEGER NOT NULL,
+    `TypeDesign` INT NOT NULL,
     `SentenceInformationBottom` TEXT,
     `SentenceInformationTop` TEXT,
     `SentenceBottom` TEXT,
     `RepairOrderSentenceTop` TEXT,
     `RepairOrderSentenceBottom` TEXT,
-    `TVA` DECIMAL(5, 2),
-    `PreloadedLine` INTEGER NOT NULL
+    `TVA` DECIMAL(5,2),
+    `PreloadedLine` INT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `InterestingReferences` (
     `Id` CHAR(36) NOT NULL PRIMARY KEY,
     `Reference` VARCHAR(255) NOT NULL,
-    `Price` DECIMAL(15, 2) NOT NULL
+    `Price` DECIMAL(15,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `Inventorys` (
@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS `Inventorys` (
     `Details` TEXT,
     `Picture` TEXT,
     `Type` VARCHAR(255),
-    `Price` DECIMAL(15, 2),
-    `Quantity` INTEGER,
+    `Price` DECIMAL(15,2),
+    `Quantity` INT,
     `DateAdded` VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `Users` (
     `Picture` TEXT,
     `Password` VARCHAR(255) NOT NULL,
     `Team` VARCHAR(255) NOT NULL,
-    `Role` INTEGER NOT NULL,
+    `Role` INT NOT NULL,
     `DateAdded` VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `OtherVehicles` (
     `Type` VARCHAR(255) NOT NULL,
     `Mark` VARCHAR(255) NOT NULL,
     `Model` VARCHAR(255) NOT NULL,
-    `StatusDataView` INTEGER NOT NULL,
+    `StatusDataView` INT NOT NULL,
     `AdditionalInformation` TEXT,
     `DateAdded` VARCHAR(255) NOT NULL,
     FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
@@ -145,8 +145,8 @@ CREATE TABLE IF NOT EXISTS `Vehicles` (
     `VIN` VARCHAR(255) NOT NULL,
     `AdditionalInformation` TEXT,
     `CirculationDate` VARCHAR(255) NOT NULL,
-    `KM` INTEGER NOT NULL,
-    `StatusDataView` INTEGER NOT NULL,
+    `KM` INT NOT NULL,
+    `StatusDataView` INT NOT NULL,
     `DateAdded` VARCHAR(255) NOT NULL,
     FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -155,21 +155,24 @@ CREATE TABLE IF NOT EXISTS `AssociationSettingReferences` (
     `Id` CHAR(36) NOT NULL PRIMARY KEY,
     `IdInterestingReferences` CHAR(36) NOT NULL,
     `EditionSettingId` CHAR(36),
-    FOREIGN KEY (`EditionSettingId`) REFERENCES `EditionSettings`(`Id`),
-    FOREIGN KEY (`IdInterestingReferences`) REFERENCES `InterestingReferences`(`Id`) ON DELETE CASCADE
+    FOREIGN KEY (`IdInterestingReferences`) REFERENCES `InterestingReferences`(`Id`) ON DELETE CASCADE,
+    FOREIGN KEY (`EditionSettingId`) REFERENCES `EditionSettings`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `Quotes` (
     `Id` CHAR(36) NOT NULL PRIMARY KEY,
     `IdClient` CHAR(36) NOT NULL,
+    `IdVehicle` CHAR(36),
     `QuoteNumber` VARCHAR(255) NOT NULL,
-    `TotalAmount` DECIMAL(15, 2),
-    `Status` INTEGER NOT NULL,
+    `TotalAmount` DECIMAL(15,2),
+    `Observations` TEXT,
+    `Status` INT NOT NULL,
     `UserId` CHAR(36),
     `DateAccepted` VARCHAR(255),
     `DateAdded` VARCHAR(255) NOT NULL,
     FOREIGN KEY (`UserId`) REFERENCES `Users`(`Id`),
-    FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
+    FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE,
+    FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `Invoices` (
@@ -178,13 +181,13 @@ CREATE TABLE IF NOT EXISTS `Invoices` (
     `OrderNumber` VARCHAR(255) NOT NULL,
     `IdVehicle` CHAR(36),
     `IdOtherVehicle` CHAR(36),
-    `Payment` INTEGER NOT NULL,
-    `TotalAmount` DECIMAL(15, 2) NOT NULL,
+    `Payment` INT NOT NULL,
+    `TotalAmount` DECIMAL(15,2) NOT NULL,
     `Observations` TEXT,
     `RepairType` VARCHAR(255),
-    `Status` INTEGER NOT NULL,
-    `PartReturnedCustomer` INTEGER NOT NULL,
-    `CustomerSuppliedPart` INTEGER NOT NULL,
+    `Status` INT NOT NULL,
+    `PartReturnedCustomer` INT NOT NULL,
+    `CustomerSuppliedPart` INT NOT NULL,
     `UserId` CHAR(36),
     `DateAdded` VARCHAR(255) NOT NULL,
     FOREIGN KEY (`UserId`) REFERENCES `Users`(`Id`),
@@ -199,8 +202,8 @@ CREATE TABLE IF NOT EXISTS `MaintenanceAlerts` (
     `IdOtherVehicle` CHAR(36),
     `DateMake` VARCHAR(255) NOT NULL,
     `DateAdded` VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`),
-    FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`)
+    FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`),
+    FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `QuotesItems` (
@@ -210,8 +213,8 @@ CREATE TABLE IF NOT EXISTS `QuotesItems` (
     `PartName` VARCHAR(255) NOT NULL,
     `PartBrand` VARCHAR(255),
     `Description` TEXT,
-    `Price` DECIMAL(15, 2) NOT NULL,
-    `Quantity` INTEGER NOT NULL,
+    `Price` DECIMAL(15,2) NOT NULL,
+    `Quantity` INT NOT NULL,
     FOREIGN KEY (`IdQuote`) REFERENCES `Quotes`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -224,15 +227,16 @@ CREATE TABLE IF NOT EXISTS `HistoryParts` (
     `PartName` VARCHAR(255) NOT NULL,
     `PartBrand` VARCHAR(255),
     `Description` TEXT,
-    `Discount` DECIMAL(5, 2) NOT NULL,
-    `Price` DECIMAL(15, 2) NOT NULL,
-    `Quantity` DECIMAL(10, 2) NOT NULL,
-    `KMMounted` INTEGER,
+    `Discount` DECIMAL(5,2) NOT NULL,
+    `Price` DECIMAL(15,2) NOT NULL,
+    `Quantity` DECIMAL(10,2) NOT NULL,
+    `KMMounted` INT,
     FOREIGN KEY (`IdInvoice`) REFERENCES `Invoices`(`Id`) ON DELETE CASCADE,
     FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`),
     FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Indexes
 CREATE INDEX `IX_AssocSettingRef_EditionSettingId` ON `AssociationSettingReferences` (`EditionSettingId`);
 CREATE INDEX `IX_AssocSettingRef_IdInterestingReferences` ON `AssociationSettingReferences` (`IdInterestingReferences`);
 CREATE INDEX `IX_Emails_IdClient` ON `Emails` (`IdClient`);
@@ -248,6 +252,7 @@ CREATE INDEX `IX_OtherVehicles_IdClient` ON `OtherVehicles` (`IdClient`);
 CREATE INDEX `IX_Phones_IdClient` ON `Phones` (`IdClient`);
 CREATE INDEX `IX_ProfessionalClient_IdClient` ON `ProfessionalClient` (`IdClient`);
 CREATE INDEX `IX_Quotes_IdClient` ON `Quotes` (`IdClient`);
+CREATE INDEX `IX_Quotes_IdVehicle` ON `Quotes` (`IdVehicle`);
 CREATE INDEX `IX_Quotes_UserId` ON `Quotes` (`UserId`);
 CREATE INDEX `IX_QuotesItems_IdQuote` ON `QuotesItems` (`IdQuote`);
 CREATE INDEX `IX_Vehicles_IdClient` ON `Vehicles` (`IdClient`);

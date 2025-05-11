@@ -7,5 +7,7 @@
         public Vehicles Vehicle { get; set; }
         public OtherVehicles OtherVehicle { get; set; }
         public List<Quotes> Quotes { get; set; }
+        public List<Clients> Clients { get; set; }
+        public List<Vehicles> Vehicles { get; set; }
     }
 }

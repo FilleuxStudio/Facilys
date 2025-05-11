@@ -5,8 +5,119 @@
 @inject ILogger<ManagerQuotation> Logger
 @inject UserConnectionService UserConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject SyncServiceAPISQL SyncService
 
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Liste des devis</h4>
+                    </div><!--end col-->
+                    <div class="col-auto">
+                        <NavLink class="btn bg-primary-subtle text-primary" href="/editionQuation"><i class="fas fa-plus me-1"></i>Edition devis</NavLink>
+                    </div><!--end col-->
+                </div><!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body pt-0">
+                <div class="table-responsive">
+                    <table class="table mb-0" id="datatable_1">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Vehicule</th>
+                                <th>Client</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Montant</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (managerQuotationViewModel.Quotes.Count != 0)
+                            {
+                                @foreach (var quote in managerQuotationViewModel.Quotes)
+                                {
+                                    <tr>
+                                        <td>@quote.QuoteNumber</td>
+                                        <td>
+                                            <p class="d-inline-block align-middle mb-0">
+                                                @if (quote.Vehicle != null)
+                                                {
+                                                    <span class="d-block align-middle mb-0 product-name text-body">@quote.Vehicle.Immatriculation</span>
+                                                    <span class="text-muted font-13">@quote.Vehicle.Mark</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="d-block align-middle mb-0 product-name text-body">Aucun résultat</span>
+                                                }
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="d-inline-block align-middle mb-0">
+                                                @if (quote.Client != null)
+                                                {
+                                                    <span class="d-block align-middle mb-0 product-name text-body">@quote.Client.Fname @quote.Client.Lname</span>
+                                                    <span class="text-muted font-13">@quote.Client.City</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="d-block align-middle mb-0 product-name text-body">Aucun résultat</span>
+                                                }
+                                            </p>
+                                        </td>
+                                        <td>@quote.DateAdded</td>
+                                        <td>
+                                            @switch (quote.Status)
+                                            {
+                                                case StatusQuote.waiting:
+                                                    <span class="badge bg-warning-subtle text-warning">En attente</span>
+                                                    break;
 
-@code {
+                                                case StatusQuote.accept:
+                                                    <span class="badge bg-success-subtle text-success">Accepté</span>
+                                                    break;
 
-}
+                                                case StatusQuote.refuse:
+                                                    <span class="badge bg-danger-subtle text-danger">Refusé</span>
+                                                    break;
+                                            }
+                                        </td>
+
+                                        <td>@quote.TotalAmount?.ToString("#.##") €</td>
+                                        <td class="text-end">
+                                            <NavLink class="btn btn-sm bg-warning-subtle text-warning" href=@($"/UpdateQuation/{quote.Id}")><i class="las la-pen text-warning fs-18"></i></NavLink>
+                                            <button type="button" @onclick="@(() => OpenModalData("OpenModalDeleteQuation", quote.Id))" class="btn btn-sm bg-danger-subtle text-danger"><i class="las la-trash-alt text-danger fs-18"></i></button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <!-- end col -->
+</div> <!-- end row -->
+
+<div class="@modalManager.GetModal("OpenModalDeleteQuation")?.ModalClass" id="OpenModalDeleteQuation" tabindex="-1" role="dialog" aria-labelledby="OpenModalDeleteQuationLabel" style="@modalManager.GetModal("OpenModalDeleteQuation")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalDeleteQuation")?.AriaHidden">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalDeleteQuationLabel">Supprimer un devis : @managerQuotationViewModel.Quote.QuoteNumber</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalDeleteQuation"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerQuotationViewModel.Quote" OnValidSubmit="SubmitDeleteQuatation" FormName="DeleteQuotationForm">
+                    <p class="text-center">Si vous cliquez ici, toutes les données de ce devis seront effacées de manière irréversible.</p>
+                    <div class="row mb-3">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-danger px-4">Supprimer</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div><!--end modal-body-->
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->
