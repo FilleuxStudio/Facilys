@@ -47,15 +47,21 @@ jobs:
         S3_ENDPOINT: https://ht2-storage.n0c.com:5443
         S3_BUCKET_NAME: jmaqmsnt
       run: |
+        set -e  # Stop on first error
+        set -x  # Debug output
+
         sudo apt-get update
-        sudo apt-get install -y curl unzip
-        sudo apt-get install -y python3-pip
+        sudo apt-get install -y curl unzip python3-pip
+
         pip3 install awscli
-        aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-        aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-        aws configure set default.region "$AWS_REGION"
-        aws s3 sync SiteWebFacilys/public s3://$S3_BUCKET_NAME/public/ \
-          --endpoint-url $S3_ENDPOINT \
+
+        export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+        export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+        export AWS_REGION="$AWS_REGION"
+
+        aws --version
+        aws --no-cli-pager s3 sync SiteWebFacilys/public s3://$S3_BUCKET_NAME/public/ \
+          --endpoint-url "$S3_ENDPOINT" \
           --acl public-read \
           --delete
 
