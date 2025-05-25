@@ -155,6 +155,7 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Force HTTPS
 });
 
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<UserConnectionService>();

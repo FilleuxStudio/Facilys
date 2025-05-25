@@ -11,7 +11,9 @@ namespace Facilys.Components.Models
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
         [ForeignKey("IdVehicle")]
-        public Vehicles Vehicle { get; set; }
+        public Vehicles? Vehicle { get; set; }
+        [ForeignKey("IdOtherVehicle")]
+        public OtherVehicles? OtherVehicle { get; set; }
         [Required]
         public string QuoteNumber { get; set; } = string.Empty;
         public float? TotalAmount { get; set; } = 0.00f;

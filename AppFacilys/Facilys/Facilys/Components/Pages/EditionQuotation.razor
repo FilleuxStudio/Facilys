@@ -1,0 +1,189 @@
+﻿@page "/editionQuation"
+@rendermode InteractiveServer
+@inject PageTitleService PageTitleService
+@inject IJSRuntime JSRuntime
+@inject AuthService AuthService
+@inject ILogger<EditionInvoice> Logger
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@attribute [StreamRendering]
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Edition de devis</h4>
+                    </div><!--end col-->
+                </div><!--end row-->
+            </div><!--end card-header-->
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body pt-0">
+                        <div class="row mt-3">
+                            <div class="col-4 align-self-center">
+                                <img src="@managerQuotationViewModel.CompanySettings.Logo" alt="logo company" class="logo-sm me-1" height="70">
+                            </div><!--end col-->
+                            <div class="col-8 text-end align-self-center">
+                                <h5 class="mb-1 fw-semibold text-black"><span class="text-muted">Devis N° :</span> @QuotationNumber</h5>
+                                <h5 class="mb-0 fw-semibold text-black"><span class="text-muted">Date :</span> @DateTime.Now.Date.ToShortDateString()</h5>
+                            </div><!--end col-->
+                        </div>
+                    </div>
+                </div>
+            </div> <!--end col-->
+        </div><!--end row-->
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="card-title">Selectionner un client</h4>
+                            </div><!--end col-->
+                        </div>  <!--end row-->
+                    </div><!--end card-header-->
+                    <div class="card-body pt-0">
+                        <div class="row">
+                            <div class="col">
+                                <InputText @bind-Value="SearchClient" placeholder="Rechercher..." class="form-control mb-1" @oninput="HandleSearchClient" />
+                                <select class="form-select" @onchange="HandleSelectionChangedClient">
+                                    <option>Selectionner un client</option>
+                                    @foreach (var item in managerQuotationViewModel.ClientItems)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            </div><!-- end col -->
+                        </div><!-- end row -->
+                    </div><!--end card-body-->
+                </div><!--end card-->
+            </div> <!--end col-->
+            <div class="col-md-6 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="card-title">Selectionner un véhicule</h4>
+                            </div><!--end col-->
+                        </div>  <!--end row-->
+                    </div><!--end card-header-->
+                    <div class="card-body pt-0">
+                        <div class="col">
+                            <InputSelect @bind-Value="SelectedValueVehicle" class="form-select">
+                                <option>Selectionner un véhicule</option>
+                                @foreach (var item in managerQuotationViewModel.VehicleItems)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </InputSelect>
+                            <InputNumber @bind-Value="Km" placeholder="kilometrage voiture..." class="form-control mt-1" />
+                        </div><!-- end col -->
+                    </div><!--end card-body-->
+                </div><!--end card-->
+            </div> <!--end col-->
+        </div><!--end row-->
+        <EditForm Model="@invoiceData" OnSubmit="@CreateQuotationValidSubmit">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="">
+                                <table class="table table-bordered mb-0 table-centered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width:15%">Référence</th>
+                                            <th>Description</th>
+                                            <th style="width:9%">Quantité</th>
+                                            <th style="width:10%">Prix unitaire</th>
+                                            <th style="width:9%">Remise</th>
+                                            <th style="width:9%">Montant HT</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                            @for (int i = 0; i < 15; i++)
+                                            {
+                                                // Création d'une variable locale pour la fermeture
+                                                <tr @key="i">
+                                                    <td>
+                                                        <InputText @bind-Value="invoiceData.LineRef[i]" class="form-control" id="@($"invoiceData-LineRef-{i}")" />
+                                                    </td>
+                                                    <td>
+                                                        <InputText @bind-Value="invoiceData.LineDesc[i]" class="form-control" id="@($"invoiceData-LineDesc-{i}")" />
+                                                    </td>
+                                                    <td>
+                                                        <InputNumber @bind-Value="invoiceData.LineQt[i]" class="form-control" id="@($"invoiceData-LineQt-{i}")" />
+                                                    </td>
+                                                    <td>
+                                                        <InputNumber @bind-Value="invoiceData.LinePrice[i]" @oninput="(e) => OnLinePriceChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LinePrice-{i}")" />
+                                                    </td>
+                                                    <td>
+                                                        <InputNumber @bind-Value="invoiceData.LineDisc[i]" @oninput="(e) => OnLineDiscChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LineDisc-{i}")" />
+                                                    </td>
+                                                    <td>
+                                                        <InputNumber @bind-Value="invoiceData.LineMo[i]" class="form-control no-spinner" id="@($"invoiceData-LineMo-{i}")" readonly />
+                                                    </td>
+                                                </tr>
+                                            }
+                                        
+                                    </tbody>
+                                </table><!--end /table-->
+                                <div class="row mt-1 justify-content-end">
+                                    <div class="col-4 d-flex flex-column">
+                                        <div class="mb-2 row">
+                                            <label for="HT" class="col-sm-2 col-form-label text-end">HT</label>
+                                            <div class="col-sm-10">
+                                                <InputNumber @bind-Value="invoiceData.HT" id="HT" class="form-control no-spinner" readonly />
+                                            </div>
+                                        </div>
+                                        <div class="mb-2 row">
+                                            <label for="TVA" class="col-sm-2 col-form-label text-end">TVA</label>
+                                            <div class="col-sm-10">
+                                                <InputNumber @bind-Value="invoiceData.TVA" id="TVA" class="form-control no-spinner" readonly />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <label for="TTC" class="col-sm-2 col-form-label text-end"><strong>TTC</strong></label>
+                                            <div class="col-sm-10">
+                                                <InputNumber @bind-Value="invoiceData.TTC" id="TTC" class="form-control no-spinner" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <div class="form-check form-switch form-switch-info">
+                                            <InputCheckbox @bind-Value="invoiceData.PartReturnedCustomer" class="form-check-input" id="PartReturnedCustomer" />
+                                            <label class="form-check-label" for="PartReturnedCustomer">Pièces remplacées à remettre au client</label>
+                                        </div>
+                                    </div><!-- end col -->
+                                    <div class="col-6">
+                                        <div class="form-check form-switch form-switch-info">
+                                            <InputCheckbox @bind-Value="invoiceData.CustomerSuppliedPart" class="form-check-input" id="CustomerSuppliedPart" />
+                                            <label class="form-check-label" for="CustomerSuppliedPart">Pièces fournies par le client </label>
+                                        </div>
+                                    </div><!-- end col -->
+                                </div>
+                                <div class="row mt-1 mb-3">
+                                    <div class="col-12">
+                                        <InputTextArea @bind-Value="managerQuotationViewModel.Quote.Observations" placeholder="Détails supplémentaires…" class="form-control" rows="5" />
+                                    </div><!-- end col -->
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success" @onclick="() => actionType = 1">Sauvegarder le devis</button>
+                            <button type="submit" class="btn btn-primary" @onclick="() => actionType = 2">Générer le PDF</button>
+                        </div>
+                    </div>
+                </div> <!--end col-->
+            </div><!--end row-->
+
+        </EditForm>
+
+    </div> <!-- end col -->
+</div> <!-- end row -->

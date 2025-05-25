@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 3
+    },
+    "auditLog": "C:\\Users\\Dimitri\\Documents\\Master Cours\\Projet Thématique\\logs\\.fba0224ace40887de29552a22d1582b7b5933dd8-audit.json",
+    "files": [
+        {
+            "date": 1747766685020,
+            "name": "C:\\Users\\Dimitri\\Documents\\Master Cours\\Projet Thématique\\logs\\info-2025-05-20.log",
+            "hash": "861a2119ce8ba6ae331f6e96e98818eb112867db76a06a9e3fb52b61238ce10c"
+        }
+    ],
+    "hashType": "sha256"
+}
