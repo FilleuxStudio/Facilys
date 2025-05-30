@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@* @page "/"
 @inject NavigationManager NavigationManager
 @inject AuthService AuthService
 
@@ -18,3 +18,86 @@
     }
      
 }
+ *@
+ @page "/"
+@rendermode InteractiveServer
+@layout MainLayoutLogin
+@inject NavigationManager NavigationManager
+@inject AuthService AuthService
+@inject IJSRuntime JSRuntime
+
+<div class="loading-container d-flex justify-content-center align-items-center vh-100">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Vérification de l'authentification...</span>
+    </div>
+    <div class="ms-3">
+        <p class="mb-0">Vérification de votre session...</p>
+    </div>
+</div>
+
+@code {
+
+    private bool hasNavigated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(100);
+
+        //await base.OnInitializedAsync();
+        // try
+        // {
+        //     // if (!OperatingSystem.IsBrowser())
+        //     // {
+        //     //     return; // Skip navigation during prerender
+        //     // }
+
+        //     // Vérifier si l'utilisateur est authentifié
+        //     bool isAuthenticated = await AuthService.IsAuthenticatedAsync();
+
+        //     if (isAuthenticated)
+        //     {
+        //         // Utilisateur authentifié, rediriger vers le dashboard
+        //         NavigationManager.NavigateTo("/dashboard", forceLoad: true);
+        //     }
+        //     else
+        //     {
+        //         // Utilisateur non authentifié, rediriger vers la page de login
+        //         NavigationManager.NavigateTo("/login", forceLoad: true);
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     // En cas d'erreur, rediriger vers la page de login
+        //     Console.Error.WriteLine($"Erreur lors de la vérification d'authentification : {ex.Message}");
+        //     NavigationManager.NavigateTo("/login", forceLoad: true);
+        // }
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !hasNavigated)
+        {
+            hasNavigated = true;
+
+            try
+            {
+                bool isAuthenticated = await AuthService.IsAuthenticatedAsync();
+
+                if (isAuthenticated)
+                {
+                    NavigationManager.NavigateTo("/dashboard");
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/login");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Erreur lors de la vérification d'authentification : {ex.Message}");
+                NavigationManager.NavigateTo("/login");
+            }
+        }
+    }
+} 

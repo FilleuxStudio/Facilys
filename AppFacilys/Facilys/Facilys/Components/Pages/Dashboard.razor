@@ -3,10 +3,10 @@
 @inject IJSRuntime JSRuntime
 @inject PageTitleService PageTitleService
 @attribute [StreamRendering]
-@*@inject DynamicDbContextFactory DBcontextFactory*@
 @inject UserConnectionService UserConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IMemoryCache _cache
+@inject ILogger<Dashboard> Logger
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -29,7 +29,7 @@
                 <div class="row d-flex justify-content-center border-dashed-bottom pb-3">
                     <div class="col-9">
                         <p class="text-dark mb-0 fw-semibold fs-14">Clients total</p>
-                        <h3 class="mt-2 mb-0 fw-bold">@client</h3>
+                        <h3 class="mt-2 mb-0 fw-bold">@dashboardData.ClientCount</h3>
                     </div>
                     <div class="col-3 align-self-center">
                         <div class="d-flex justify-content-center align-items-center thumb-xl bg-light rounded-circle mx-auto">
@@ -46,7 +46,7 @@
                 <div class="row d-flex justify-content-center border-dashed-bottom pb-3">
                     <div class="col-9">
                         <p class="text-dark mb-0 fw-semibold fs-14">Factures total</p>
-                        <h3 class="mt-2 mb-0 fw-bold">@invoice</h3>
+                        <h3 class="mt-2 mb-0 fw-bold">@dashboardData.InvoiceCount</h3>
                     </div>
                     <div class="col-3 align-self-center">
                         <div class="d-flex justify-content-center align-items-center thumb-xl bg-light rounded-circle mx-auto">
@@ -63,7 +63,7 @@
                 <div class="row d-flex justify-content-center border-dashed-bottom pb-3">
                     <div class="col-9">
                         <p class="text-dark mb-0 fw-semibold fs-14">Véhicules total</p>
-                        <h3 class="mt-2 mb-0 fw-bold">@vehicle</h3>
+                        <h3 class="mt-2 mb-0 fw-bold">@dashboardData.VehicleCount</h3>
                     </div>
                     <div class="col-3 align-self-center">
                         <div class="d-flex justify-content-center align-items-center thumb-xl bg-light rounded-circle mx-auto">
@@ -99,7 +99,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var topVehicle in TopVehicleData)
+                            @foreach (var topVehicle in dashboardData.TopVehicles)
                             {
                                 <tr>
                                     <td>@topVehicle.VehicleMark</td>
@@ -134,7 +134,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var topClient in TopClientData)
+                            @foreach (var topClient in dashboardData.TopClients)
                             {
                                 <tr>
                                     <td><a class="text-primary">@topClient.LastName</a></td>
@@ -158,7 +158,10 @@
                     <div class="col">
                         <h4 class="card-title">
                             <p class="m-0 fs-12 fst-italic ps-2 text-muted">
-                                Dernières données mises à jour - il y a @DateTime.Now.Second Seconde<NavLink href="/" class="link-danger ms-1 "><i class="align-middle iconoir-refresh"></i></NavLink>
+                                Dernières données mises à jour - @dashboardData.LastUpdate.ToString("HH:mm:ss")
+                                <button class="btn btn-link link-danger ms-1 p-0" @onclick="RefreshData">
+                                    <i class="align-middle iconoir-refresh"></i>
+                                </button>
                             </p>
                         </h4>
                     </div>
@@ -168,7 +171,7 @@
     </div>
 </div>
 
-@code {
+@* @code {
     int client = 0;
     int vehicle = 0;
     int invoice = 0;
@@ -187,13 +190,15 @@
         {
             PageTitleService.CurrentTitle = "Dashboard";
         });
+
+        await UserConnection.LoadCredentialsAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await UserConnection.LoadCredentialsAsync();
+           // await UserConnection.LoadCredentialsAsync();
             await LoadDataHeader();
 
             
@@ -285,6 +290,159 @@
         public DateTime VehicleYear { get; set; }
         public int RepairCount { get; set; }
     }
+    public class TopClient
+    {
+        public string ClientId { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public int RepairCount { get; set; }
+    }
+} *@
+
+@code {
+    private DashboardData dashboardData = new();
+    private bool settingEmpty = true;
+    private const string CACHE_KEY = "dashboard_data";
+    private readonly TimeSpan CACHE_DURATION = TimeSpan.FromMinutes(5);
+
+    protected override async Task OnInitializedAsync()
+    {
+        PageTitleService.CurrentTitle = "Dashboard";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UserConnection.LoadCredentialsAsync();
+            await LoadDashboardData();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            // Vérifier le cache d'abord
+            if (_cache.TryGetValue(CACHE_KEY, out DashboardData cachedData))
+            {
+                dashboardData = cachedData;
+                return;
+            }
+
+            // Charger les données depuis la DB
+            await LoadDataFromDatabase();
+
+            // Mettre en cache
+           _cache.Set(CACHE_KEY, dashboardData, new MemoryCacheEntryOptions
+{
+    AbsoluteExpirationRelativeToNow = CACHE_DURATION,
+    Size = 1 // Obligatoire puisque SizeLimit est défini
+});
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Erreur lors du chargement des données du dashboard");
+        }
+    }
+
+    private async Task LoadDataFromDatabase()
+    {
+        using var context = await DbContextFactory.CreateDbContextAsync();
+
+        // Optimisation: Une seule requête pour les compteurs
+        var counts = await context.Database.SqlQueryRaw<CountResult>(@"
+            SELECT
+                (SELECT COUNT(*) FROM Clients) as ClientCount,
+                (SELECT COUNT(*) FROM Vehicles  ) as VehicleCount,
+                (SELECT COUNT(*) FROM Invoices) as InvoiceCount
+        ").FirstOrDefaultAsync();
+
+        if (counts != null)
+        {
+            dashboardData.ClientCount = counts.ClientCount;
+            dashboardData.VehicleCount = counts.VehicleCount;
+            dashboardData.InvoiceCount = counts.InvoiceCount;
+        }
+
+        settingEmpty = await context.CompanySettings.AnyAsync();
+
+        // Top véhicules avec requête optimisée
+        dashboardData.TopVehicles = await context.HistoryParts
+            .Where(h => h.Vehicle != null)
+            .GroupBy(h => new { h.Vehicle.Id, h.Vehicle.Mark, h.Vehicle.Model, h.Vehicle.CirculationDate })
+            .Select(g => new TopVehicle
+            {
+                VehicleId = g.Key.Id.ToString(),
+                VehicleMark = g.Key.Mark,
+                VehicleModel = g.Key.Model,
+                VehicleYear = g.Key.CirculationDate,
+                RepairCount = g.Count()
+            })
+            .OrderByDescending(x => x.RepairCount)
+            .Take(10)
+            .AsNoTracking()
+            .ToListAsync();
+
+        // Top clients avec requête optimisée
+        dashboardData.TopClients = await context.HistoryParts
+            .Where(h => h.Vehicle != null || h.OtherVehicle != null)
+            .GroupBy(h => new
+            {
+                ClientId = h.Vehicle != null ? h.Vehicle.Client.Id : h.OtherVehicle.Client.Id,
+                LastName = h.Vehicle != null ? h.Vehicle.Client.Lname : h.OtherVehicle.Client.Lname,
+                FirstName = h.Vehicle != null ? h.Vehicle.Client.Fname : h.OtherVehicle.Client.Fname
+            })
+            .Select(g => new TopClient
+            {
+                ClientId = g.Key.ClientId.ToString(),
+                LastName = g.Key.LastName,
+                FirstName = g.Key.FirstName,
+                RepairCount = g.Count()
+            })
+            .OrderByDescending(x => x.RepairCount)
+            .Take(10)
+            .AsNoTracking()
+            .ToListAsync();
+
+        dashboardData.LastUpdate = DateTime.Now;
+    }
+
+    private async Task RefreshData()
+    {
+        _cache.Remove(CACHE_KEY);
+        await LoadDashboardData();
+        StateHasChanged();
+    }
+
+    // Classes pour les données
+    public class DashboardData
+    {
+        public int ClientCount { get; set; }
+        public int VehicleCount { get; set; }
+        public int InvoiceCount { get; set; }
+        public List<TopVehicle> TopVehicles { get; set; } = new();
+        public List<TopClient> TopClients { get; set; } = new();
+        public DateTime LastUpdate { get; set; }
+    }
+
+    public class CountResult
+    {
+        public int ClientCount { get; set; }
+        public int VehicleCount { get; set; }
+        public int InvoiceCount { get; set; }
+    }
+
+    public class TopVehicle
+    {
+        public string VehicleId { get; set; }
+        public string VehicleMark { get; set; }
+        public string VehicleModel { get; set; }
+        public DateTime VehicleYear { get; set; }
+        public int RepairCount { get; set; }
+    }
+
     public class TopClient
     {
         public string ClientId { get; set; }

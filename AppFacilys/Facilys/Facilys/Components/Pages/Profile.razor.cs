@@ -13,9 +13,8 @@ namespace Facilys.Components.Pages
         public string UserId { get; set; }
         public int CountQuotes = 0, CountInvoices = 0;
         public string PasswordA = string.Empty, PasswordB = string.Empty;
-
+        private ApplicationDbContext DbContext;
         Users User = new();
-        ApplicationDbContext DbContext;
         readonly ModalManagerId modalManager = new();
         EditContext editContext;
 

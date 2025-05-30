@@ -1,0 +1,123 @@
+﻿@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+@* Ce composant surveille la session utilisateur en arrière-plan *@
+
+@code {
+    private Timer? _sessionTimer;
+    private Timer? _activityTimer;
+    private bool _disposed = false;
+    private DateTime _lastCheck = DateTime.UtcNow;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Démarrer le timer pour vérifier la session toutes les 2 minutes
+        _sessionTimer = new Timer(CheckSessionExpiration, null, TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(2));
+
+        // Timer pour mettre à jour l'activité toutes les 30 minutes
+        _activityTimer = new Timer(UpdateActivity, null, TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
+
+        // Vérifier immédiatement si on est sur une page protégée
+        await CheckCurrentSession();
+    }
+
+    private async void CheckSessionExpiration(object? state)
+    {
+        if (_disposed) return;
+
+        try
+        {
+            // Éviter les vérifications trop fréquentes
+            if (DateTime.UtcNow.Subtract(_lastCheck).TotalMinutes < 1)
+                return;
+
+            _lastCheck = DateTime.UtcNow;
+            bool isAuthenticated = await AuthService.IsAuthenticatedSilentAsync();
+
+            if (!isAuthenticated)
+            {
+                // Session expirée, rediriger vers la page de login
+                await InvokeAsync(async () =>
+                {
+                    await AuthService.LogoutAsync();
+
+                    // Afficher une notification à l'utilisateur
+                    await ShowSessionExpiredMessage();
+
+                    NavigationManager.NavigateTo("/login", forceLoad: true);
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Erreur lors de la vérification de session : {ex.Message}");
+        }
+    }
+
+    private async void UpdateActivity(object? state)
+    {
+        if (_disposed) return;
+
+        try
+        {
+            // Mettre à jour l'activité utilisateur pour prolonger la session
+            await AuthService.UpdateLastActivityAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Erreur lors de la mise à jour de l'activité : {ex.Message}");
+        }
+    }
+
+    private async Task CheckCurrentSession()
+    {
+        try
+        {
+            string currentPath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+            // Liste des pages qui nécessitent une authentification
+            string[] protectedPages = { "dashboard", "profile", "settings", "admin" };
+
+            if (protectedPages.Any(page => currentPath.StartsWith(page, StringComparison.OrdinalIgnoreCase)))
+            {
+                bool isAuthenticated = await AuthService.IsAuthenticatedAsync();
+
+                if (!isAuthenticated)
+                {
+                    NavigationManager.NavigateTo("/login", forceLoad: true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Erreur lors de la vérification de la session courante : {ex.Message}");
+        }
+    }
+
+    private async Task ShowSessionExpiredMessage()
+    {
+        try
+        {
+            // Utiliser une notification plus moderne si disponible
+            await JSRuntime.InvokeVoidAsync("console.log", "Session expirée - redirection vers la page de connexion");
+            // Optionnel : remplacer par une notification toast si votre framework l'a
+            // await JSRuntime.InvokeVoidAsync("alert", "Votre session a expiré. Vous allez être redirigé vers la page de connexion.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Erreur lors de l'affichage du message : {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _sessionTimer?.Dispose();
+            _activityTimer?.Dispose();
+            _disposed = true;
+        }
+    }
+}

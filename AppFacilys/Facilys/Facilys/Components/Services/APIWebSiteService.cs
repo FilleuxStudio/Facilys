@@ -1,5 +1,5 @@
-﻿using Facilys.Components.Constants;
-using Facilys.Components.Models;
+﻿using Facilys.Components.Models;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Text;
 using System.Text.Json;
 
@@ -8,11 +8,13 @@ namespace Facilys.Components.Services
     public class APIWebSiteService
     {
         private readonly HttpClient _httpClient;
-
-        public APIWebSiteService(HttpClient httpClient)
+        private readonly EnvironmentApp _envApp;
+        public APIWebSiteService(HttpClient httpClient, EnvironmentApp envApp)
         {
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri("https://facilys.flixmail.fr");
+            _httpClient.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
+            _envApp = envApp;
         }
 
         public async Task<string> GetKeyAccessApp()
@@ -33,14 +35,17 @@ namespace Facilys.Components.Services
     {
         { new StringContent(email), "email" },
         { new StringContent(password), "password" },
-        {new StringContent(EnvironmentApp.AccessToken), "_csrf" }
+        {new StringContent(_envApp.AccessToken), "_csrf" }
     };
 
-            // Ajout du header CSRF
-            _httpClient.DefaultRequestHeaders.Add("x-csrf-token", EnvironmentApp.AccessToken);
-            _httpClient.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/login")
+            {
+                Content = formContent
+            };
 
-            var response = await _httpClient.PostAsync("api/login", formContent);
+            request.Headers.Add("x-csrf-token", _envApp.AccessToken);
+
+            var response = await _httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
                 return (false, false, null);
@@ -108,14 +113,17 @@ namespace Facilys.Components.Services
             var formContent = new MultipartFormDataContent
             {
                 { new StringContent(email), "email" },
-                {new StringContent(EnvironmentApp.AccessToken), "_csrf" }
+                {new StringContent(_envApp.AccessToken), "_csrf" }
             };
 
-            // Ajout du header CSRF
-            _httpClient.DefaultRequestHeaders.Add("x-csrf-token", EnvironmentApp.AccessToken);
-            _httpClient.DefaultRequestHeaders.Add("Origin", "https://facilys.flixmail.fr");
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/company")
+            {
+                Content = formContent
+            };
 
-            var response = await _httpClient.PostAsync("api/company", formContent);
+            request.Headers.Add("x-csrf-token", _envApp.AccessToken);
+
+            var response = await _httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
                 return (false, null);
@@ -165,7 +173,7 @@ namespace Facilys.Components.Services
             // Création du payload avec les nouvelles données
             var updateData = new
             {
-                _csrf = EnvironmentApp.AccessToken,
+                _csrf = _envApp.AccessToken,
                 email = updatedSettings.Email, // important !
                 companyName = updatedSettings.NameCompany,
                 logo = updatedSettings.Logo,
@@ -190,8 +198,7 @@ namespace Facilys.Components.Services
                 Content = jsonContent
             };
 
-            request.Headers.Add("x-csrf-token", EnvironmentApp.AccessToken);
-            request.Headers.Add("Origin", "https://facilys.flixmail.fr");
+            request.Headers.Add("x-csrf-token", _envApp.AccessToken);
 
             // Envoi sécurisé avec gestion d'erreurs améliorée
             try
@@ -250,7 +257,6 @@ namespace Facilys.Components.Services
             return null;
         }
 
-        // Ajoutez d'autres méthodes pour interagir avec votre API selon vos besoins
     }
 
     public class UserData

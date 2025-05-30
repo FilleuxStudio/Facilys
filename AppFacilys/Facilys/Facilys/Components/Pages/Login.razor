@@ -4,6 +4,7 @@
 @inject PageTitleService PageTitleService
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
+@inject EnvironmentApp EnvApp
 @inject AuthService AuthService
 @attribute [StreamRendering]
 
@@ -107,7 +108,7 @@
             if (user != null)
             {
                 // Redirigez l'utilisateur vers une page protégée ou tableau de bord
-                EnvironmentApp.EmailUserConnect = user.Email;
+                EnvApp.EmailUserConnect = user.Email;
                 NavigationManager.NavigateTo("/dashboard", forceLoad: true);
                 //NavigationManager.NavigateTo("/dashboard");
             }

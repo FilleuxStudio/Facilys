@@ -1,6 +1,5 @@
 ﻿using ElectronNET.API;
 using ElectronNET.API.Entities;
-using Facilys.Components.Constants;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
@@ -13,11 +12,13 @@ namespace Facilys.Components.Services
     {
         private readonly VehicleRegistrationExtractor _extractor;
         private readonly OcrPerformanceMonitor _performanceMonitor;
+        private readonly EnvironmentApp _envApp;
 
-        public VehicleRegistrationDocumentAnalyzer()
+        public VehicleRegistrationDocumentAnalyzer(EnvironmentApp envApp)
         {
             _extractor = new VehicleRegistrationExtractor();
             _performanceMonitor = new OcrPerformanceMonitor();
+            _envApp = envApp;
         }
 
         public async Task<VehicleRegisterData> AnalyzeDocument(MemoryStream imageStream)
@@ -44,7 +45,7 @@ namespace Facilys.Components.Services
             }
         }
 
-        private static async Task<string> PerformOcrAsync(MemoryStream imageStream)
+        private async Task<string> PerformOcrAsync(MemoryStream imageStream)
         {
             var tessdataPath = await EnsureTessdataFiles();
 
@@ -75,11 +76,11 @@ namespace Facilys.Components.Services
                       .Trim();
         }
 
-        private static async Task<string> EnsureTessdataFiles()
+        private  async Task<string> EnsureTessdataFiles()
         {
             string pathDoc = await Electron.App.GetPathAsync(PathName.Documents);
             //string pathDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-            var destDir = Path.Combine(pathDoc, EnvironmentApp.FolderData, "tessdata");
+            var destDir = Path.Combine(pathDoc, _envApp.FolderData, "tessdata");
 
             if (!Directory.Exists(destDir) || Directory.GetFiles(destDir).Length == 0)
             {

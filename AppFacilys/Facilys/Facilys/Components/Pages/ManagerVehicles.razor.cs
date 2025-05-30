@@ -4,6 +4,7 @@ using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
@@ -19,7 +20,8 @@ namespace Facilys.Components.Pages
         ApplicationDbContext DbContext;
         VINInfo VinInfo = new();
         Guid selectClient = Guid.Empty;
-        readonly VehicleRegistrationDocumentAnalyzer documentAnalyzer = new();
+        [Inject] private EnvironmentApp EnvApp { get; set; }
+        VehicleRegistrationDocumentAnalyzer documentAnalyzer;
         bool ViewRawOCRData = false;
 
         protected override async Task OnInitializedAsync()
@@ -44,6 +46,8 @@ namespace Facilys.Components.Pages
             modalManager.RegisterModal("OpenModalLargeEditOtherVehicle");
             modalManager.RegisterModal("OpenModalLargeDeleteOtherVehicle");
             modalManager.RegisterModal("OpenModalDataOCR");
+
+            documentAnalyzer = new(EnvApp);
         }
 
 

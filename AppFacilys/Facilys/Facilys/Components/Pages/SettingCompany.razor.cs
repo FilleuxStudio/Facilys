@@ -1,7 +1,7 @@
-﻿using Facilys.Components.Constants;
-using Facilys.Components.Data;
+﻿using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
+using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +17,9 @@ namespace Facilys.Components.Pages
         readonly ModalManagerId modalManager = new();
         private string? PreviewImageBase64 { get; set; }
         private int? UserCount { get; set; }
+
+        [Inject] private EnvironmentApp EnvApp { get; set; }
+
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -45,7 +48,7 @@ namespace Facilys.Components.Pages
                 }
                 else
                 {
-                    EnvironmentApp.AccessToken = await APIWebSite.GetKeyAccessApp();
+                    EnvApp.AccessToken = await APIWebSite.GetKeyAccessApp();
                     (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
                     if (Success)
                     {

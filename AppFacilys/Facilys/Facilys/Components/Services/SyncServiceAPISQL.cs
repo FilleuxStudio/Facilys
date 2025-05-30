@@ -1,5 +1,4 @@
-﻿using Facilys.Components.Constants;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace Facilys.Components.Services
@@ -7,10 +6,12 @@ namespace Facilys.Components.Services
     public class SyncServiceAPISQL
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly EnvironmentApp _envApp;
 
-        public SyncServiceAPISQL(IHttpClientFactory httpClientFactory)
+        public SyncServiceAPISQL(IHttpClientFactory httpClientFactory, EnvironmentApp envApp)
         {
             _httpClientFactory = httpClientFactory;
+            _envApp = envApp;
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace Facilys.Components.Services
                 // Ajout du token CSRF en champ de formulaire
                 formContent.Add(new StringContent(token), "_csrf");
 
-                var userEmail = EnvironmentApp.EmailUserConnect;
+                var userEmail = _envApp.EmailUserConnect;
                 formContent.Add(new StringContent(userEmail), "usermail");
 
 

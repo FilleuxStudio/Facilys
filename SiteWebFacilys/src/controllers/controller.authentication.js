@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
     console.log(match);
     if (!match) {
       if (pathLink.link == undefined) {
-       return res.redirect("/login");
+       return res.redirect("/login?message=Email ou mot de passe incorrect.");
       } else {
        return res.redirect(
           "/shop-checkout?id=" +
@@ -137,9 +137,9 @@ exports.register = async (req, res) => {
       firstName,
       lastName,
       email,
-      siret: "null",
-      addressclient: "null",
-      phone: "null",
+      siret: "--",
+      addressclient: "--",
+      phone: "--",
       password: hashedPassword, // Mot de passe haché
       manager: false, // Par défaut, false, peut être ajusté selon vos besoins
       mariadbUser: "null",

@@ -1,14 +1,15 @@
-﻿namespace Facilys.Components.Constants
+﻿namespace Facilys.Components.Services
 {
     public class EnvironmentApp
     {
-        public static readonly string FolderData = "Facilys";
-        public static string AccessToken = "";
-        public static Guid IdUserConnect = Guid.Empty;
-        public static string EmailUserConnect = "";
-        public static string UserDatabaseOnline = "";
-        public static string PassDatabaseOnline = "";
-        public static string DatabaseOnline = "";
-        public static string HostDatabaseOnline = "";
+        public string FolderData { get; } = "Facilys";
+
+        public string AccessToken { get; set; } = string.Empty;
+        public Guid IdUserConnect { get; set; } = Guid.Empty;
+        public string EmailUserConnect { get; set; } = string.Empty;
+        public string UserDatabaseOnline { get; set; } = string.Empty;
+        public string PassDatabaseOnline { get; set; } = string.Empty;
+        public string DatabaseOnline { get; set; } = string.Empty;
+        public string HostDatabaseOnline { get; set; } = string.Empty;
     }
 }
