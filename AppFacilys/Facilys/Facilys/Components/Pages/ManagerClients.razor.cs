@@ -322,56 +322,74 @@ namespace Facilys.Components.Pages
         }
         private async Task SubmitEditClient()
         {
-            var provider = DbContext.Database.ProviderName;
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
-                DbContext.Clients.Update(managerClientViewModel.Client);
-                await DbContext.SaveChangesAsync();
+                // Création de la stratégie d'exécution pour MariaDB
+                var executionStrategy = DbContext.Database.CreateExecutionStrategy();
 
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Phones WHERE IdClient = {0}", managerClientViewModel.Client.Id);
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Emails WHERE IdClient = {0}", managerClientViewModel.Client.Id);
-
-                if (managerClientViewModel.PhonesClients.Count != 0)
+                await executionStrategy.ExecuteAsync(async () =>
                 {
-                    foreach (var phone in managerClientViewModel.PhonesClients)
+                    using var transaction = await DbContext.Database.BeginTransactionAsync();
+
+                    // Mise à jour du client principal
+                    DbContext.Clients.Update(managerClientViewModel.Client);
+                    await DbContext.SaveChangesAsync();
+
+                    // Suppression des relations existantes
+                    await DbContext.Database.ExecuteSqlRawAsync(
+                        "DELETE FROM Phones WHERE IdClient = {0}",
+                        managerClientViewModel.Client.Id
+                    );
+
+                    await DbContext.Database.ExecuteSqlRawAsync(
+                        "DELETE FROM Emails WHERE IdClient = {0}",
+                        managerClientViewModel.Client.Id
+                    );
+
+                    // Ajout des nouveaux téléphones
+                    if (managerClientViewModel.PhonesClients?.Count > 0)
                     {
-                        phone.Client = managerClientViewModel.Client;
+                        foreach (var phone in managerClientViewModel.PhonesClients)
+                        {
+                            phone.Client.Id = managerClientViewModel.Client.Id;
+                        }
+                        await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
                     }
-                    await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
-                }
 
-                if (managerClientViewModel.EmailsClients.Count != 0)
-                {
-                    foreach (var email in managerClientViewModel.EmailsClients)
+                    // Ajout des nouveaux emails
+                    if (managerClientViewModel.EmailsClients?.Count > 0)
                     {
-                        email.Client = managerClientViewModel.Client;
+                        foreach (var email in managerClientViewModel.EmailsClients)
+                        {
+                            email.Client.Id = managerClientViewModel.Client.Id;
+                        }
+                        await DbContext.Emails.AddRangeAsync(managerClientViewModel.EmailsClients);
                     }
-                    await DbContext.Emails.AddRangeAsync(managerClientViewModel.EmailsClients);
-                }
 
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                    // Validation finale
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
-                if (HybridSupport.IsElectronActive)
-                {
-                    // Envoi vers l'API Node.js avec les DTOs
                     if (HybridSupport.IsElectronActive)
                     {
-                        var clientDto = managerClientViewModel.Client.ToDto();
-                        var phonesDto = managerClientViewModel.PhonesClients.Select(p => p.ToDto()).ToArray();
-                        var emailsDto = managerClientViewModel.EmailsClients.Select(e => e.ToDto()).ToArray();
+                        // Envoi vers l'API Node.js avec les DTOs
+                        if (HybridSupport.IsElectronActive)
+                        {
+                            var clientDto = managerClientViewModel.Client.ToDto();
+                            var phonesDto = managerClientViewModel.PhonesClients.Select(p => p.ToDto()).ToArray();
+                            var emailsDto = managerClientViewModel.EmailsClients.Select(e => e.ToDto()).ToArray();
 
-                        await SyncService.PushChangesAsync("api/query/updateclient", new[] { clientDto });
-                        await SyncService.PushChangesAsync("api/query/addphone", phonesDto);
-                        await SyncService.PushChangesAsync("api/query/addemail", emailsDto);
+                            await SyncService.PushChangesAsync("api/query/updateclient", new[] { clientDto });
+                            await SyncService.PushChangesAsync("api/query/addphone", phonesDto);
+                            await SyncService.PushChangesAsync("api/query/addemail", emailsDto);
+                        }
                     }
-                }
 
-                ResetForm();
-                CloseModal("OpenModalLargeEditClient");
-                await RefreshClientList();
-            }
+                    ResetForm();
+                    CloseModal("OpenModalLargeEditClient");
+                    await RefreshClientList();
+                });
+             }
             catch (Exception ex)
             {
                 Logger.LogError(message: ex.Message, "Erreur lors de la mise à jour de la base de données");

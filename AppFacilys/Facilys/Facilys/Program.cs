@@ -223,26 +223,26 @@ if (HybridSupport.IsElectronActive)
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
         // Mode Electron - ports fixes locaux
-        serverOptions.ListenLocalhost(5000, listenOptions =>
-        {
-            listenOptions.UseHttps(httpsOptions =>
-            {
-                httpsOptions.ServerCertificate = CreateSelfSignedCertificate();
-            });
-        });
+        //serverOptions.ListenLocalhost(5000, listenOptions =>
+        //{
+        //    listenOptions.UseHttps(httpsOptions =>
+        //    {
+        //        httpsOptions.ServerCertificate = CreateSelfSignedCertificate();
+        //    });
+        //});
 
-        serverOptions.ListenLocalhost(5001, listenOptions =>
-        {
-            listenOptions.UseHttps(httpsOptions =>
-            {
-                httpsOptions.ServerCertificate = CreateSelfSignedCertificate();
-            });
-        });
-        // serverOptions.ListenLocalhost(5100); // HTTP
         //serverOptions.ListenLocalhost(5001, listenOptions =>
         //{
-        //    listenOptions.UseHttps(); // HTTPS
+        //    listenOptions.UseHttps(httpsOptions =>
+        //    {
+        //        httpsOptions.ServerCertificate = CreateSelfSignedCertificate();
+        //    });
         //});
+        // serverOptions.ListenLocalhost(5100); // HTTP
+        serverOptions.ListenLocalhost(5001, listenOptions =>
+        {
+            listenOptions.UseHttps(); // HTTPS
+        });
     });
 
     ServicePointManager.ServerCertificateValidationCallback =

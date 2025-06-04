@@ -1,27 +1,33 @@
 ﻿using ElectronNET.API;
 using Facilys.Components.Data;
 using Facilys.Components.Models;
+using Facilys.Components.Models.Modal;
 using Facilys.Components.Models.ViewModels;
 using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+using MySqlX.XDevAPI;
 using System.Globalization;
 
 namespace Facilys.Components.Pages
 {
     public partial class EditionQuotation
     {
-        private string QuotationNumber = string.Empty;
+        private string QuotationNumber { get; set; } = string.Empty;
         private Guid IdUser = Guid.Empty;
         private string SelectedValueClient { get; set; } = string.Empty;
         private string SelectedValueVehicle { get; set; } = string.Empty;
         private string SearchClient { get; set; } = string.Empty;
+        private string currentPhone = string.Empty, currentEmail = string.Empty;
+        private int PreloadedLine = 15;
         private int Km { get; set; } = 0;
         private short actionType;
         private readonly ManagerQuotationViewModel managerQuotationViewModel = new();
-        private readonly InvoiceData invoiceData = new();
+        private readonly InvoiceData quotationData = new();
+        readonly ModalManagerId modalManager = new();
         ApplicationDbContext DbContext;
 
         protected override async Task OnInitializedAsync()
@@ -31,20 +37,17 @@ namespace Facilys.Components.Pages
                 PageTitleService.CurrentTitle = "Edition de devis";
             });
 
-            managerQuotationViewModel.ClientItems = [];
-            managerQuotationViewModel.VehicleItems = [];
-            managerQuotationViewModel.Quote = new();
+            Init();
             managerQuotationViewModel.CompanySettings = new();
 
-            invoiceData.LineRef = [.. Enumerable.Repeat("", 15)];
-            invoiceData.LineDesc = [.. Enumerable.Repeat("", 15)];
-            invoiceData.LineQt = [.. Enumerable.Repeat<float?>(0.0f, 15)];
-            invoiceData.LinePrice = [.. Enumerable.Repeat<float?>(0.0f, 15)];
-            invoiceData.LineDisc = [.. Enumerable.Repeat<float?>(0.0f, 15)];
-            invoiceData.LineMo = [.. Enumerable.Repeat<float?>(0.0f, 15)];
+            quotationData.Lines = Enumerable.Range(0, PreloadedLine)
+            .Select(_ => new QuotationLine { })
+            .ToList();
+
+            modalManager.RegisterModal("OpenModalLargeAddClient");
+            modalManager.RegisterModal("OpenModalLargeAddVehicle");
 
         }
-
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -55,12 +58,26 @@ namespace Facilys.Components.Pages
                 StateHasChanged(); // Demande un nouveau rendu du composant
             }
         }
+
+        private void Init()
+        {
+            managerQuotationViewModel.Client = new();
+            managerQuotationViewModel.Vehicle = new();
+            managerQuotationViewModel.ClientItems = [];
+            managerQuotationViewModel.VehicleItems = [];
+            managerQuotationViewModel.Quote = new();
+            managerQuotationViewModel.Vehicles = [];
+            managerQuotationViewModel.PhonesClients = [];
+            managerQuotationViewModel.EmailsClients = [];
+        }
+
         private async Task LoadDataHeader()
         {
             DbContext = await DbContextFactory.CreateDbContextAsync();
             managerQuotationViewModel.CompanySettings = await DbContext.CompanySettings.AsNoTracking().Take(1).FirstOrDefaultAsync() ?? new();
             managerQuotationViewModel.Clients = await DbContext.Clients.ToListAsync();
             managerQuotationViewModel.Quote = await DbContext.Quotes.AsNoTracking().Take(1).FirstOrDefaultAsync() ?? new();
+            managerQuotationViewModel.Edition = await DbContext.EditionSettings.FirstOrDefaultAsync() ?? new();
 
             foreach (var client in managerQuotationViewModel.Clients)
             {
@@ -76,6 +93,131 @@ namespace Facilys.Components.Pages
 
             var user = await AuthService.GetAuthenticatedAsync();
             IdUser = user.Id;
+        }
+
+        /// <summary>
+        /// Ouvre un modal sans données supplémentaires.
+        /// </summary>
+        /// <param name="id">L'identifiant du modal à ouvrir.</param>
+        private async void OpenModal(string id)
+        {
+            await JSRuntime.InvokeVoidAsync("modifyBodyForModal", true);
+            modalManager.OpenModal(id);
+            Init();
+            StateHasChanged();
+        }
+
+        /// <summary>
+        /// Fermeture du modal
+        /// </summary>
+        /// <param name="idModal"></param>
+        private async void CloseModal(string idModal)
+        {
+            await JSRuntime.InvokeVoidAsync("modifyBodyForModal", false);
+            modalManager.CloseModal(idModal);
+            ResetForm();
+            StateHasChanged();
+        }
+
+        private void HandleKeyUpPhone(KeyboardEventArgs e)
+        {
+            if (e.Key == "Enter" || e.Key == ";")
+            {
+                AddPhone();
+            }
+        }
+
+        private void HandleKeyDownPhone(KeyboardEventArgs e)
+        {
+            if (e.Key == "Delete")
+            {
+                RemoveSelectedPhones();
+            }
+        }
+
+        private void HandleKeyUpEmail(KeyboardEventArgs e)
+        {
+
+            if (e.Key == "Enter" || e.Key == ";")
+            {
+                AddEmail();
+            }
+        }
+
+        private void HandleKeyDownEmail(KeyboardEventArgs e)
+        {
+            if (e.Key == "Delete")
+            {
+                RemoveSelectedEmails();
+            }
+        }
+
+        private void AddPhone()
+        {
+            if (!string.IsNullOrWhiteSpace(currentPhone))
+            {
+                managerQuotationViewModel.PhonesClients.Add(new()
+                {
+                    Id = Guid.NewGuid(),
+                    Phone = currentPhone.Trim(),
+                });
+                currentPhone = "";
+            }
+        }
+
+        private void AddEmail()
+        {
+            if (!string.IsNullOrWhiteSpace(currentEmail))
+            {
+                managerQuotationViewModel.EmailsClients.Add(new()
+                {
+                    Id = Guid.NewGuid(),
+                    Email = currentEmail.Trim(),
+                });
+                currentEmail = "";
+            }
+        }
+
+
+        private void HandleEmailSelection(ChangeEventArgs e)
+        {
+            string[] selectedEmailAddress = (string[])e.Value;
+            managerQuotationViewModel.EmailsClient = managerQuotationViewModel.EmailsClients
+                .FirstOrDefault(ec => ec.Email == selectedEmailAddress[0]);
+        }
+
+        private void HandlePhoneSelection(ChangeEventArgs e)
+        {
+            string[] selectedPhone = (string[])e.Value;
+            managerQuotationViewModel.PhonesClient = managerQuotationViewModel.PhonesClients
+                .FirstOrDefault(ec => ec.Phone == selectedPhone[0]);
+        }
+
+        private void RemoveSelectedEmails()
+        {
+            if (managerQuotationViewModel.EmailsClient != null)
+            {
+                managerQuotationViewModel.EmailsClients.Remove(managerQuotationViewModel.EmailsClient);
+                managerQuotationViewModel.EmailsClient = null;
+            }
+
+            StateHasChanged();
+        }
+
+        private void RemoveSelectedPhones()
+        {
+            if (managerQuotationViewModel.PhonesClient != null)
+            {
+                managerQuotationViewModel.PhonesClients.Remove(managerQuotationViewModel.PhonesClient);
+                managerQuotationViewModel.PhonesClient = null;
+            }
+            StateHasChanged();
+        }
+
+        // Rechercher numéro facture
+        private void HandleQuotationNumber(ChangeEventArgs e)
+        {
+            QuotationNumber = e.Value?.ToString() ?? string.Empty;
         }
 
         // Rechercher un client
@@ -256,27 +398,26 @@ namespace Facilys.Components.Pages
         }
 
 
-        private void OnLinePriceChanged(object value, int index)
+        private void OnLinePriceChanged(object value, QuotationLine line)
         {
             if (value is string stringValue)
             {
                 if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
                 {
-                    invoiceData.LinePrice[index] = result;
-                    UpdateLineAmount(index);
+                    line.LinePrice = result;
+                    UpdateLineAmount(line);
                 }
             }
-
         }
 
-        private void OnLineDiscChanged(object value, int index)
+        private void OnLineDiscChanged(object value, QuotationLine line)
         {
             if (value is string stringValue)
             {
                 if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
                 {
-                    invoiceData.LineDisc[index] = result;
-                    UpdateLineAmount(index);
+                    line.LineDisc = result;
+                    UpdateLineAmount(line);
                 }
             }
         }
@@ -286,29 +427,28 @@ namespace Facilys.Components.Pages
         /// </summary>
         /// <param name="index">id ligne</param>
         /// <returns>calcul</returns>
-        private void UpdateLineAmount(int index)
+        private void UpdateLineAmount(QuotationLine line)
         {
-            // Assurez-vous que LineQt[index] existe et n'est pas nul
-            if (invoiceData.LineQt.Count > index && invoiceData.LineQt[index] != null)
+            if (line.LineQt != null)
             {
-                float price = invoiceData.LinePrice[index] ?? 0.0f;
-                float discount = invoiceData.LineDisc[index] ?? 0.0f;
-                float quantity = invoiceData.LineQt[index].Value;
+                float price = line.LinePrice ?? 0.0f;
+                float discount = line.LineDisc ?? 0.0f;
+                float quantity = line.LineQt.Value;
 
-                // Calculez le montant HT
                 float amount = price * quantity * (1 - discount / 100);
-
-                // Mettez à jour LineMo
-                invoiceData.LineMo[index] = (float?)Math.Round(amount, 2); // Arrondi à 2 décimales
-
+                line.LineMo = (float?)Math.Round(amount, 2);
                 CalculateTotals();
             }
         }
 
+
         private void CalculateTotals()
         {
-
+            quotationData.HT = quotationData.Lines.Sum(line => line.LineMo ?? 0.0f);
+            quotationData.TVA = ((quotationData.HT * managerQuotationViewModel.Edition.TVA ?? 0.0f) / 100);
+            quotationData.TTC = quotationData.HT + quotationData.TVA;
         }
+
 
         private async Task CreateQuotationValidSubmit()
         {
@@ -323,30 +463,24 @@ namespace Facilys.Components.Pages
                 Client = client,
                 OtherVehicle = otherVehicle,
                 Vehicle = vehicle,
-                TotalAmount = invoiceData.TTC,
+                TotalAmount = quotationData.TTC,
                 Observations = managerQuotationViewModel.Quote.Observations,
                 Status = StatusQuote.waiting,
                 User = user,
             };
 
-            List<QuotesItems> quotesItems = [];
-
-            for (int i = 0; i < invoiceData.LineRef.Count; i++)
+            List<QuotesItems> quotesItems = quotationData.Lines
+            .Where(line => !string.IsNullOrWhiteSpace(line.LineRef))
+            .Select(line => new QuotesItems
             {
-                if (invoiceData.LineRef[i] != string.Empty || invoiceData.LineRef[i] != null)
-                {
-                    quotesItems.Add(new QuotesItems()
-                    {
-                        Id = Guid.NewGuid(),
-                        Quote = quote,
-                        PartNumber = invoiceData.LineRef[i],
-                        Description = invoiceData.LineDesc[i],
-                        Price = invoiceData.LinePrice[i] ?? 0.0f,
-                        Quantity = (int)(invoiceData.LineQt[i] ?? 0),
-                    });
-                }
-
-            }
+                Id = Guid.NewGuid(),
+                Quote = quote,
+                PartNumber = line.LineRef,
+                Description = line.LineDesc,
+                Price = line.LinePrice ?? 0.0f,
+                Quantity = (int)(line.LineQt ?? 0),
+            })
+            .ToList();
 
             managerQuotationViewModel.Quote = quote;
             managerQuotationViewModel.QuotesItems = quotesItems;
@@ -361,24 +495,151 @@ namespace Facilys.Components.Pages
             else if (actionType == 2)
             {
 
-                using var transaction = await DbContext.Database.BeginTransactionAsync();
                 try
                 {
+                    var executionStrategy = DbContext.Database.CreateExecutionStrategy();
 
-                    await DbContext.Quotes.AddAsync(quote);
-                    await DbContext.QuotesItems.AddRangeAsync(quotesItems);
+                    await executionStrategy.ExecuteAsync(async () =>
+                    {
+                        using var transaction = await DbContext.Database.BeginTransactionAsync();
 
-                    await DbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                        await DbContext.Quotes.AddAsync(quote);
+                        await DbContext.QuotesItems.AddRangeAsync(quotesItems);
+
+                        await DbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                    });
 
                 }
                 catch (Exception ex)
                 {
                     Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
                 }
+
+                PhonesClients phonesClients = await DbContext.Phones.Where(c => c.Client.Id == Guid.Parse(SelectedValueClient)).FirstOrDefaultAsync();
+                EmailsClients emailsClients = await DbContext.Emails.Where(m => m.Client.Id == Guid.Parse(SelectedValueClient)).FirstOrDefaultAsync();
+
+                string fileName = QuotationNumber + "-" + managerQuotationViewModel.Client.Fname + "-" + managerQuotationViewModel.Client.Lname + "-" + DateTime.Now.Date.ToString("dd-MM-yy") + ".pdf";
+                byte[] pdfBytesInvoice = null, pdfBytesOrder = null;
+                PdfQuotationType1Service pdfQuotationType = new();
+                var pdfQuotation = pdfQuotationType.GenerateQuotationPdf(managerQuotationViewModel, quote, Km, phonesClients, emailsClients);
+                await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
+                await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
+
+                if (HybridSupport.IsElectronActive)
+                {
+                    await SaveDocuments.SaveDocumentsPDF(managerQuotationViewModel.Edition.PathSaveFile + "Devis", "Devis-" + fileName, pdfBytesInvoice);
+                }
             }
 
+            ResetForm();
             StateHasChanged();
+        }
+
+        private async Task SubmitAddClient()
+        {
+            if (managerQuotationViewModel.Client.Fname != "" && managerQuotationViewModel.Client.Lname != "" && managerQuotationViewModel.Client.Address != "")
+            {
+                try
+                {
+                    managerQuotationViewModel.Client.Id = Guid.NewGuid();
+                    managerQuotationViewModel.Client.DateCreated = DateTime.Now;
+                    await DbContext.Clients.AddAsync(managerQuotationViewModel.Client);
+                    await DbContext.SaveChangesAsync();
+
+                    if (managerQuotationViewModel.PhonesClients.Count != 0)
+                    {
+                        for (int i = 0; i < managerQuotationViewModel.PhonesClients.Count; i++)
+                        {
+                            managerQuotationViewModel.PhonesClients[i].Client = managerQuotationViewModel.Client;
+                        }
+
+                        await DbContext.Phones.AddRangeAsync(managerQuotationViewModel.PhonesClients);
+                    }
+
+                    if (managerQuotationViewModel.EmailsClients.Count != 0)
+                    {
+                        for (int i = 0; i < managerQuotationViewModel.EmailsClients.Count; i++)
+                        {
+                            managerQuotationViewModel.EmailsClients[i].Client = managerQuotationViewModel.Client;
+                        }
+                        await DbContext.Emails.AddRangeAsync(managerQuotationViewModel.EmailsClients);
+                    }
+
+                    await DbContext.SaveChangesAsync();
+
+                    if (HybridSupport.IsElectronActive)
+                    {
+                        // Envoi vers l'API Node.js avec les DTOs
+                        if (HybridSupport.IsElectronActive)
+                        {
+                            var clientDto = managerQuotationViewModel.Client.ToDto();
+                            var phonesDto = managerQuotationViewModel.PhonesClients.Select(p => p.ToDto()).ToArray();
+                            var emailsDto = managerQuotationViewModel.EmailsClients.Select(e => e.ToDto()).ToArray();
+
+                            await SyncService.PushChangesAsync("api/query/addclient", new[] { clientDto });
+                            await SyncService.PushChangesAsync("api/query/addphone", phonesDto);
+                            await SyncService.PushChangesAsync("api/query/addemail", emailsDto);
+                        }
+                    }
+
+                    managerQuotationViewModel.ClientItems.Clear();
+                    managerQuotationViewModel.ClientItems.Add(new SelectListItem(managerQuotationViewModel.Client.Lname + " " + managerQuotationViewModel.Client.Fname, managerQuotationViewModel.Client.Id.ToString()));
+                    SelectedValueClient = managerQuotationViewModel.Client.Id.ToString();
+                    CloseModal("OpenModalLargeAddClient");
+
+                    await RefreshClientList();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
+                }
+            }
+        }
+
+        private async Task SubmitAddVehicle()
+        {
+            try
+            {
+                managerQuotationViewModel.Vehicle.Id = Guid.NewGuid();
+                managerQuotationViewModel.Vehicle.DateAdded = DateTime.Now;
+                managerQuotationViewModel.Vehicle.Client = await DbContext.Clients.FindAsync(Guid.Parse(SelectedValueClient));
+                await DbContext.Vehicles.AddAsync(managerQuotationViewModel.Vehicle);
+                await DbContext.SaveChangesAsync();
+
+
+                managerQuotationViewModel.VehicleItems.Clear();
+                managerQuotationViewModel.VehicleItems.Add(new SelectListItem(managerQuotationViewModel.Vehicle.Immatriculation + " " + managerQuotationViewModel.Vehicle.Mark + " " + managerQuotationViewModel.Vehicle.Model, managerQuotationViewModel.Vehicle.Id.ToString()));
+                SelectedValueVehicle = managerQuotationViewModel.Vehicle.Id.ToString();
+                CloseModal("OpenModalLargeAddVehicle");
+
+                await RefreshClientList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, "Erreur lors de l'ajout dans la base de données");
+            }
+        }
+
+        private void ResetForm()
+        {
+            managerQuotationViewModel.Client = new(); // Réinitialisez avec un nouvel objet Client
+            managerQuotationViewModel.PhonesClients.Clear();
+            managerQuotationViewModel.PhonesClients = [];
+            managerQuotationViewModel.EmailsClients.Clear();
+            managerQuotationViewModel.EmailsClients = [];
+            currentPhone = string.Empty;
+            currentEmail = string.Empty;
+        }
+
+        private async Task RefreshClientList()
+        {
+            // Récupérer la liste mise à jour des clients depuis votre service
+            await LoadDataHeader();
+            await InvokeAsync(StateHasChanged);
+            // await InvokeAsync(StateHasChanged);
+            // StateHasChanged();
         }
 
         public void Dispose()

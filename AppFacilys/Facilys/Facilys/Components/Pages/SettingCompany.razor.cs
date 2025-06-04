@@ -31,33 +31,79 @@ namespace Facilys.Components.Pages
             }
         }
 
+        //private async Task LoadDataHeader()
+        //{
+        //    DbContext = await DbContextFactory.CreateDbContextAsync();
+
+        //    CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
+        //    UserCount = await DbContext.Users.CountAsync();
+
+        //    if (CompanySettings == null || CompanySettings.Siret == "null")
+        //    {
+        //        var (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
+        //        if (Success)
+        //        {
+        //            CompanySettings = companySettings;
+        //            await SubmitUpdateOrAddCompany();
+        //        }
+        //        else
+        //        {
+        //            EnvApp.AccessToken = await APIWebSite.GetKeyAccessApp();
+        //            (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
+        //            if (Success)
+        //            {
+        //                CompanySettings = companySettings;
+        //            }
+        //        }
+        //    }
+        //}
+
         private async Task LoadDataHeader()
         {
             DbContext = await DbContextFactory.CreateDbContextAsync();
 
+            // Récupérer les données locales
             CompanySettings = await DbContext.CompanySettings.FirstOrDefaultAsync();
             UserCount = await DbContext.Users.CountAsync();
 
-            if (CompanySettings == null || CompanySettings.Siret == "null")
+            // Vérifier si les données locales sont valides
+            bool shouldFetchFromApi = CompanySettings == null ||
+                                     string.IsNullOrEmpty(CompanySettings.Siret) ||
+                                     CompanySettings.Siret == "null";
+
+            if (shouldFetchFromApi)
             {
-                var (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
-                if (Success)
+                bool success;
+                CompanySettings apiSettings;
+
+                // Premier essai de récupération
+                (success, apiSettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
+
+                if (!success)
                 {
-                    CompanySettings = companySettings;
-                    await SubmitUpdateOrAddCompany();
-                }
-                else
-                {
+                    // Rafraîchir le token si échec
                     EnvApp.AccessToken = await APIWebSite.GetKeyAccessApp();
-                    (Success, companySettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
-                    if (Success)
+                    (success, apiSettings) = await APIWebSite.PostGetCompanyUserAsync(Email);
+                }
+
+                if (success)
+                {
+                    // Sauvegarder l'ID local existant
+                    Guid? localId = CompanySettings?.Id;
+
+                    // Mettre à jour avec les données de l'API
+                    CompanySettings = apiSettings;
+
+                    // Conserver l'ID local s'il existait
+                    if (localId.HasValue)
                     {
-                        CompanySettings = companySettings;
+                        CompanySettings.Id = localId.Value;
                     }
+
+                    await SubmitUpdateOrAddCompany();
                 }
             }
         }
-
         private async Task OnInputFileChange(InputFileChangeEventArgs e)
         {
             var file = e.File;
@@ -77,23 +123,29 @@ namespace Facilys.Components.Pages
         {
             try
             {
-
+                // Mise à jour via l'API
                 await APIWebSite.PutUpdateCompanyAsync(CompanySettings);
 
-                var existingCompany = await DbContext.CompanySettings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
+                // Vérifier l'existence par ID
+                var existingCompany = await DbContext.CompanySettings
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == CompanySettings.Id);
+
+
                 if (existingCompany == null)
                 {
-                    await DbContext.AddAsync(CompanySettings);
+                    DbContext.CompanySettings.Add(CompanySettings);
                 }
                 else
                 {
-                    DbContext.Update(CompanySettings);
+                    DbContext.CompanySettings.Update(CompanySettings);
                 }
+
                 await DbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                Logger.LogError(ex, "Erreur lors de la mise à jour de la base de données");
             }
         }
 

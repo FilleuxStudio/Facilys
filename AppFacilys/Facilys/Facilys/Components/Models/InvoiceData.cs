@@ -2,6 +2,7 @@
 {
     public class InvoiceData()
     {
+        public List<QuotationLine> Lines { get; set; } = new List<QuotationLine>();
         public List<string> LineRef { get; set; } = [];
         public List<string> LineDesc { get; set; } = [];
         public List<float?> LineQt { get; set; } = [];
@@ -15,5 +16,16 @@
         public float HT { get; set; } = 0.0f;
         public float TVA { get; set; } = 0.0f;
         public float TTC { get; set; } = 0.0f;
+    }
+
+    public class QuotationLine
+    {
+        public Guid Id { get; } = Guid.NewGuid(); // Identifiant unique stable
+        public string LineRef { get; set; } = "";
+        public string LineDesc { get; set; } = "";
+        public float? LineQt { get; set; } = 0.0f;
+        public float? LinePrice { get; set; } = 0.0f;
+        public float? LineDisc { get; set; } = 0.0f;
+        public float? LineMo { get; set; } = 0.0f;
     }
 }

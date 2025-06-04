@@ -6,6 +6,7 @@
 @inject ILogger<EditionInvoice> Logger
 @inject UserConnectionService UserConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject SyncServiceAPISQL SyncService
 @attribute [StreamRendering]
 
 <div class="row">
@@ -29,7 +30,10 @@
                                 <img src="@managerQuotationViewModel.CompanySettings.Logo" alt="logo company" class="logo-sm me-1" height="70">
                             </div><!--end col-->
                             <div class="col-8 text-end align-self-center">
-                                <h5 class="mb-1 fw-semibold text-black"><span class="text-muted">Devis N° :</span> @QuotationNumber</h5>
+                                <h5 class="mb-0 fw-semibold text-black">
+                                    <span class="text-muted me-2">Devis N° :</span>
+                                    <InputText id="quotationInput" @bind-Value="QuotationNumber" class="form-control mb-1 form-control-sm w-auto d-inline-block" @oninput="HandleQuotationNumber" />
+                                </h5>
                                 <h5 class="mb-0 fw-semibold text-black"><span class="text-muted">Date :</span> @DateTime.Now.Date.ToShortDateString()</h5>
                             </div><!--end col-->
                         </div>
@@ -52,13 +56,14 @@
                         <div class="row">
                             <div class="col">
                                 <InputText @bind-Value="SearchClient" placeholder="Rechercher..." class="form-control mb-1" @oninput="HandleSearchClient" />
-                                <select class="form-select" @onchange="HandleSelectionChangedClient">
+                                <select class="form-select  mb-1" @onchange="HandleSelectionChangedClient">
                                     <option>Selectionner un client</option>
                                     @foreach (var item in managerQuotationViewModel.ClientItems)
                                     {
                                         <option value="@item.Value">@item.Text</option>
                                     }
                                 </select>
+                                <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddClient"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i>Ajotuer un client</button>
                             </div><!-- end col -->
                         </div><!-- end row -->
                     </div><!--end card-body-->
@@ -75,20 +80,22 @@
                     </div><!--end card-header-->
                     <div class="card-body pt-0">
                         <div class="col">
-                            <InputSelect @bind-Value="SelectedValueVehicle" class="form-select">
+                            <InputSelect @bind-Value="SelectedValueVehicle" class="form-select mb-1">
                                 <option>Selectionner un véhicule</option>
                                 @foreach (var item in managerQuotationViewModel.VehicleItems)
                                 {
                                     <option value="@item.Value">@item.Text</option>
                                 }
                             </InputSelect>
+                            <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddOtherVehicle"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajouter un type d'engin non immatriculé</button>
+                            <button type="button" @onclick="@(() => OpenModal("OpenModalLargeAddVehicle"))" class="btn bg-primary-subtle text-primary"><i class="fas fa-plus me-1"></i> Ajotuer un véhicule</button>
                             <InputNumber @bind-Value="Km" placeholder="kilometrage voiture..." class="form-control mt-1" />
                         </div><!-- end col -->
                     </div><!--end card-body-->
                 </div><!--end card-->
             </div> <!--end col-->
         </div><!--end row-->
-        <EditForm Model="@invoiceData" OnSubmit="@CreateQuotationValidSubmit">
+        <EditForm Model="@quotationData" OnSubmit="@CreateQuotationValidSubmit" FormName="AddQuitation">
             <div class="row justify-content-center">
                 <div class="col-12">
                     <div class="card">
@@ -107,31 +114,34 @@
                                     </thead>
 
                                     <tbody>
-                                            @for (int i = 0; i < 15; i++)
-                                            {
-                                                // Création d'une variable locale pour la fermeture
-                                                <tr @key="i">
-                                                    <td>
-                                                        <InputText @bind-Value="invoiceData.LineRef[i]" class="form-control" id="@($"invoiceData-LineRef-{i}")" />
-                                                    </td>
-                                                    <td>
-                                                        <InputText @bind-Value="invoiceData.LineDesc[i]" class="form-control" id="@($"invoiceData-LineDesc-{i}")" />
-                                                    </td>
-                                                    <td>
-                                                        <InputNumber @bind-Value="invoiceData.LineQt[i]" class="form-control" id="@($"invoiceData-LineQt-{i}")" />
-                                                    </td>
-                                                    <td>
-                                                        <InputNumber @bind-Value="invoiceData.LinePrice[i]" @oninput="(e) => OnLinePriceChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LinePrice-{i}")" />
-                                                    </td>
-                                                    <td>
-                                                        <InputNumber @bind-Value="invoiceData.LineDisc[i]" @oninput="(e) => OnLineDiscChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LineDisc-{i}")" />
-                                                    </td>
-                                                    <td>
-                                                        <InputNumber @bind-Value="invoiceData.LineMo[i]" class="form-control no-spinner" id="@($"invoiceData-LineMo-{i}")" readonly />
-                                                    </td>
-                                                </tr>
-                                            }
-                                        
+                                        @foreach (var line in quotationData.Lines)
+                                        {
+                                            <tr @key="line.Id">
+                                                <td>
+                                                    <InputText @bind-Value="line.LineRef" class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <InputText @bind-Value="line.LineDesc" class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <InputNumber @bind-Value="line.LineQt" class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <InputNumber @bind-Value="line.LinePrice"
+                                                                 @oninput="(e) => OnLinePriceChanged(e.Value, line)"
+                                                                 class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <InputNumber @bind-Value="line.LineDisc"
+                                                                 @oninput="(e) => OnLineDiscChanged(e.Value, line)"
+                                                                 class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <InputNumber @bind-Value="line.LineMo"
+                                                                 class="form-control no-spinner" readonly />
+                                                </td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table><!--end /table-->
                                 <div class="row mt-1 justify-content-end">
@@ -139,19 +149,19 @@
                                         <div class="mb-2 row">
                                             <label for="HT" class="col-sm-2 col-form-label text-end">HT</label>
                                             <div class="col-sm-10">
-                                                <InputNumber @bind-Value="invoiceData.HT" id="HT" class="form-control no-spinner" readonly />
+                                                <InputNumber @bind-Value="quotationData.HT" id="HT" class="form-control no-spinner" readonly />
                                             </div>
                                         </div>
                                         <div class="mb-2 row">
                                             <label for="TVA" class="col-sm-2 col-form-label text-end">TVA</label>
                                             <div class="col-sm-10">
-                                                <InputNumber @bind-Value="invoiceData.TVA" id="TVA" class="form-control no-spinner" readonly />
+                                                <InputNumber @bind-Value="quotationData.TVA" id="TVA" class="form-control no-spinner" readonly />
                                             </div>
                                         </div>
                                         <div class="row">
                                             <label for="TTC" class="col-sm-2 col-form-label text-end"><strong>TTC</strong></label>
                                             <div class="col-sm-10">
-                                                <InputNumber @bind-Value="invoiceData.TTC" id="TTC" class="form-control no-spinner" readonly />
+                                                <InputNumber @bind-Value="quotationData.TTC" id="TTC" class="form-control no-spinner" readonly />
                                             </div>
                                         </div>
                                     </div>
@@ -159,13 +169,13 @@
                                 <div class="row mt-2">
                                     <div class="col-6">
                                         <div class="form-check form-switch form-switch-info">
-                                            <InputCheckbox @bind-Value="invoiceData.PartReturnedCustomer" class="form-check-input" id="PartReturnedCustomer" />
+                                            <InputCheckbox @bind-Value="quotationData.PartReturnedCustomer" class="form-check-input" id="PartReturnedCustomer" />
                                             <label class="form-check-label" for="PartReturnedCustomer">Pièces remplacées à remettre au client</label>
                                         </div>
                                     </div><!-- end col -->
                                     <div class="col-6">
                                         <div class="form-check form-switch form-switch-info">
-                                            <InputCheckbox @bind-Value="invoiceData.CustomerSuppliedPart" class="form-check-input" id="CustomerSuppliedPart" />
+                                            <InputCheckbox @bind-Value="quotationData.CustomerSuppliedPart" class="form-check-input" id="CustomerSuppliedPart" />
                                             <label class="form-check-label" for="CustomerSuppliedPart">Pièces fournies par le client </label>
                                         </div>
                                     </div><!-- end col -->
@@ -176,7 +186,7 @@
                                     </div><!-- end col -->
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-success" @onclick="() => actionType = 1">Sauvegarder le devis</button>
+                            <button type="submit" class="btn btn-info" @onclick="() => actionType = 1">Sauvegarder le devis</button>
                             <button type="submit" class="btn btn-primary" @onclick="() => actionType = 2">Générer le PDF</button>
                         </div>
                     </div>
@@ -187,3 +197,194 @@
 
     </div> <!-- end col -->
 </div> <!-- end row -->
+
+<div class="@modalManager.GetModal("OpenModalLargeAddClient")?.ModalClass" id="OpenModalLargeAddClient" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeAddClientLabel" style="@modalManager.GetModal("OpenModalLargeAddClient")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeAddClient")?.AriaHidden">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalLargeAddClientLabel">Ajouter un clients</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeAddClient"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerQuotationViewModel.Client" OnValidSubmit="SubmitAddClient" FormName="AddClientForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Lname" class="form-label">Nom / N° Siret <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Lname" @bind-Value="managerQuotationViewModel.Client.Lname" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Fname">Prénom / Nom d'entreprise <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Fanme" @bind-Value="managerQuotationViewModel.Client.Fname" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="Address" class="form-label">Adresse <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Address" @bind-Value="managerQuotationViewModel.Client.Address" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="city">Ville <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="useremail" @bind-Value="managerQuotationViewModel.Client.City" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="PostalCode">Code Postal <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="PostalCode" @bind-Value="managerQuotationViewModel.Client.PostalCode" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="Type">Type de client <span class="text-danger">*</span></label>
+                                <InputSelect class="form-select" id="Type" @bind-Value="managerQuotationViewModel.Client.Type">
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="@TypeClient.Client">Client</option>
+                                    <option value="@TypeClient.ClientProfessional">Client professionnel</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="Phone" class="form-label">Téléphone <span class="text-danger">*</span></label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="Phone" @bind-value="currentPhone" @onkeyup="HandleKeyUpPhone" aria-describedby="button-addon1" />
+                                <button class="btn btn-outline-success" type="button" @onclick="AddPhone" id="button-addon1">+</button>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phoneList" class="form-label">Liste des numéros</label>
+                                <select id="phoneList" class="form-select" size="3" multiple @onkeydown="HandleKeyDownPhone">
+                                    @foreach (var phone in managerQuotationViewModel.PhonesClients)
+                                    {
+                                        <option value="@phone.Phone">@phone.Phone</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="email">Email <span class="text-warning">*</span></label>
+                                <div class="input-group mb-3">
+                                    <input type="email" class="form-control" id="email" @bind-value="currentEmail" @onkeyup="HandleKeyUpEmail" aria-describedby="button-addon2" />
+                                    <button class="btn btn-outline-secondary" type="button" @onclick="AddEmail" id="button-addon2">+</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="emailList" class="form-label">Liste des emails</label>
+                                <select id="emailList" class="form-select" size="3" multiple @onkeydown="HandleKeyDownEmail">
+                                    @foreach (var email in managerQuotationViewModel.EmailsClients)
+                                    {
+                                        <option value="@email.Email">@email.Email</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="AdditionalInformation">Informations complémentaires</label>
+                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerQuotationViewModel.Client.AdditionalInformation"></InputTextArea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-primary px-4">Ajouter</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div><!--end modal-body-->
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->
+
+<div class="@modalManager.GetModal("OpenModalLargeAddVehicle")?.ModalClass" id="OpenModalLargeAddVehicle" tabindex="-1" role="dialog" aria-labelledby="OpenModalLargeAddVehicleLabel" style="@modalManager.GetModal("OpenModalLargeAddVehicle")?.ModalDisplay" aria-hidden="@modalManager.GetModal("OpenModalLargeAddVehicle")?.AriaHidden">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="OpenModalLargeAddVehicleLabel">Ajouter un véhicule au client</h6>
+                <button type="button" class="btn-close" @onclick="@(() => CloseModal("OpenModalLargeAddVehicle"))"></button>
+            </div><!--end modal-header-->
+            <div class="modal-body">
+                <EditForm class="" Model="@managerQuotationViewModel.Vehicle" OnValidSubmit="SubmitAddVehicle" FormName="AddVehicleForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Immatriculation" class="form-label">Immatriculation <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Immatriculation" @bind-Value="managerQuotationViewModel.Vehicle.Immatriculation" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="CirculationDate" class="form-label">Date 1er Immat <span class="text-danger">*</span></label>
+                                <InputDate class="form-control" id="CirculationDate" @bind-Value="managerQuotationViewModel.Vehicle.CirculationDate" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="Mark" class="form-label">Marque <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Mark" @bind-Value="managerQuotationViewModel.Vehicle.Mark" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="Model">Modèle <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Model" @bind-Value="managerQuotationViewModel.Vehicle.Model" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="Type">Type <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="Type" @bind-Value="managerQuotationViewModel.Vehicle.Type" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="VIN">VIN <span class="text-danger">*</span></label>
+                                <InputText class="form-control" id="VIN" @bind-Value="managerQuotationViewModel.Vehicle.VIN" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="KM">KM <span class="text-warning">*</span></label>
+                                <InputNumber class="form-control" id="VIN" @bind-Value="managerQuotationViewModel.Vehicle.KM" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="AdditionalInformation">Informations complémentaires</label>
+                                <InputTextArea class="form-control" rows="5" id="AdditionalInformation" @bind-Value="managerQuotationViewModel.Vehicle.AdditionalInformation"></InputTextArea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-primary px-4">Ajouter</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (modalManager.IsBackdropVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
