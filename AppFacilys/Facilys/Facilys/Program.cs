@@ -220,7 +220,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
     .AddEnvironmentVariables();
 
 
@@ -246,7 +246,7 @@ if (HybridSupport.IsElectronActive)
         //    });
         //});
         // serverOptions.ListenLocalhost(5100); // HTTP
-        serverOptions.ListenLocalhost(5001, listenOptions =>
+        serverOptions.ListenLocalhost(6080, listenOptions =>
         {
             listenOptions.UseHttps(); // HTTPS
         });
@@ -256,9 +256,6 @@ if (HybridSupport.IsElectronActive)
         (sender, certificate, chain, sslPolicyErrors) => true;
     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
-    // Configuration Electron
-    builder.WebHost.UseElectron(args);
-    builder.Services.AddElectron();
 }
 else
 {
@@ -294,6 +291,10 @@ else
         serverOptions.ListenAnyIP(int.Parse(port));
     });
 }
+
+// Configuration Electron
+builder.WebHost.UseElectron(args);
+builder.Services.AddElectron();
 
 // Configuration des services Blazor
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -573,7 +574,7 @@ async Task CreateOptimizedElectronWindow()
         // OPTIMISATION: Options de performance
         UseContentSize = true,
     });
-    mainWindow.LoadURL("https://localhost:5001");
+    mainWindow.LoadURL("https://localhost:6080");
 
     // OPTIMISATION: Gestionnaires d'événements optimisés
     mainWindow.OnReadyToShow += async () =>
