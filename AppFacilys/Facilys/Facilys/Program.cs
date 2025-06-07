@@ -216,11 +216,13 @@ using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Chargement de la configuration
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables();  // Permet override via variables Docker/K8S
+    .AddEnvironmentVariables();
+
 
 // SOLUTION CLOUD RUN: Configuration des ports dynamique
 if (HybridSupport.IsElectronActive)
@@ -253,37 +255,45 @@ if (HybridSupport.IsElectronActive)
     ServicePointManager.ServerCertificateValidationCallback =
         (sender, certificate, chain, sslPolicyErrors) => true;
     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+
+    // Configuration Electron
+    builder.WebHost.UseElectron(args);
+    builder.Services.AddElectron();
 }
 else
 {
     // MODE CLOUD RUN: Configuration dynamique des ports
+    //var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    //var urls = $"http://0.0.0.0:{port}";
+
+    //builder.WebHost.UseUrls(urls);
+
+    //// Configuration Kestrel pour Cloud Run
+    //builder.WebHost.ConfigureKestrel(serverOptions =>
+    //{
+    //    serverOptions.ListenAnyIP(int.Parse(port), listenOptions =>
+    //    {
+    //        // Pas de HTTPS en mode Cloud Run (géré par le load balancer)
+    //        listenOptions.UseConnectionLogging();
+    //    });
+
+    //    // Optimisations pour Cloud Run
+    //    serverOptions.Limits.MaxConcurrentConnections = 100;
+    //    serverOptions.Limits.MaxConcurrentUpgradedConnections = 100;
+    //    serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+    //    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+    //    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+    //});
+
     var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-    var urls = $"http://0.0.0.0:{port}";
 
-    builder.WebHost.UseUrls(urls);
+    builder.Configuration.GetSection("Kestrel").Value = null;
 
-    // Configuration Kestrel pour Cloud Run
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(int.Parse(port), listenOptions =>
-        {
-            // Pas de HTTPS en mode Cloud Run (géré par le load balancer)
-            listenOptions.UseConnectionLogging();
-        });
-
-        // Optimisations pour Cloud Run
-        serverOptions.Limits.MaxConcurrentConnections = 100;
-        serverOptions.Limits.MaxConcurrentUpgradedConnections = 100;
-        serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
-        serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
-        serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+        serverOptions.ListenAnyIP(int.Parse(port));
     });
 }
-
-
-// Configuration Electron
-builder.WebHost.UseElectron(args);
-builder.Services.AddElectron();
 
 // Configuration des services Blazor
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
