@@ -12,8 +12,10 @@ namespace Facilys.Components.Models
 
         [ForeignKey("IdVehicle")]
         public Vehicles? Vehicle { get; set; }
+        public Guid? IdVehicle { get; set; } = Guid.Empty;
         [ForeignKey("IdOtherVehicle")]
         public OtherVehicles? OtherVehicle { get; set; }
+        public Guid? IdOtherVehicle { get; set; } = Guid.Empty;
         [Required]
         public DateTime DateMake { get; set; } = DateTime.Now.AddYears(2);
         [Required]

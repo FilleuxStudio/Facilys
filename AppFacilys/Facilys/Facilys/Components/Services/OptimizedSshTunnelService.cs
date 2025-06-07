@@ -1,5 +1,4 @@
 ﻿using Renci.SshNet;
-using System.Collections.Concurrent;
 
 namespace Facilys.Components.Services
 {

@@ -9,6 +9,7 @@ namespace Facilys.Components.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
+        public Guid IdClient { get; set; }
         public string Phone { get; set; } = string.Empty;
 
         /// <summary>

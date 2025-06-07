@@ -1,7 +1,6 @@
 ﻿using ElectronNET.API;
 using Facilys.Components.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Facilys.Components.Data
 {

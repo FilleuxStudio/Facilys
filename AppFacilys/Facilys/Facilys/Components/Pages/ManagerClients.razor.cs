@@ -389,7 +389,7 @@ namespace Facilys.Components.Pages
                     CloseModal("OpenModalLargeEditClient");
                     await RefreshClientList();
                 });
-             }
+            }
             catch (Exception ex)
             {
                 Logger.LogError(message: ex.Message, "Erreur lors de la mise à jour de la base de données");

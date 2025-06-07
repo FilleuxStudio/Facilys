@@ -1,20 +1,46 @@
 START TRANSACTION;
 
+-- Suppression des tables existantes (optionnel, à utiliser avec précaution)
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS 
+    `AssociationSettingReferences`,
+    `HistoryParts`,
+    `QuotesItems`,
+    `MaintenanceAlerts`,
+    `Invoices`,
+    `Quotes`,
+    `Emails`,
+    `OtherVehicles`,
+    `Phones`,
+    `ProfessionalClient`,
+    `Vehicles`,
+    `InterestingReferences`,
+    `Inventorys`,
+    `ReferencesIgnored`,
+    `SyncMetaDatas`,
+    `Users`,
+    `VersionDatabases`,
+    `Clients`,
+    `CompanySettings`,
+    `EditionSettings`;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Création des tables principales
 CREATE TABLE IF NOT EXISTS `Clients` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `Lname` VARCHAR(255) NOT NULL,
     `Fname` VARCHAR(255) NOT NULL,
     `Address` TEXT NOT NULL,
     `City` VARCHAR(255) NOT NULL,
     `PostalCode` VARCHAR(20) NOT NULL,
-    `Type` INT NOT NULL,
+    `Type` TINYINT NOT NULL,
     `AdditionalInformation` TEXT NOT NULL,
     `DateCreated` DATETIME NOT NULL,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `CompanySettings` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `NameCompany` VARCHAR(255) NOT NULL,
     `Logo` LONGTEXT NOT NULL,
     `TVA` VARCHAR(50) NOT NULL,
@@ -35,31 +61,31 @@ CREATE TABLE IF NOT EXISTS `CompanySettings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `EditionSettings` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `StartNumberInvoice` VARCHAR(50) NOT NULL,
     `PathSaveFile` TEXT NOT NULL,
     `PathSaveInvociePrepare` TEXT NOT NULL,
     `Picture` TEXT,
-    `TypeDesign` INT NOT NULL,
+    `TypeDesign` TINYINT NOT NULL,
     `SentenceInformationBottom` TEXT,
     `SentenceInformationTop` TEXT,
     `SentenceBottom` TEXT,
     `RepairOrderSentenceTop` TEXT,
     `RepairOrderSentenceBottom` TEXT,
     `TVA` DECIMAL(5,2),
-    `PreloadedLine` INT NOT NULL,
+    `PreloadedLine` SMALLINT NOT NULL,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `InterestingReferences` (
-    `Id` VARCHAR(36) NOT NULL,
-    `Reference` VARCHAR(255) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `Reference` VARCHAR(255) NOT NULL UNIQUE,
     `Price` DECIMAL(10,2) NOT NULL,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `Inventorys` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `Reference` VARCHAR(255) NOT NULL,
     `PartName` VARCHAR(255) NOT NULL,
     `Mark` VARCHAR(255) NOT NULL,
@@ -69,17 +95,18 @@ CREATE TABLE IF NOT EXISTS `Inventorys` (
     `Price` DECIMAL(10,2),
     `Quantity` INT,
     `DateAdded` DATETIME NOT NULL,
-    PRIMARY KEY (`Id`)
+    PRIMARY KEY (`Id`),
+    INDEX `IDX_Reference` (`Reference`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `ReferencesIgnored` (
-    `Id` VARCHAR(36) NOT NULL,
-    `Reference` VARCHAR(255) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `Reference` VARCHAR(255) NOT NULL UNIQUE,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `SyncMetaDatas` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `TableName` VARCHAR(255) NOT NULL,
     `LastSyncTime` DATETIME NOT NULL,
     `SyncStatus` VARCHAR(100) NOT NULL,
@@ -87,75 +114,75 @@ CREATE TABLE IF NOT EXISTS `SyncMetaDatas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `Users` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `Lname` VARCHAR(255) NOT NULL,
     `Fname` VARCHAR(255) NOT NULL,
-    `Email` VARCHAR(255) NOT NULL,
-    `Login` VARCHAR(255) NOT NULL,
+    `Email` VARCHAR(255) NOT NULL UNIQUE,
+    `Login` VARCHAR(255) NOT NULL UNIQUE,
     `Picture` TEXT,
     `Password` VARCHAR(255) NOT NULL,
     `Team` VARCHAR(255) NOT NULL,
-    `Role` INT NOT NULL,
+    `Role` TINYINT NOT NULL,
     `DateAdded` DATETIME NOT NULL,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `VersionDatabases` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `Version` VARCHAR(50) NOT NULL,
     `DateVersion` DATETIME NOT NULL,
     `PathBackup` TEXT NOT NULL,
     PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tables avec clés étrangères
+-- Tables avec relations
 CREATE TABLE IF NOT EXISTS `Emails` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdClient` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `IdClient` CHAR(36) NOT NULL,
     `Email` VARCHAR(255) NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_Emails_IdClient` (`IdClient`),
-    CONSTRAINT `FK_Emails_Clients` FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
+    CONSTRAINT `FK_Emails_Clients` FOREIGN KEY (`IdClient`) 
+        REFERENCES `Clients`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `OtherVehicles` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdClient` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `IdClient` CHAR(36) NOT NULL,
     `SerialNumber` VARCHAR(255) NOT NULL,
     `Type` VARCHAR(100) NOT NULL,
     `Mark` VARCHAR(255) NOT NULL,
     `Model` VARCHAR(255) NOT NULL,
-    `StatusDataView` INT NOT NULL,
+    `StatusDataView` TINYINT NOT NULL,
     `AdditionalInformation` TEXT,
     `DateAdded` DATETIME NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_OtherVehicles_IdClient` (`IdClient`),
-    CONSTRAINT `FK_OtherVehicles_Clients` FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
+    CONSTRAINT `FK_OtherVehicles_Clients` FOREIGN KEY (`IdClient`) 
+        REFERENCES `Clients`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `Phones` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdClient` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `IdClient` CHAR(36) NOT NULL,
     `Phone` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_Phones_IdClient` (`IdClient`),
-    CONSTRAINT `FK_Phones_Clients` FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
+    CONSTRAINT `FK_Phones_Clients` FOREIGN KEY (`IdClient`) 
+        REFERENCES `Clients`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `ProfessionalClient` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdClient` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `IdClient` CHAR(36) NOT NULL,
     `NameCompany` VARCHAR(255) NOT NULL,
     `Siret` VARCHAR(50) NOT NULL,
     `TVANumber` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_ProfessionalClient_IdClient` (`IdClient`),
-    CONSTRAINT `FK_ProfessionalClient_Clients` FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
+    CONSTRAINT `FK_ProfessionalClient_Clients` FOREIGN KEY (`IdClient`) 
+        REFERENCES `Clients`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `Vehicles` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdClient` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `IdClient` CHAR(36) NOT NULL,
     `Immatriculation` VARCHAR(20) NOT NULL,
     `Type` VARCHAR(100) NOT NULL,
     `Mark` VARCHAR(255) NOT NULL,
@@ -164,110 +191,111 @@ CREATE TABLE IF NOT EXISTS `Vehicles` (
     `AdditionalInformation` TEXT NOT NULL,
     `CirculationDate` DATE NOT NULL,
     `KM` INT NOT NULL,
-    `StatusDataView` INT NOT NULL,
+    `StatusDataView` TINYINT NOT NULL,
     `DateAdded` DATETIME NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_Vehicles_IdClient` (`IdClient`),
-    CONSTRAINT `FK_Vehicles_Clients` FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE
+    CONSTRAINT `FK_Vehicles_Clients` FOREIGN KEY (`IdClient`) 
+        REFERENCES `Clients`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tables avec relations complexes
 CREATE TABLE IF NOT EXISTS `AssociationSettingReferences` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdInterestingReferences` VARCHAR(36) NOT NULL,
-    `EditionSettingId` VARCHAR(36),
+    `Id` CHAR(36) NOT NULL,
+    `IdInterestingReferences` CHAR(36) NOT NULL,
+    `EditionSettingId` CHAR(36),
     PRIMARY KEY (`Id`),
-    INDEX `IX_AssociationSettingReferences_I` (`IdInterestingReferences`),
-    INDEX `IX_AssociationSettingReferences_E` (`EditionSettingId`),
-    CONSTRAINT `FK_AssociationSettingReferences_I` FOREIGN KEY (`IdInterestingReferences`) REFERENCES `InterestingReferences`(`Id`) ON DELETE CASCADE,
-    CONSTRAINT `FK_AssociationSettingReferences_E` FOREIGN KEY (`EditionSettingId`) REFERENCES `EditionSettings`(`Id`)
+    CONSTRAINT `FK_AssociationSettingReferences_Interesting` FOREIGN KEY (`IdInterestingReferences`) 
+        REFERENCES `InterestingReferences`(`Id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_AssociationSettingReferences_Edition` FOREIGN KEY (`EditionSettingId`) 
+        REFERENCES `EditionSettings`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `Invoices` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `InvoiceNumber` VARCHAR(50) NOT NULL,
     `OrderNumber` VARCHAR(50) NOT NULL,
-    `IdVehicle` VARCHAR(36),
-    `IdOtherVehicle` VARCHAR(36),
-    `Payment` INT NOT NULL,
+    `IdVehicle` CHAR(36),
+    `IdOtherVehicle` CHAR(36),
+    `Payment` TINYINT NOT NULL,
     `TotalAmount` DECIMAL(10,2) NOT NULL,
     `Observations` TEXT,
     `RepairType` VARCHAR(100),
-    `Status` INT NOT NULL,
-    `PartReturnedCustomer` INT NOT NULL,
-    `CustomerSuppliedPart` INT NOT NULL,
-    `UserId` VARCHAR(36),
+    `Status` TINYINT NOT NULL,
+    `PartReturnedCustomer` BOOLEAN NOT NULL,
+    `CustomerSuppliedPart` BOOLEAN NOT NULL,
+    `UserId` CHAR(36),
     `DateAdded` DATETIME NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_Invoices_UserId` (`UserId`),
-    INDEX `IX_Invoices_IdVehicle` (`IdVehicle`),
-    INDEX `IX_Invoices_IdOtherVehicle` (`IdOtherVehicle`),
-    CONSTRAINT `FK_Invoices_Users` FOREIGN KEY (`UserId`) REFERENCES `Users`(`Id`),
-    CONSTRAINT `FK_Invoices_Vehicles` FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`),
-    CONSTRAINT `FK_Invoices_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`)
+    CONSTRAINT `FK_Invoices_Users` FOREIGN KEY (`UserId`) 
+        REFERENCES `Users`(`Id`),
+    CONSTRAINT `FK_Invoices_Vehicles` FOREIGN KEY (`IdVehicle`) 
+        REFERENCES `Vehicles`(`Id`),
+    CONSTRAINT `FK_Invoices_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) 
+        REFERENCES `OtherVehicles`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `MaintenanceAlerts` (
-    `Id` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
     `TypeMaintenace` VARCHAR(100) NOT NULL,
-    `IdVehicle` VARCHAR(36),
-    `IdOtherVehicle` VARCHAR(36),
+    `IdVehicle` CHAR(36),
+    `IdOtherVehicle` CHAR(36),
     `DateMake` DATETIME NOT NULL,
     `DateAdded` DATETIME NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_MaintenanceAlerts_IdVehicle` (`IdVehicle`),
-    INDEX `IX_MaintenanceAlerts_IdOtherVehicle` (`IdOtherVehicle`),
-    CONSTRAINT `FK_MaintenanceAlerts_Vehicles` FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`),
-    CONSTRAINT `FK_MaintenanceAlerts_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`)
+    CONSTRAINT `FK_MaintenanceAlerts_Vehicles` FOREIGN KEY (`IdVehicle`) 
+        REFERENCES `Vehicles`(`Id`),
+    CONSTRAINT `FK_MaintenanceAlerts_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) 
+        REFERENCES `OtherVehicles`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `Quotes` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdClient` VARCHAR(36) NOT NULL,
-    `IdVehicle` VARCHAR(36),
-    `IdOtherVehicle` VARCHAR(36),
+    `Id` CHAR(36) NOT NULL,
+    `IdClient` CHAR(36) NOT NULL,
+    `IdVehicle` CHAR(36),
+    `IdOtherVehicle` CHAR(36),
     `QuoteNumber` VARCHAR(50) NOT NULL,
     `TotalAmount` DECIMAL(10,2),
     `Observations` TEXT,
-    `Status` INT NOT NULL,
-    `UserId` VARCHAR(36),
+    `Status` TINYINT NOT NULL,
+    `UserId` CHAR(36),
     `DateAccepted` DATETIME,
     `DateAdded` DATETIME NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_Quotes_IdClient` (`IdClient`),
-    INDEX `IX_Quotes_IdOtherVehicle` (`IdOtherVehicle`),
-    INDEX `IX_Quotes_UserId` (`UserId`),
-    INDEX `IX_Quotes_IdVehicle` (`IdVehicle`),
-    CONSTRAINT `FK_Quotes_Clients` FOREIGN KEY (`IdClient`) REFERENCES `Clients`(`Id`) ON DELETE CASCADE,
-    CONSTRAINT `FK_Quotes_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`),
-    CONSTRAINT `FK_Quotes_Users` FOREIGN KEY (`UserId`) REFERENCES `Users`(`Id`),
-    CONSTRAINT `FK_Quotes_Vehicles` FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`)
+    CONSTRAINT `FK_Quotes_Clients` FOREIGN KEY (`IdClient`) 
+        REFERENCES `Clients`(`Id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_Quotes_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) 
+        REFERENCES `OtherVehicles`(`Id`),
+    CONSTRAINT `FK_Quotes_Users` FOREIGN KEY (`UserId`) 
+        REFERENCES `Users`(`Id`),
+    CONSTRAINT `FK_Quotes_Vehicles` FOREIGN KEY (`IdVehicle`) 
+        REFERENCES `Vehicles`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `HistoryParts` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdInvoice` VARCHAR(36) NOT NULL,
-    `IdVehicle` VARCHAR(36),
-    `IdOtherVehicle` VARCHAR(36),
+    `Id` CHAR(36) NOT NULL,
+    `IdInvoice` CHAR(36) NOT NULL,
+    `IdVehicle` CHAR(36),
+    `IdOtherVehicle` CHAR(36),
     `PartNumber` VARCHAR(255) NOT NULL,
     `PartName` VARCHAR(255) NOT NULL,
     `PartBrand` VARCHAR(255),
     `Description` TEXT,
     `Discount` DECIMAL(5,2) NOT NULL,
     `Price` DECIMAL(10,2) NOT NULL,
-    `Quantity` DECIMAL(8,2) NOT NULL,
+    `Quantity` DECIMAL(10,2) NOT NULL,
     `KMMounted` INT,
     PRIMARY KEY (`Id`),
-    INDEX `IX_HistoryParts_IdVehicle` (`IdVehicle`),
-    INDEX `IX_HistoryParts_IdInvoice` (`IdInvoice`),
-    INDEX `IX_HistoryParts_IdOtherVehicle` (`IdOtherVehicle`),
-    CONSTRAINT `FK_HistoryParts_Vehicles` FOREIGN KEY (`IdVehicle`) REFERENCES `Vehicles`(`Id`),
-    CONSTRAINT `FK_HistoryParts_Invoices` FOREIGN KEY (`IdInvoice`) REFERENCES `Invoices`(`Id`) ON DELETE CASCADE,
-    CONSTRAINT `FK_HistoryParts_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) REFERENCES `OtherVehicles`(`Id`)
+    CONSTRAINT `FK_HistoryParts_Invoices` FOREIGN KEY (`IdInvoice`) 
+        REFERENCES `Invoices`(`Id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_HistoryParts_Vehicles` FOREIGN KEY (`IdVehicle`) 
+        REFERENCES `Vehicles`(`Id`),
+    CONSTRAINT `FK_HistoryParts_OtherVehicles` FOREIGN KEY (`IdOtherVehicle`) 
+        REFERENCES `OtherVehicles`(`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `QuotesItems` (
-    `Id` VARCHAR(36) NOT NULL,
-    `IdQuote` VARCHAR(36) NOT NULL,
+    `Id` CHAR(36) NOT NULL,
+    `IdQuote` CHAR(36) NOT NULL,
     `PartNumber` VARCHAR(255) NOT NULL,
     `PartName` VARCHAR(255) NOT NULL,
     `PartBrand` VARCHAR(255),
@@ -275,12 +303,34 @@ CREATE TABLE IF NOT EXISTS `QuotesItems` (
     `Price` DECIMAL(10,2) NOT NULL,
     `Quantity` INT NOT NULL,
     PRIMARY KEY (`Id`),
-    INDEX `IX_QuotesItems_IdQuote` (`IdQuote`),
-    CONSTRAINT `FK_QuotesItems_Quotes` FOREIGN KEY (`IdQuote`) REFERENCES `Quotes`(`Id`) ON DELETE CASCADE
+    CONSTRAINT `FK_QuotesItems_Quotes` FOREIGN KEY (`IdQuote`) 
+        REFERENCES `Quotes`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Optimisations pour MariaDB
-SET FOREIGN_KEY_CHECKS = 1;
+-- Création des index manquants
+CREATE INDEX `IDX_Emails_Client` ON `Emails` (`IdClient`);
+CREATE INDEX `IDX_OtherVehicles_Client` ON `OtherVehicles` (`IdClient`);
+CREATE INDEX `IDX_Phones_Client` ON `Phones` (`IdClient`);
+CREATE INDEX `IDX_ProfessionalClient_Client` ON `ProfessionalClient` (`IdClient`);
+CREATE INDEX `IDX_Vehicles_Client` ON `Vehicles` (`IdClient`);
+CREATE INDEX `IDX_AssociationRefs_Interesting` ON `AssociationSettingReferences` (`IdInterestingReferences`);
+CREATE INDEX `IDX_AssociationRefs_Edition` ON `AssociationSettingReferences` (`EditionSettingId`);
+CREATE INDEX `IDX_Invoices_User` ON `Invoices` (`UserId`);
+CREATE INDEX `IDX_Invoices_Vehicle` ON `Invoices` (`IdVehicle`);
+CREATE INDEX `IDX_Invoices_OtherVehicle` ON `Invoices` (`IdOtherVehicle`);
+CREATE INDEX `IDX_Maintenance_Vehicle` ON `MaintenanceAlerts` (`IdVehicle`);
+CREATE INDEX `IDX_Maintenance_OtherVehicle` ON `MaintenanceAlerts` (`IdOtherVehicle`);
+CREATE INDEX `IDX_Quotes_Client` ON `Quotes` (`IdClient`);
+CREATE INDEX `IDX_Quotes_User` ON `Quotes` (`UserId`);
+CREATE INDEX `IDX_Quotes_Vehicle` ON `Quotes` (`IdVehicle`);
+CREATE INDEX `IDX_Quotes_OtherVehicle` ON `Quotes` (`IdOtherVehicle`);
+CREATE INDEX `IDX_HistoryParts_Invoice` ON `HistoryParts` (`IdInvoice`);
+CREATE INDEX `IDX_HistoryParts_Vehicle` ON `HistoryParts` (`IdVehicle`);
+CREATE INDEX `IDX_HistoryParts_OtherVehicle` ON `HistoryParts` (`IdOtherVehicle`);
+CREATE INDEX `IDX_QuotesItems_Quote` ON `QuotesItems` (`IdQuote`);
+
+-- Optimisations finales
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
+SET AUTOCOMMIT = 1;
 
 COMMIT;

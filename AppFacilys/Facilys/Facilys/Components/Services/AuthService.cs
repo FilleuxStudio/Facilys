@@ -360,8 +360,8 @@ namespace Facilys.Components.Services
                 Users userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (userDb == null)
                 {
-                   await SetUserWeb(result.UserData);
-                   userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                    await SetUserWeb(result.UserData);
+                    userDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 }
 
                 await SetAuthenticatedAsync(userDb);
@@ -635,8 +635,8 @@ namespace Facilys.Components.Services
                 Team = user.Company,
                 DateAdded = DateTime.Now
             };
-           await _context.Users.AddAsync(AddUserWeb);
-           await _context.SaveChangesAsync();
+            await _context.Users.AddAsync(AddUserWeb);
+            await _context.SaveChangesAsync();
         }
 
         private async Task SetMariaDBCredentials(UserData user)

@@ -10,6 +10,7 @@ namespace Facilys.Components.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
+        public Guid IdClient { get; set; }
         [Required]
         public string Immatriculation { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
@@ -53,6 +54,7 @@ namespace Facilys.Components.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
+        public Guid IdClient { get; set; }
         [Required]
         public string SerialNumber { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;

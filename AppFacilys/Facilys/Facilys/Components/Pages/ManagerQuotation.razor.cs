@@ -82,7 +82,7 @@ namespace Facilys.Components.Pages
 
                 var quoteId = managerQuotationViewModel.Quote.Id;
 
-                
+
                 // Supprimer les devis et leurs éléments
                 var quotes = await DbContext.QuotesItems.Where(q => q.Quote.Id == quoteId).ToListAsync();
                 foreach (var quote in quotes)

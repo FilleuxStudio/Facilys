@@ -170,7 +170,8 @@ namespace Facilys.Components.Pages
             {
                 managerVehicleViewModel.Vehicle.Id = Guid.NewGuid();
                 managerVehicleViewModel.Vehicle.DateAdded = DateTime.Now;
-                managerVehicleViewModel.Vehicle.Client = await DbContext.Clients.FindAsync(selectClient);
+                managerVehicleViewModel.Vehicle.Client = null;
+                managerVehicleViewModel.Vehicle.IdClient = selectClient;
                 await DbContext.Vehicles.AddAsync(managerVehicleViewModel.Vehicle);
                 await DbContext.SaveChangesAsync();
 
@@ -274,7 +275,8 @@ namespace Facilys.Components.Pages
             {
                 managerVehicleViewModel.OtherVehicle.Id = Guid.NewGuid();
                 managerVehicleViewModel.OtherVehicle.DateAdded = DateTime.Now;
-                managerVehicleViewModel.OtherVehicle.Client = await DbContext.Clients.FindAsync(selectClient);
+                managerVehicleViewModel.OtherVehicle.Client = null;
+                managerVehicleViewModel.OtherVehicle.IdClient = selectClient;
                 await DbContext.OtherVehicles.AddAsync(managerVehicleViewModel.OtherVehicle);
                 await DbContext.SaveChangesAsync();
 

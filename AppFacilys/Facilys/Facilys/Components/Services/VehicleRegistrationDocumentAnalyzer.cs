@@ -76,7 +76,7 @@ namespace Facilys.Components.Services
                       .Trim();
         }
 
-        private  async Task<string> EnsureTessdataFiles()
+        private async Task<string> EnsureTessdataFiles()
         {
             string pathDoc = await Electron.App.GetPathAsync(PathName.Documents);
             //string pathDoc = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)

@@ -37,15 +37,9 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.ClientItems = [];
             managerInvoiceViewModel.VehicleItems = [];
 
-            if (managerInvoiceViewModel.Edition.PreloadedLine > 0)
-            {
-                invoiceData.LineRef = [.. Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine)];
-                invoiceData.LineDesc = [.. Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine)];
-                invoiceData.LineQt = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-                invoiceData.LinePrice = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-                invoiceData.LineDisc = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-                invoiceData.LineMo = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-            }
+            invoiceData.InvoiceLines = Enumerable.Range(0, managerInvoiceViewModel.Edition.PreloadedLine)
+           .Select(_ => new InvoiceLine { })
+           .ToList();
         }
 
 
@@ -69,6 +63,13 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.CompanySettings = await DbContext.CompanySettings.AsNoTracking().FirstOrDefaultAsync();
             managerInvoiceViewModel.Clients = await DbContext.Clients.ToListAsync();
 
+            if (managerInvoiceViewModel.Edition.PreloadedLine > 0)
+            {
+                invoiceData.InvoiceLines = Enumerable.Range(0, managerInvoiceViewModel.Edition.PreloadedLine)
+          .Select(_ => new InvoiceLine { })
+          .ToList();
+            }
+
             if (managerInvoiceViewModel.Invoice == null)
             {
                 if (managerInvoiceViewModel.Edition != null)
@@ -90,12 +91,6 @@ namespace Facilys.Components.Pages
                 managerInvoiceViewModel.ClientItems.Add(new SelectListItem(client.Lname + " " + client.Fname, client.Id.ToString()));
             }
 
-            invoiceData.LineRef = [.. Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine)];
-            invoiceData.LineDesc = [.. Enumerable.Repeat("", managerInvoiceViewModel.Edition.PreloadedLine)];
-            invoiceData.LineQt = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-            invoiceData.LinePrice = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-            invoiceData.LineDisc = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
-            invoiceData.LineMo = [.. Enumerable.Repeat<float?>(0.0f, managerInvoiceViewModel.Edition.PreloadedLine)];
             var user = await AuthService.GetAuthenticatedAsync();
             IdUser = user.Id;
         }
@@ -278,27 +273,26 @@ namespace Facilys.Components.Pages
         }
 
 
-        private void OnLinePriceChanged(object value, int index)
+        private void OnLinePriceChanged(object value, InvoiceLine line)
         {
             if (value is string stringValue)
             {
                 if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
                 {
-                    invoiceData.LinePrice[index] = result;
-                    UpdateLineAmount(index);
+                    line.LinePrice = result;
+                    UpdateLineAmount(line);
                 }
             }
-
         }
 
-        private void OnLineDiscChanged(object value, int index)
+        private void OnLineDiscChanged(object value, InvoiceLine line)
         {
             if (value is string stringValue)
             {
                 if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
                 {
-                    invoiceData.LineDisc[index] = result;
-                    UpdateLineAmount(index);
+                    line.LineDisc = result;
+                    UpdateLineAmount(line);
                 }
             }
         }
@@ -308,34 +302,24 @@ namespace Facilys.Components.Pages
         /// </summary>
         /// <param name="index">id ligne</param>
         /// <returns>calcul</returns>
-        private void UpdateLineAmount(int index)
+        private void UpdateLineAmount(InvoiceLine line)
         {
-            // Assurez-vous que LineQt[index] existe et n'est pas nul
-            if (invoiceData.LineQt.Count > index && invoiceData.LineQt[index] != null)
+            if (line.LineQt != null)
             {
-                float price = invoiceData.LinePrice[index] ?? 0.0f;
-                float discount = invoiceData.LineDisc[index] ?? 0.0f;
-                float quantity = invoiceData.LineQt[index].Value;
+                float price = line.LinePrice ?? 0.0f;
+                float discount = line.LineDisc ?? 0.0f;
+                float quantity = line.LineQt.Value;
 
-                // Calculez le montant HT
                 float amount = price * quantity * (1 - discount / 100);
-
-                // Mettez à jour LineMo
-                invoiceData.LineMo[index] = (float?)Math.Round(amount, 2); // Arrondi à 2 décimales
-
+                line.LineMo = (float?)Math.Round(amount, 2);
                 CalculateTotals();
             }
         }
 
         private void CalculateTotals()
         {
-            float totalHT = 0;
-            for (int i = 0; i < managerInvoiceViewModel.Edition.PreloadedLine; i++)
-            {
-                totalHT += invoiceData.LineMo[i] ?? 0.0f;
-            }
-            invoiceData.HT = totalHT;
-            invoiceData.TVA = ((totalHT * managerInvoiceViewModel.Edition.TVA ?? 0.0f) / 100); // Supposons un taux de TVA de 20%
+            invoiceData.HT = invoiceData.InvoiceLines.Sum(line => line.LineMo ?? 0.0f);
+            invoiceData.TVA = ((invoiceData.HT * managerInvoiceViewModel.Edition.TVA ?? 0.0f) / 100);
             invoiceData.TTC = invoiceData.HT + invoiceData.TVA;
         }
 
@@ -359,38 +343,30 @@ namespace Facilys.Components.Pages
                 User = user
             };
 
-            List<HistoryPart> LineDataPart = [];
-
-            for (int i = 0; i < invoiceData.LineRef.Count; i++)
-            {
-                if (invoiceData.LineRef[i] != string.Empty || invoiceData.LineRef[i] != null)
+            // Création de la liste sans requêtes asynchrones dans le Select
+            List<HistoryPart> LineDataPart = invoiceData.InvoiceLines
+                .Where(line => !string.IsNullOrWhiteSpace(line.LineRef))
+                .Select(line => new HistoryPart
                 {
-                    LineDataPart.Add(new HistoryPart()
-                    {
-                        Id = Guid.NewGuid(),
-                        Invoice = invoice,
-                        Vehicle = await DbContext.Vehicles.FindAsync(Guid.Parse(SelectedValueVehicle)),
-                        OtherVehicle = await DbContext.OtherVehicles.FindAsync(Guid.Parse(SelectedValueVehicle)),
-                        PartNumber = invoiceData.LineRef[i],
-                        Description = invoiceData.LineDesc[i],
-                        Discount = invoiceData.LineDisc[i] ?? 0.0f,
-                        Price = invoiceData.LinePrice[i] ?? 0.0f,
-                        Quantity = invoiceData.LineQt[i] ?? 0.0f,
-                        KMMounted = Km
-                    });
-                }
-            }
+                    Id = Guid.NewGuid(),
+                    Invoice = invoice,
+                    Vehicle = vehicle,
+                    OtherVehicle = otherVehicle,
+                    PartNumber = line.LineRef,
+                    Description = line.LineDesc,
+                    Discount = line.LineDisc ?? 0.0f,
+                    Price = line.LinePrice ?? 0.0f,
+                    Quantity = (int)(line.LineQt ?? 0),
+                    KMMounted = Km
+                })
+                .ToList();
 
             managerInvoiceViewModel.HistoryParts = LineDataPart;
+            managerInvoiceViewModel.Vehicle = vehicle;
+            managerInvoiceViewModel.OtherVehicle = otherVehicle;
 
-            var Vehicle = await DbContext.Vehicles.FindAsync(Guid.Parse(SelectedValueVehicle));
-            var OtherVehicle = await DbContext.OtherVehicles.FindAsync(Guid.Parse(SelectedValueVehicle));
-
-            managerInvoiceViewModel.Vehicle = Vehicle;
-            managerInvoiceViewModel.OtherVehicle = OtherVehicle;
-
-            if (Vehicle != null)
-                Vehicle.KM = Km;
+            if (vehicle != null)
+                vehicle.KM = Km;
 
 
             if (actionType == 1)
@@ -402,22 +378,50 @@ namespace Facilys.Components.Pages
 
                 managerInvoiceViewModel.InvoiceData = invoiceData;
 
-                using var transaction = await DbContext.Database.BeginTransactionAsync();
-                try
+                var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+
+                await executionStrategy.ExecuteAsync(async () =>
                 {
+                    using var transaction = await DbContext.Database.BeginTransactionAsync();
 
-                    await DbContext.Invoices.AddAsync(invoice);
-                    await DbContext.HistoryParts.AddRangeAsync(LineDataPart);
-                    DbContext.Vehicles.Update(Vehicle);
+                    try
+                    {
+                        // Ajout des entités
+                        await DbContext.Invoices.AddAsync(invoice);
+                        await DbContext.HistoryParts.AddRangeAsync(LineDataPart);
 
-                    await DbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                        if (vehicle != null)
+                            DbContext.Vehicles.Update(vehicle);
+                        else if (otherVehicle != null) // Ajout d'une vérification supplémentaire
+                            DbContext.OtherVehicles.Update(otherVehicle);
 
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-                }
+                        // Sauvegarde avec gestion explicite des erreurs
+                        var saved = await DbContext.SaveChangesAsync();
+
+                        if (saved > 0) // Vérification que des changements ont bien été sauvegardés
+                            await transaction.CommitAsync();
+                        else
+                        {
+                            await transaction.RollbackAsync();
+                            Logger.LogWarning("Aucun changement n'a été sauvegardé dans la base de données");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            // Tentative de rollback en cas d'erreur
+                            await transaction.RollbackAsync();
+                        }
+                        catch (Exception rollbackEx)
+                        {
+                            Logger.LogError(rollbackEx, "Erreur lors du rollback de la transaction");
+                        }
+
+                        Logger.LogError(ex, "Erreur lors de la mise à jour de la base de données");
+                        throw; // Re-lancer l'exception pour la gestion ultérieure
+                    }
+                });
 
                 PhonesClients phonesClients = await DbContext.Phones.Where(c => c.Client.Id == Guid.Parse(SelectedValueClient)).FirstOrDefaultAsync();
                 EmailsClients emailsClients = await DbContext.Emails.Where(m => m.Client.Id == Guid.Parse(SelectedValueClient)).FirstOrDefaultAsync();
@@ -454,14 +458,14 @@ namespace Facilys.Components.Pages
                         }
                         break;
                     case InvoiceTypeDesign.TypeC:
-                        //PdfInvoiceType3Service pdfInvoiceType3 = new();
-                        //pdfBytesInvoice = pdfInvoiceType3.GenerateInvoicePdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
-                        //pdfBytesOrder = pdfRepairOrder.GenerateRepairOrderPdf(managerInvoiceViewModel, invoice, km, phonesClients, emailsClients);
-                        //await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
-                        //await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
+                        PdfInvoiceType3Service pdfInvoiceType3 = new();
+                        pdfBytesInvoice = pdfInvoiceType3.GenerateInvoicePdf(managerInvoiceViewModel, invoice, Km, phonesClients, emailsClients);
+                        pdfBytesOrder = pdfRepairOrder.GenerateRepairOrderPdf(managerInvoiceViewModel, invoice, Km, phonesClients, emailsClients);
+                        await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
+                        await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
 
-                        //await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
-                        //await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
+                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Factures", "Facture-" + fileName, pdfBytesInvoice);
+                        await SaveDocuments.SaveDocumentsPDF(managerInvoiceViewModel.Edition.PathSaveFile + "Ordre", "Ordre-" + fileName, pdfBytesOrder);
                         break;
                 }
 

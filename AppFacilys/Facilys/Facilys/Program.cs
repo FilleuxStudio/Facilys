@@ -208,7 +208,6 @@ using Facilys.Components.Data;
 using Facilys.Components.Services;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Net;
@@ -216,6 +215,12 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();  // Permet override via variables Docker/K8S
 
 // SOLUTION CLOUD RUN: Configuration des ports dynamique
 if (HybridSupport.IsElectronActive)

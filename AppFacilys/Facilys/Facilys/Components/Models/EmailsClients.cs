@@ -10,6 +10,7 @@ namespace Facilys.Components.Models
 
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
+        public Guid IdClient { get; set; }
 
         public string Email { get; set; } = string.Empty;
 

@@ -13,8 +13,10 @@ namespace Facilys.Components.Models
         public string OrderNumber { get; set; } = string.Empty;
         [ForeignKey("IdVehicle")]
         public Vehicles? Vehicle { get; set; }
+        public Guid? IdVehicle { get; set; } = Guid.Empty;
         [ForeignKey("IdOtherVehicle")]
         public OtherVehicles? OtherVehicle { get; set; }
+        public Guid? IdOtherVehicle { get; set; } = Guid.Empty;
         [Required]
         public PaymentMethod Payment { get; set; }
         public float TotalAmount { get; set; } = 0.00f;

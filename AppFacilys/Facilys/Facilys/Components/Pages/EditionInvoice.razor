@@ -130,27 +130,27 @@
                                     </thead>
 
                                     <tbody>
-                                        @for (int i = 0; i < managerInvoiceViewModel.Edition.PreloadedLine; i++)
+                                        @foreach (var line in invoiceData.InvoiceLines)
                                         {
                                             // Création d'une variable locale pour la fermeture
-                                            <tr @key="i">
+                                            <tr @key="line.Id">
                                                 <td>
-                                                    <InputText @bind-Value="invoiceData.LineRef[i]" class="form-control" id="@($"invoiceData-LineRef-{i}")" />
+                                                    <InputText @bind-Value="line.LineRef" class="form-control" />
                                                 </td>
                                                 <td>
-                                                    <InputText @bind-Value="invoiceData.LineDesc[i]" class="form-control" id="@($"invoiceData-LineDesc-{i}")" />
+                                                    <InputText @bind-Value="line.LineDesc" class="form-control" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineQt[i]" class="form-control" id="@($"invoiceData-LineQt-{i}")" />
+                                                    <InputNumber @bind-Value="line.LineQt" class="form-control" />
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LinePrice[i]" @oninput="(e) => OnLinePriceChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LinePrice-{i}")" />
+                                                    <InputNumber @bind-Value="line.LinePrice" @oninput="(e) => OnLinePriceChanged(e.Value, line)" class="form-control"/>
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineDisc[i]" @oninput="(e) => OnLineDiscChanged(e.Value, i)" class="form-control" id="@($"invoiceData-LineDisc-{i}")" />
+                                                    <InputNumber @bind-Value="line.LineDisc" @oninput="(e) => OnLineDiscChanged(e.Value, line)" class="form-control"/>
                                                 </td>
                                                 <td>
-                                                    <InputNumber @bind-Value="invoiceData.LineMo[i]" class="form-control no-spinner" id="@($"invoiceData-LineMo-{i}")" readonly />
+                                                    <InputNumber @bind-Value="line.LineMo" class="form-control no-spinner" readonly />
                                                 </td>
                                             </tr>
                                         }

@@ -1,9 +1,6 @@
-﻿using Facilys.Components.Pages;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Renci.SshNet;
-using System;
-using System.IO;
 
 namespace Facilys.Components.Data
 {

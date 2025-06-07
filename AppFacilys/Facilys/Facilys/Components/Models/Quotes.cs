@@ -10,10 +10,13 @@ namespace Facilys.Components.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("IdClient")]
         public Clients Client { get; set; }
+        public Guid IdClient { get; set; }
         [ForeignKey("IdVehicle")]
         public Vehicles? Vehicle { get; set; }
+        public Guid? IdVehicle { get; set; } = Guid.Empty;
         [ForeignKey("IdOtherVehicle")]
         public OtherVehicles? OtherVehicle { get; set; }
+        public Guid? IdOtherVehicle { get; set; } = Guid.Empty;
         [Required]
         public string QuoteNumber { get; set; } = string.Empty;
         public float? TotalAmount { get; set; } = 0.00f;
@@ -39,6 +42,7 @@ namespace Facilys.Components.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("IdQuote")]
         public Quotes Quote { get; set; }
+        public Guid IdQuote { get; set; }
         public string PartNumber { get; set; } = string.Empty;
         [Required]
         public string? PartName { get; set; } = string.Empty;

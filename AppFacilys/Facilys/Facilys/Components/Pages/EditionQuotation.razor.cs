@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using MySqlX.XDevAPI;
 using System.Globalization;
 
 namespace Facilys.Components.Pages
@@ -40,7 +39,7 @@ namespace Facilys.Components.Pages
             Init();
             managerQuotationViewModel.CompanySettings = new();
 
-            quotationData.Lines = Enumerable.Range(0, PreloadedLine)
+            quotationData.QuotationLines = Enumerable.Range(0, PreloadedLine)
             .Select(_ => new QuotationLine { })
             .ToList();
 
@@ -444,7 +443,7 @@ namespace Facilys.Components.Pages
 
         private void CalculateTotals()
         {
-            quotationData.HT = quotationData.Lines.Sum(line => line.LineMo ?? 0.0f);
+            quotationData.HT = quotationData.QuotationLines.Sum(line => line.LineMo ?? 0.0f);
             quotationData.TVA = ((quotationData.HT * managerQuotationViewModel.Edition.TVA ?? 0.0f) / 100);
             quotationData.TTC = quotationData.HT + quotationData.TVA;
         }
@@ -469,7 +468,7 @@ namespace Facilys.Components.Pages
                 User = user,
             };
 
-            List<QuotesItems> quotesItems = quotationData.Lines
+            List<QuotesItems> quotesItems = quotationData.QuotationLines
             .Where(line => !string.IsNullOrWhiteSpace(line.LineRef))
             .Select(line => new QuotesItems
             {
@@ -487,6 +486,7 @@ namespace Facilys.Components.Pages
             managerQuotationViewModel.Vehicle = vehicle;
             managerQuotationViewModel.OtherVehicle = otherVehicle;
             managerQuotationViewModel.Client = client;
+            managerQuotationViewModel.QuotationData = quotationData;
 
             if (actionType == 1)
             {
@@ -501,14 +501,31 @@ namespace Facilys.Components.Pages
 
                     await executionStrategy.ExecuteAsync(async () =>
                     {
+                        // Utilisation d'une transaction explicite
                         using var transaction = await DbContext.Database.BeginTransactionAsync();
 
-                        await DbContext.Quotes.AddAsync(quote);
-                        await DbContext.QuotesItems.AddRangeAsync(quotesItems);
+                        try
+                        {
+                            await DbContext.Quotes.AddAsync(quote);
+                            await DbContext.QuotesItems.AddRangeAsync(quotesItems);
 
-                        await DbContext.SaveChangesAsync();
-                        await transaction.CommitAsync();
+                            // SaveChanges avec acceptAllChangesOnSuccess à false pour plus de sécurité
+                            await DbContext.SaveChangesAsync(acceptAllChangesOnSuccess: false);
 
+                            await transaction.CommitAsync();
+
+                            // Accepte les changements seulement après un commit réussi
+                            DbContext.ChangeTracker.AcceptAllChanges();
+                        }
+                        catch
+                        {
+                            // Rollback explicite en cas d'erreur
+                            await transaction.RollbackAsync();
+
+                            // Rejette les changements après un échec
+                            DbContext.ChangeTracker.Clear();
+                            throw;
+                        }
                     });
 
                 }
@@ -521,15 +538,13 @@ namespace Facilys.Components.Pages
                 EmailsClients emailsClients = await DbContext.Emails.Where(m => m.Client.Id == Guid.Parse(SelectedValueClient)).FirstOrDefaultAsync();
 
                 string fileName = QuotationNumber + "-" + managerQuotationViewModel.Client.Fname + "-" + managerQuotationViewModel.Client.Lname + "-" + DateTime.Now.Date.ToString("dd-MM-yy") + ".pdf";
-                byte[] pdfBytesInvoice = null, pdfBytesOrder = null;
                 PdfQuotationType1Service pdfQuotationType = new();
                 var pdfQuotation = pdfQuotationType.GenerateQuotationPdf(managerQuotationViewModel, quote, Km, phonesClients, emailsClients);
-                await JSRuntime.InvokeVoidAsync("downloadFile", "Facture-" + fileName, pdfBytesInvoice);
-                await JSRuntime.InvokeVoidAsync("downloadFile", "Ordre-" + fileName, pdfBytesOrder);
+                await JSRuntime.InvokeVoidAsync("downloadFile", "Devis-" + fileName, pdfQuotation);
 
                 if (HybridSupport.IsElectronActive)
                 {
-                    await SaveDocuments.SaveDocumentsPDF(managerQuotationViewModel.Edition.PathSaveFile + "Devis", "Devis-" + fileName, pdfBytesInvoice);
+                    await SaveDocuments.SaveDocumentsPDF(managerQuotationViewModel.Edition.PathSaveFile + "Devis", "Devis-" + fileName, pdfQuotation);
                 }
             }
 

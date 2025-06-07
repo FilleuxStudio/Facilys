@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.ExtendedProperties;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Facilys.Components.Models.ViewModels
 {
