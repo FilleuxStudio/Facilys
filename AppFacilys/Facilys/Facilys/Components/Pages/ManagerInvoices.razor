@@ -91,8 +91,8 @@
                                             <span class="badge bg-success-subtle text-success"><i class="fas fa-check me-1"></i> @invoice.Status</span>
                                         </td>
                                         <td>@invoice.TotalAmount.ToString("#.##") €</td>
-                                        <td class="text-end">
-                                            <a href="#"><i class="fas fa-print text-secondary fs-18"></i></a>
+                                    <td class="text-end">
+                                        <button type="button" @onclick="@(() => GenerateInvoicePdf(invoice.Id))" class="btn btn-sm bg-secondary-subtle text-secondary"><i class="fas fa-print text-secondary fs-18"></i></button>
                                                 <button type="button" @onclick="@(() => OpenModalData("OpenModaDeleteInvoice", invoice.Id))" class="btn btn-sm bg-danger-subtle text-danger"><i class="las la-trash-alt text-danger fs-18"></i></button>
                                         </td>
                                     </tr>

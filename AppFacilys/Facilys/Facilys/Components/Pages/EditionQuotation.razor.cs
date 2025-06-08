@@ -644,6 +644,9 @@ namespace Facilys.Components.Pages
             managerQuotationViewModel.PhonesClients = [];
             managerQuotationViewModel.EmailsClients.Clear();
             managerQuotationViewModel.EmailsClients = [];
+            managerQuotationViewModel.Quote = new();
+            managerQuotationViewModel.Quotes.Clear();
+            managerQuotationViewModel.Vehicle = new();
             currentPhone = string.Empty;
             currentEmail = string.Empty;
         }
