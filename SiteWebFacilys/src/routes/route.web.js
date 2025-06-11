@@ -23,6 +23,11 @@ router.get("/contact", (req, res) => {
   res.render("contact", { currentDateTime: now, currentRoute: req.path, session: req.session });
 });
 
+// Route pour la page "tutorial"
+router.get("/tutorial", (req, res) => {
+  res.render("tutorial", { currentDateTime: now, currentRoute: req.path, session: req.session });
+});
+
 // Route pour la page "/term-of-use"
 router.get("/term-of-use", (req, res) => {
   res.render("term-of-use", { currentDateTime: now, currentRoute: req.path, session: req.session});

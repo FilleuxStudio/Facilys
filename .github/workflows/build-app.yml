@@ -101,6 +101,17 @@ jobs:
             exit 1
           }
 
+          $electronConfigPath = Join-Path -Path "win-unpacked" -ChildPath "appsettings.Electron.json"
+          $defaultConfigPath = Join-Path -Path "win-unpacked" -ChildPath "appsettings.json"
+    
+          if (Test-Path $electronConfigPath) {
+            Write-Output "Remplacement de appsettings.json par appsettings.Electron.json"
+            Remove-Item -Path $defaultConfigPath -ErrorAction SilentlyContinue
+            Rename-Item -Path $electronConfigPath -NewName "appsettings.json"
+          } else {
+            Write-Warning "Fichier appsettings.Electron.json non trouvé, conservation de appsettings.json"
+          }
+
           Compress-Archive -Path `
             "win-unpacked", `
             "Facilys Setup 1.0.0.exe", `
