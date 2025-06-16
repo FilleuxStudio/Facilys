@@ -35,7 +35,7 @@ namespace Facilys.Components.Pages
                 try
                 {
                     // Vérification du chemin
-                    string modulePath = "assets/js/pages/ecommerce-index.init.js";
+                    string modulePath = "./assets/js/pages/ecommerce-index.init.js";
 
                     chartModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", modulePath);
 
