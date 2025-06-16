@@ -67,7 +67,7 @@ exports.shoppingGetAllProducts = async (req, res) => {
   
       await order.save();
   
-      res.status(201).redirect('payment-success');
+      res.status(201).redirect('check-out-payment');
     } catch (error) {
       console.error("Erreur lors de l'ajout du produit", error);
       res.status(500).send("Erreur lors de l'ajout du produit");

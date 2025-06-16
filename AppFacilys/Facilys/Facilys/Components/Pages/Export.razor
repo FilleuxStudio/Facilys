@@ -5,7 +5,6 @@
 @inject UserConnectionService UserConnection
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
-
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-3">
         <div class="card">
@@ -15,30 +14,27 @@
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">View Detail</a>
-                        <a class="dropdown-item" href="#">Clear All</a>
-                        <a class="dropdown-item" href="#">Delete</a>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportClients("csv"))">Export CSV</button>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportClients("excel"))">Export Excel</button>
                     </div>
                 </div>
-                <img src="assets/images/logos/lang-logo/gdrive.png" class="me-2 align-self-center thumb-xl" alt="...">
-                <h5 class="fw-semibold mt-3 fs-14">Google Drive</h5>
+                <img src="assets/images/products/2888740.png" class="me-2 align-self-center thumb-xl" alt="...">
+                <h5 class="fw-semibold mt-3 fs-14">Clients</h5>
                 <div class="d-flex justify-content-between my-2">
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">34 </span>Files</p>
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">500 </span>GB</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">@clients </span> Entrées</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">Export </span>Disponible</p>
                 </div>
                 <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 text-truncate">
-                        <div class="d-flex align-items-center">
-                            <div class="progress bg-secondary-subtle w-100" style="height:5px;" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar bg-secondary" style="width: 38%"></div>
-                            </div>
-                            <small class="flex-shrink-1 ms-1">38%</small>
-                        </div>
-                    </div><!--end media body-->
-                </div><!--end media-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div> <!--end col-->
+                    <div class="flex-grow-1">
+                        <button class="btn btn-primary btn-sm w-100" @onclick="@(() => ExportClients("csv"))">
+                            <i class="fa-solid fa-download me-1"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-md-6 col-lg-3">
         <div class="card">
             <div class="card-body">
@@ -47,30 +43,27 @@
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">View Detail</a>
-                        <a class="dropdown-item" href="#">Clear All</a>
-                        <a class="dropdown-item" href="#">Delete</a>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportVehicles("csv"))">Export CSV</button>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportVehicles("excel"))">Export Excel</button>
                     </div>
                 </div>
-                <img src="assets/images/logos/lang-logo/dropbox.png" class="me-2 align-self-center thumb-xl" alt="...">
-                <h5 class="fw-semibold mt-3 fs-14">Dropbox</h5>
+                <img src="assets/images/products/14703696.png" class="me-2 align-self-center thumb-xl" alt="...">
+                <h5 class="fw-semibold mt-3 fs-14">Véhicules</h5>
                 <div class="d-flex justify-content-between my-2">
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">68 </span>Files</p>
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">500 </span>GB</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">@vehicle </span> Entrées</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">Export </span>Disponible</p>
                 </div>
                 <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 text-truncate">
-                        <div class="d-flex align-items-center">
-                            <div class="progress bg-secondary-subtle w-100" style="height:5px;" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar bg-secondary" style="width: 15%"></div>
-                            </div>
-                            <small class="flex-shrink-1 ms-1">15%</small>
-                        </div>
-                    </div><!--end media body-->
-                </div><!--end media-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div> <!--end col-->
+                    <div class="flex-grow-1">
+                        <button class="btn btn-success btn-sm w-100" @onclick="@(() => ExportVehicles("csv"))">
+                            <i class="fa-solid fa-download me-1"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-md-6 col-lg-3">
         <div class="card">
             <div class="card-body">
@@ -79,30 +72,27 @@
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">View Detail</a>
-                        <a class="dropdown-item" href="#">Clear All</a>
-                        <a class="dropdown-item" href="#">Delete</a>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportInventorys("csv"))">Export CSV</button>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportInventorys("excel"))">Export Excel</button>
                     </div>
                 </div>
-                <img src="assets/images/logos/lang-logo/onedrive.png" class="me-2 align-self-center thumb-xl" alt="...">
-                <h5 class="fw-semibold mt-3 fs-14">Onedrive</h5>
+                <img src="assets/images/products/2992173.png" class="me-2 align-self-center thumb-xl" alt="...">
+                <h5 class="fw-semibold mt-3 fs-14">Inventaire</h5>
                 <div class="d-flex justify-content-between my-2">
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">192 </span>Files</p>
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">500 </span>GB</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">@inventory </span> Entrées</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">Export </span>Disponible</p>
                 </div>
                 <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 text-truncate">
-                        <div class="d-flex align-items-center">
-                            <div class="progress bg-secondary-subtle w-100" style="height:5px;" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar bg-secondary" style="width: 48%"></div>
-                            </div>
-                            <small class="flex-shrink-1 ms-1">48%</small>
-                        </div>
-                    </div><!--end media body-->
-                </div><!--end media-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div> <!--end col-->
+                    <div class="flex-grow-1">
+                        <button class="btn btn-warning btn-sm w-100" @onclick="@(() => ExportInventorys("csv"))">
+                            <i class="fa-solid fa-download me-1"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-md-6 col-lg-3">
         <div class="card">
             <div class="card-body">
@@ -111,32 +101,31 @@
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="#">View Detail</a>
-                        <a class="dropdown-item" href="#">Clear All</a>
-                        <a class="dropdown-item" href="#">Delete</a>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportInvoices("csv"))">Export CSV</button>
+                        <button class="dropdown-item" type="button" @onclick="@(() => ExportInvoices("excel"))">Export Excel</button>
                     </div>
                 </div>
-                <img src="assets/images/logos/lang-logo/server.png" class="me-2 align-self-center thumb-xl" alt="...">
-                <h5 class="fw-semibold mt-3 fs-14">Server</h5>
+                <img src="assets/images/products/16920787.png" class="me-2 align-self-center thumb-xl" alt="...">
+                <h5 class="fw-semibold mt-3 fs-14">Factures</h5>
                 <div class="d-flex justify-content-between my-2">
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">81 </span>Files</p>
-                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">500 </span>GB</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">@invoice </span> Entrées</p>
+                    <p class="text-muted mb-0 fs-13 fw-semibold"><span class="text-dark">Export </span>Disponible</p>
                 </div>
                 <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 text-truncate">
-                        <div class="d-flex align-items-center">
-                            <div class="progress bg-secondary-subtle w-100" style="height:5px;" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar bg-secondary" style="width: 76%"></div>
-                            </div>
-                            <small class="flex-shrink-1 ms-1">76%</small>
-                        </div>
-                    </div><!--end media body-->
-                </div><!--end media-->
-            </div><!--end card-body-->
-        </div><!--end card-->
-    </div> <!--end col-->
-</div><!--end row-->
+                    <div class="flex-grow-1">
+                        <button class="btn btn-info btn-sm w-100" @onclick="@(() => ExportInvoices("csv"))">
+                            <i class="fa-solid fa-download me-1"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
+    int clients = 0, vehicle = 0, inventory = 0, invoice = 0;
+    ApplicationDbContext context;
     protected override async Task OnInitializedAsync()
     {
         PageTitleService.CurrentTitle = "Exportation des données";
@@ -147,18 +136,22 @@
         if (firstRender)
         {
             await UserConnection.LoadCredentialsAsync();
-            StateHasChanged(); // Demande un nouveau rendu du composant
+            context = await DbContextFactory.CreateDbContextAsync();
+
+            clients = await context.Clients.CountAsync();
+            vehicle = await context.Vehicles.CountAsync();
+            inventory = await context.Inventorys.CountAsync();
+            invoice = await context.Invoices.CountAsync();
+            StateHasChanged();
         }
     }
 
-
     private async Task ExportClients(string format)
     {
-        using var _context = await DbContextFactory.CreateDbContextAsync();
 
         if (format == "csv")
         {
-            var bytes = await ExportService.GenerateCsvAsync(_context.Clients);
+            var bytes = await ExportService.GenerateCsvAsync(context.Clients);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
@@ -166,78 +159,71 @@
         }
         else
         {
-            var bytes = await ExportService.GenerateExcelAsync(_context.Clients);
+            var bytes = await ExportService.GenerateExcelAsync(context.Clients);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.xlsx", streamRef);
         }
     }
 
     private async Task ExportVehicles(string format)
     {
-        using var _context = await DbContextFactory.CreateDbContextAsync();
-
         if (format == "csv")
         {
-            var bytes = await ExportService.GenerateCsvAsync(_context.Vehicles);
+            var bytes = await ExportService.GenerateCsvAsync(context.Vehicles);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "vehicles.csv", streamRef);
         }
         else
         {
-            var bytes = await ExportService.GenerateExcelAsync(_context.Vehicles);
+            var bytes = await ExportService.GenerateExcelAsync(context.Vehicles);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "vehicles.xlsx", streamRef);
         }
     }
 
-
     private async Task ExportInventorys(string format)
     {
-        using var _context = await DbContextFactory.CreateDbContextAsync();
-
         if (format == "csv")
         {
-            var bytes = await ExportService.GenerateCsvAsync(_context.Inventorys);
+            var bytes = await ExportService.GenerateCsvAsync(context.Inventorys);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "inventory.csv", streamRef);
         }
         else
         {
-            var bytes = await ExportService.GenerateExcelAsync(_context.Inventorys);
+            var bytes = await ExportService.GenerateExcelAsync(context.Inventorys);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "inventory.xlsx", streamRef);
         }
     }
 
     private async Task ExportInvoices(string format)
     {
-        using var _context = await DbContextFactory.CreateDbContextAsync();
-
         if (format == "csv")
         {
-            var bytes = await ExportService.GenerateCsvAsync(_context.Invoices);
+            var bytes = await ExportService.GenerateCsvAsync(context.Invoices);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "invoices.csv", streamRef);
         }
         else
         {
-            var bytes = await ExportService.GenerateExcelAsync(_context.Invoices);
+            var bytes = await ExportService.GenerateExcelAsync(context.Invoices);
             using var stream = new MemoryStream(bytes);
             var streamRef = new DotNetStreamReference(stream);
 
-            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "clients.csv", streamRef);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", "invoices.xlsx", streamRef);
         }
     }
 }

@@ -1,0 +1,338 @@
+﻿@page "/upkeep"
+@rendermode InteractiveServer
+@inject PageTitleService PageTitleService
+@inject IJSRuntime JSRuntime
+@inject UserConnectionService UserConnection
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+
+
+@* <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Timeline</h4>
+                    </div><!--end col-->
+                </div>  <!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body px-0 pt-0">
+                <div class="activity p-3 pt-0 simplebar-scrollable-y" data-simplebar="init" style="height:500px">
+                    <div class="simplebar-wrapper" style="margin: 0px -24px -24px;">
+                        <div class="simplebar-height-auto-observer-wrapper"><div class="simplebar-height-auto-observer"></div></div><div class="simplebar-mask">
+                            <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content" style="height: 100%; overflow: hidden scroll;">
+                                    <div class="simplebar-content" style="padding: 0px 24px 24px;">
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity ">
+                                                <i class="las la-check-circle text-primary"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0 w-75">Task finished</h6>
+                                                    <span class="text-muted d-block">10 Min ago</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.
+                                                    <a href="#" class="text-primary">[more info]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-user-clock text-danger"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0  w-75">Task Overdue</h6>
+                                                    <span class="text-muted">50 Min ago</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.
+                                                    <a href="#" class="text-primary">[more info]</a>
+                                                </p>
+                                                <span class="badge badge-soft-secondary">Design</span>
+                                                <span class="badge badge-soft-secondary">HTML</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-clipboard-check text-primary"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0  w-75">New Task</h6>
+                                                    <span class="text-muted">10 hours ago</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.
+                                                    <a href="#" class="text-primary">[more info]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-comment-dots text-danger"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0">New Comment</h6>
+                                                    <span class="text-muted">Yesterday</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.
+                                                    <a href="#" class="text-primary">[more info]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-user-friends text-primary"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0">New Lead Miting</h6>
+                                                    <span class="text-muted">14 Nov 2019</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.
+                                                    <a href="#" class="text-primary">[more info]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><div class="simplebar-placeholder" style="width: 636px; height: 566px;"></div>
+                    </div><div class="simplebar-track simplebar-horizontal" style="visibility: hidden;"><div class="simplebar-scrollbar" style="width: 0px; display: none;"></div></div><div class="simplebar-track simplebar-vertical" style="visibility: visible;"><div class="simplebar-scrollbar" style="height: 441px; transform: translate3d(0px, 0px, 0px); display: block;"></div></div>
+                </div><!--end activity-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+    <div class="col-md-6 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Timeline</h4>
+                    </div><!--end col-->
+                </div>  <!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body pt-0">
+                <div class="tracking-list">
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">Sep 18, 2024<span class="d-block fs-12 text-muted">05:01 PM</span></div>
+                        <p class="mb-0 text-muted">It is a long established fact that a reader will be distracted.</p>
+                    </div>
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">Aug 10, 2024<span class="d-block fs-12 text-muted">11:19 AM</span></div>
+                        <p class="mb-0 text-muted">There are many variations of passages of Lorem Ipsum available, but the majority </p>
+                    </div>
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">Aug 10, 2024<span class="d-block fs-12 text-muted">11:19 AM</span></div>
+                        <p class="mb-0 text-muted">There are many variations of passages of Lorem Ipsum available, but the majority </p>
+                    </div>
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">Aug 10, 2024<span class="d-block fs-12 text-muted">11:19 AM</span></div>
+                        <p class="mb-0 text-muted">There are many variations of passages of Lorem Ipsum available, but the majority </p>
+                    </div>
+
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">Jul 06, 2024<span class="d-block fs-12 text-muted">02:02 PM</span></div>
+                        <p class="mb-0 text-muted">The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.</p>
+                    </div>
+                </div>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+</div> *@
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Chronologie</h4>
+                    </div><!--end col-->
+                </div>  <!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body px-0 pt-0">
+                <div class="activity p-3 pt-0 simplebar-scrollable-y" data-simplebar="init" style="height:500px">
+                    <div class="simplebar-wrapper" style="margin: 0px -24px -24px;">
+                        <div class="simplebar-height-auto-observer-wrapper"><div class="simplebar-height-auto-observer"></div></div><div class="simplebar-mask">
+                            <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content" style="height: 100%; overflow: hidden scroll;">
+                                    <div class="simplebar-content" style="padding: 0px 24px 24px;">
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity ">
+                                                <i class="las la-check-circle text-primary"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0 w-75">Révision terminée</h6>
+                                                    <span class="text-muted d-block">Il y a 10 min</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    Vidange moteur et changement du filtre à huile effectués. Contrôle général réalisé avec succès.
+                                                    <a href="#" class="text-primary">[plus d'infos]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-user-clock text-danger"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0  w-75">Rappel en retard</h6>
+                                                    <span class="text-muted">Il y a 50 min</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    Rappel constructeur pour mise à jour du système de freinage ABS. Prendre rendez-vous rapidement.
+                                                    <a href="#" class="text-primary">[plus d'infos]</a>
+                                                </p>
+                                                <span class="badge badge-soft-secondary">Rappel</span>
+                                                <span class="badge badge-soft-secondary">Urgent</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-clipboard-check text-primary"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0  w-75">Nouvelle intervention</h6>
+                                                    <span class="text-muted">Il y a 10 heures</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    Contrôle technique programmé pour le mois prochain. Pré-contrôle recommandé avant la date limite.
+                                                    <a href="#" class="text-primary">[plus d'infos]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-comment-dots text-danger"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0">Nouveau commentaire</h6>
+                                                    <span class="text-muted">Hier</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    Mécanicien signale usure des plaquettes de frein avant. Remplacement recommandé dans les 2000 km.
+                                                    <a href="#" class="text-primary">[plus d'infos]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="activity-info">
+                                            <div class="icon-info-activity">
+                                                <i class="las la-user-friends text-primary"></i>
+                                            </div>
+                                            <div class="activity-info-text">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="m-0">Nouveau rendez-vous</h6>
+                                                    <span class="text-muted">14 Nov 2024</span>
+                                                </div>
+                                                <p class="text-muted mt-3">
+                                                    Rendez-vous programmé pour changement des pneus hiver et contrôle de la géométrie des roues.
+                                                    <a href="#" class="text-primary">[plus d'infos]</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><div class="simplebar-placeholder" style="width: 636px; height: 566px;"></div>
+                    </div><div class="simplebar-track simplebar-horizontal" style="visibility: hidden;"><div class="simplebar-scrollbar" style="width: 0px; display: none;"></div></div><div class="simplebar-track simplebar-vertical" style="visibility: visible;"><div class="simplebar-scrollbar" style="height: 441px; transform: translate3d(0px, 0px, 0px); display: block;"></div></div>
+                </div><!--end activity-->
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+    <div class="col-md-6 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">Chronologie</h4>
+                    </div><!--end col-->
+                </div>  <!--end row-->
+            </div><!--end card-header-->
+            <div class="card-body pt-0">
+                <div class="tracking-list">
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">18 Sep 2024<span class="d-block fs-12 text-muted">17:01</span></div>
+                        <p class="mb-0 text-muted">Révision 15 000 km effectuée - Vidange, filtres et contrôle technique réalisés.</p>
+                    </div>
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">10 Août 2024<span class="d-block fs-12 text-muted">11:19</span></div>
+                        <p class="mb-0 text-muted">Changement des plaquettes de frein arrière et contrôle du système de freinage.</p>
+                    </div>
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">10 Août 2024<span class="d-block fs-12 text-muted">11:19</span></div>
+                        <p class="mb-0 text-muted">Remplacement des amortisseurs avant suite à l'usure détectée lors du contrôle.</p>
+                    </div>
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">10 Août 2024<span class="d-block fs-12 text-muted">11:19</span></div>
+                        <p class="mb-0 text-muted">Contrôle et ajustement de la géométrie des roues après changement des pneus.</p>
+                    </div>
+
+                    <div class="tracking-item">
+                        <div class="tracking-icon icon-inner">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="tracking-date">06 Juil 2024<span class="d-block fs-12 text-muted">14:02</span></div>
+                        <p class="mb-0 text-muted">Montage des pneus été et contrôle de la pression. Stockage des pneus hiver effectué.</p>
+                    </div>
+                </div>
+            </div><!--end card-body-->
+        </div><!--end card-->
+    </div> <!--end col-->
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        PageTitleService.CurrentTitle = "Maintenances";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UserConnection.LoadCredentialsAsync();
+        }
+    }
+}
