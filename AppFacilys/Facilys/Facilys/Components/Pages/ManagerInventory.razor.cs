@@ -104,49 +104,59 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitEditInventory()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                if (selectedFile != null)
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    inventory.Picture = await ConvertToBase64(selectedFile);
+                    if (selectedFile != null)
+                    {
+                        inventory.Picture = await ConvertToBase64(selectedFile);
+                    }
+                    DbContext.Inventorys.Update(inventory);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
                 }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    Logger.LogError(ex, "Erreur lors de la mise à jour de l'inventaire");
+                    throw;
+                }
+            });
 
-                DbContext.Inventorys.Update(inventory);
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                ResetForm();
-                CloseModal("OpenModalLargeEditInventory");
-                await RefreshInventoryList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-            }
+            // Actions post-transaction
+            ResetForm();
+            CloseModal("OpenModalLargeEditInventory");
         }
 
         private async Task SubmitDeleteInventory()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    DbContext.Inventorys.Remove(inventory);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    Logger.LogError(ex, "Erreur lors de la suppression de l'inventaire");
+                    throw;
+                }
+            });
 
-                DbContext.Inventorys.Remove(inventory);
-
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                // Réinitialiser
-                ResetForm();
-                CloseModal("OpenModalDeleteInventory");
-                await RefreshInventoryList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données inventaire");
-            }
+            // Actions post-transaction
+            ResetForm();
+            CloseModal("OpenModalDeleteInventory");
+            await RefreshInventoryList();
         }
+
         private async Task RefreshInventoryList()
         {
             // Récupérer la liste mise à jour des clients depuis votre service

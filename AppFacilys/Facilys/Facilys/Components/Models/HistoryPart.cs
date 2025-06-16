@@ -12,10 +12,10 @@ namespace Facilys.Components.Models
         public Guid IdInvoice { get; set; }
         [ForeignKey("IdVehicle")]
         public Vehicles? Vehicle { get; set; }
-        public Guid? IdVehicle { get; set; } = Guid.Empty;
+        public Guid? IdVehicle { get; set; } = null;
         [ForeignKey("IdOtherVehicle")]
         public OtherVehicles? OtherVehicle { get; set; }
-        public Guid? IdOtherVehicle { get; set; } = Guid.Empty;
+        public Guid? IdOtherVehicle { get; set; } = null;
         public string PartNumber { get; set; } = string.Empty;
         [Required]
         public string? PartName { get; set; } = string.Empty;

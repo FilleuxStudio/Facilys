@@ -1,4 +1,5 @@
-﻿using ElectronNET.API;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using ElectronNET.API;
 using Facilys.Components.Data;
 using Facilys.Components.Models;
 using Facilys.Components.Models.Modal;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.JSInterop;
 using System.Globalization;
 
@@ -490,7 +492,46 @@ namespace Facilys.Components.Pages
 
             if (actionType == 1)
             {
+                try
+                {
+                    var executionStrategy = DbContext.Database.CreateExecutionStrategy();
 
+                    await executionStrategy.ExecuteAsync(async () =>
+                    {
+                        // Utilisation d'une transaction explicite
+                        using var transaction = await DbContext.Database.BeginTransactionAsync();
+
+                        try
+                        {
+                            await DbContext.Quotes.AddAsync(quote);
+                            await DbContext.QuotesItems.AddRangeAsync(quotesItems);
+
+                            // SaveChanges avec acceptAllChangesOnSuccess à false pour plus de sécurité
+                            await DbContext.SaveChangesAsync(acceptAllChangesOnSuccess: false);
+
+                            await transaction.CommitAsync();
+
+                            // Accepte les changements seulement après un commit réussi
+                            DbContext.ChangeTracker.AcceptAllChanges();
+                        }
+                        catch
+                        {
+                            // Rollback explicite en cas d'erreur
+                            await transaction.RollbackAsync();
+
+                            // Rejette les changements après un échec
+                            DbContext.ChangeTracker.Clear();
+                            throw;
+                        }
+                    });
+
+                    Navigation.NavigateTo("/managerQuotes");
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                }
             }
             else if (actionType == 2)
             {
@@ -645,6 +686,7 @@ namespace Facilys.Components.Pages
             managerQuotationViewModel.EmailsClients.Clear();
             managerQuotationViewModel.EmailsClients = [];
             managerQuotationViewModel.Quote = new();
+            managerQuotationViewModel.Quotes = [];
             managerQuotationViewModel.Quotes.Clear();
             managerQuotationViewModel.Vehicle = new();
             currentPhone = string.Empty;

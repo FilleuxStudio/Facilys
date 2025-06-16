@@ -76,34 +76,45 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitDeleteQuatation()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-
-                var quoteId = managerQuotationViewModel.Quote.Id;
-
-
-                // Supprimer les devis et leurs éléments
-                var quotes = await DbContext.QuotesItems.Where(q => q.Quote.Id == quoteId).ToListAsync();
-                foreach (var quote in quotes)
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM QuotesItems WHERE IdQuote = {0}", quote.Id);
+                    var quoteId = managerQuotationViewModel.Quote.Id;
+
+                    // Suppression avec Entity Framework (plus propre)
+                    var quotesItems = await DbContext.QuotesItems
+                        .Where(qi => qi.IdQuote == quoteId)
+                        .ToListAsync();
+
+                    if (quotesItems.Any())
+                    {
+                        DbContext.QuotesItems.RemoveRange(quotesItems);
+                    }
+
+                    var quote = await DbContext.Quotes.FindAsync(quoteId);
+                    if (quote != null)
+                    {
+                        DbContext.Quotes.Remove(quote);
+                    }
+
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
                 }
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Quotes WHERE Id = {0}", quoteId);
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    Logger.LogError(ex, "Erreur lors de la suppression des données devis");
+                    throw;
+                }
+            });
 
-
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                // Réinitialiser le formulaire et rafraîchir la liste des clients
-                ResetForm();
-                CloseModal("OpenModalDeleteQuation");
-                await RefreshQuotationList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données client");
-            }
+            // Actions post-transaction
+            ResetForm();
+            CloseModal("OpenModalDeleteQuation");
+            await RefreshQuotationList();
         }
 
         private async Task RefreshQuotationList()

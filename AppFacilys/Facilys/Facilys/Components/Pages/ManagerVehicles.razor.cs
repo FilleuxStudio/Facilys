@@ -200,73 +200,88 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitEditVehicle()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                DbContext.Vehicles.Update(managerVehicleViewModel.Vehicle);
-                await DbContext.SaveChangesAsync();
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    DbContext.Vehicles.Update(managerVehicleViewModel.Vehicle);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
-                await transaction.CommitAsync();
+                    // Actions post-transaction (en dehors de la transaction)
+                    ResetForm();
+                    CloseModal("OpenModalLargeEditVehicle");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    Logger.LogError(ex, "Erreur lors de la mise à jour de la base de données");
+                    throw; // Re-lancer pour permettre la gestion d'erreur externe
+                }
+            });
 
-                ResetForm();
-                CloseModal("OpenModalLargeEditVehicle");
-                await RefreshVehicleList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-            }
+            //await RefreshVehicleList();
         }
 
         private async Task SubmitDeleteVehicleAllData()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
 
-                var vehicleId = managerVehicleViewModel.Vehicle.Id;
+                    var vehicleId = managerVehicleViewModel.Vehicle.Id;
 
-                // Supprimer les factures et l'historique des pièces liés aux véhicules
-                await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: false);
-                await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: true);
+                    // Supprimer les factures et l'historique des pièces liés aux véhicules
+                    await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: false);
+                    await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: true);
 
-                DbContext.Vehicles.Remove(managerVehicleViewModel.Vehicle);
+                    DbContext.Vehicles.Remove(managerVehicleViewModel.Vehicle);
 
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
-                // Réinitialiser le formulaire et rafraîchir la liste des clients
-                ResetForm();
-                CloseModal("OpenModalLargeDeleteVehicle");
-                await RefreshVehicleList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données véhicule");
-            }
+                    // Réinitialiser le formulaire et rafraîchir la liste des clients
+                    ResetForm();
+                    CloseModal("OpenModalLargeDeleteVehicle");
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données véhicule");
+                }
+            });
+            await RefreshVehicleList();
         }
 
         private async Task SubmitDeleteVehicle()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                managerVehicleViewModel.Vehicle.StatusDataView = StatusData.Delete;
-                DbContext.Vehicles.Update(managerVehicleViewModel.Vehicle);
-                await DbContext.SaveChangesAsync();
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    managerVehicleViewModel.Vehicle.StatusDataView = StatusData.Delete;
+                    DbContext.Vehicles.Update(managerVehicleViewModel.Vehicle);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
+                    ResetForm();
+                    CloseModal("OpenModalLargeDeleteVehicle");
 
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                }
+            });
 
-                ResetForm();
-                CloseModal("OpenModalLargeDeleteVehicle");
-                await RefreshVehicleList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-            }
+            await RefreshVehicleList();
         }
 
         private async Task SubmitAddOtherVehicle()
@@ -294,72 +309,84 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitEditOtherVehicle()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                DbContext.OtherVehicles.Update(managerVehicleViewModel.OtherVehicle);
-                await DbContext.SaveChangesAsync();
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    DbContext.OtherVehicles.Update(managerVehicleViewModel.OtherVehicle);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
-                await transaction.CommitAsync();
+                    ResetForm();
+                    CloseModal("OpenModalLargeEditOtherVehicle");
 
-                ResetForm();
-                CloseModal("OpenModalLargeEditOtherVehicle");
-                await RefreshVehicleList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-            }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                }
+            });
         }
 
         private async Task SubmitDeleteOtherVehicle()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                managerVehicleViewModel.OtherVehicle.StatusDataView = StatusData.Delete;
-                DbContext.OtherVehicles.Update(managerVehicleViewModel.OtherVehicle);
-                await DbContext.SaveChangesAsync();
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    managerVehicleViewModel.OtherVehicle.StatusDataView = StatusData.Delete;
+                    DbContext.OtherVehicles.Update(managerVehicleViewModel.OtherVehicle);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
+                    ResetForm();
+                    CloseModal("OpenModalLargeDeleteOtherVehicle");
 
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
+                }
+            });
 
-                ResetForm();
-                CloseModal("OpenModalLargeDeleteOtherVehicle");
-                await RefreshVehicleList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la mise à jour de la base de données");
-            }
+            await RefreshVehicleList();
         }
         private async Task SubmitDeleteOtherVehicleAllData()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
 
-                var vehicleId = managerVehicleViewModel.OtherVehicle.Id;
+                    var vehicleId = managerVehicleViewModel.OtherVehicle.Id;
 
-                // Supprimer les factures et l'historique des pièces liés aux véhicules
-                await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: false);
-                await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: true);
+                    // Supprimer les factures et l'historique des pièces liés aux véhicules
+                    await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: false);
+                    await DeleteInvoicesAndHistoryForVehicle(vehicleId, isOtherVehicle: true);
 
-                DbContext.OtherVehicles.Remove(managerVehicleViewModel.OtherVehicle);
+                    DbContext.OtherVehicles.Remove(managerVehicleViewModel.OtherVehicle);
 
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
-                // Réinitialiser le formulaire et rafraîchir la liste des clients
-                ResetForm();
-                CloseModal("OpenModalLargeDeleteOtherVehicle");
-                await RefreshVehicleList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données véhicule");
-            }
+                    // Réinitialiser le formulaire et rafraîchir la liste des clients
+                    ResetForm();
+                    CloseModal("OpenModalLargeDeleteOtherVehicle");
+
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données véhicule");
+                }
+
+            });
+            await RefreshVehicleList();
         }
 
 

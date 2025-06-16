@@ -350,6 +350,7 @@ namespace Facilys.Components.Pages
                 {
                     Id = Guid.NewGuid(),
                     Invoice = invoice,
+                    IdInvoice = invoice.Id,
                     Vehicle = vehicle,
                     OtherVehicle = otherVehicle,
                     PartNumber = line.LineRef,
@@ -371,6 +372,52 @@ namespace Facilys.Components.Pages
 
             if (actionType == 1)
             {
+                var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+
+                await executionStrategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await DbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+                        // Ajout des entités
+                        await DbContext.Invoices.AddAsync(invoice);
+                        await DbContext.HistoryParts.AddRangeAsync(LineDataPart);
+
+                        if (vehicle != null)
+                            DbContext.Vehicles.Update(vehicle);
+                        else if (otherVehicle != null) // Ajout d'une vérification supplémentaire
+                            DbContext.OtherVehicles.Update(otherVehicle);
+
+                        // Sauvegarde avec gestion explicite des erreurs
+                        var saved = await DbContext.SaveChangesAsync();
+
+                        if (saved > 0) // Vérification que des changements ont bien été sauvegardés
+                            await transaction.CommitAsync();
+                        else
+                        {
+                            await transaction.RollbackAsync();
+                            Logger.LogWarning("Aucun changement n'a été sauvegardé dans la base de données");
+                        }
+
+                        Navigation.NavigateTo("/managerInvoices");
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            // Tentative de rollback en cas d'erreur
+                            await transaction.RollbackAsync();
+                        }
+                        catch (Exception rollbackEx)
+                        {
+                            Logger.LogError(rollbackEx, "Erreur lors du rollback de la transaction");
+                        }
+
+                        Logger.LogError(ex, "Erreur lors de la mise à jour de la base de données");
+                        throw; // Re-lancer l'exception pour la gestion ultérieure
+                    }
+                });
 
             }
             else if (actionType == 2)

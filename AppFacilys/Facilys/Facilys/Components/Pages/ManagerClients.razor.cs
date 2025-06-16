@@ -351,7 +351,7 @@ namespace Facilys.Components.Pages
                     {
                         foreach (var phone in managerClientViewModel.PhonesClients)
                         {
-                            phone.Client.Id = managerClientViewModel.Client.Id;
+                            phone.Client = managerClientViewModel.Client;
                         }
                         await DbContext.Phones.AddRangeAsync(managerClientViewModel.PhonesClients);
                     }
@@ -361,7 +361,7 @@ namespace Facilys.Components.Pages
                     {
                         foreach (var email in managerClientViewModel.EmailsClients)
                         {
-                            email.Client.Id = managerClientViewModel.Client.Id;
+                            email.Client = managerClientViewModel.Client;
                         }
                         await DbContext.Emails.AddRangeAsync(managerClientViewModel.EmailsClients);
                     }
@@ -398,120 +398,124 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitDeleteClientAllData()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-
-                var clientId = managerClientViewModel.Client.Id;
-
-                // Supprimer les téléphones et emails
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Phones WHERE IdClient = {0}", clientId);
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Emails WHERE IdClient = {0}", clientId);
-
-                // Supprimer les devis et leurs éléments
-                var quotes = await DbContext.Quotes.Where(q => q.Client.Id == clientId).ToListAsync();
-                foreach (var quote in quotes)
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM QuotesItems WHERE IdQuote = {0}", quote.Id);
+
+                    var clientId = managerClientViewModel.Client.Id;
+
+                    // Supprimer les téléphones et emails
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Phones WHERE IdClient = {0}", clientId);
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Emails WHERE IdClient = {0}", clientId);
+
+                    // Supprimer les devis et leurs éléments
+                    var quotes = await DbContext.Quotes.Where(q => q.Client.Id == clientId).ToListAsync();
+                    foreach (var quote in quotes)
+                    {
+                        await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM QuotesItems WHERE IdQuote = {0}", quote.Id);
+                    }
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Quotes WHERE IdClient = {0}", clientId);
+
+                    // Supprimer les véhicules et autres véhicules
+                    var vehicles = await DbContext.Vehicles.Where(v => v.Client.Id == clientId).ToListAsync();
+                    var otherVehicles = await DbContext.OtherVehicles.Where(ov => ov.Client.Id == clientId).ToListAsync();
+
+                    // Supprimer les factures et l'historique des pièces liés aux véhicules
+                    foreach (var vehicle in vehicles)
+                    {
+                        await DeleteInvoicesAndHistoryForVehicle(vehicle.Id, isOtherVehicle: false);
+                    }
+
+                    foreach (var otherVehicle in otherVehicles)
+                    {
+                        await DeleteInvoicesAndHistoryForVehicle(otherVehicle.Id, isOtherVehicle: true);
+                    }
+
+                    // Supprimer les véhicules et autres véhicules
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Vehicles WHERE IdClient = {0}", clientId);
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM OtherVehicles WHERE IdClient = {0}", clientId);
+
+                    // Supprimer le client
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Clients WHERE Id = {0}", clientId);
+
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync(); 
                 }
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Quotes WHERE IdClient = {0}", clientId);
-
-                // Supprimer les véhicules et autres véhicules
-                var vehicles = await DbContext.Vehicles.Where(v => v.Client.Id == clientId).ToListAsync();
-                var otherVehicles = await DbContext.OtherVehicles.Where(ov => ov.Client.Id == clientId).ToListAsync();
-
-                // Supprimer les factures et l'historique des pièces liés aux véhicules
-                foreach (var vehicle in vehicles)
+                catch (Exception ex)
                 {
-                    await DeleteInvoicesAndHistoryForVehicle(vehicle.Id, isOtherVehicle: false);
+                    Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données client");
                 }
+            });
 
-                foreach (var otherVehicle in otherVehicles)
-                {
-                    await DeleteInvoicesAndHistoryForVehicle(otherVehicle.Id, isOtherVehicle: true);
-                }
-
-                // Supprimer les véhicules et autres véhicules
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Vehicles WHERE IdClient = {0}", clientId);
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM OtherVehicles WHERE IdClient = {0}", clientId);
-
-                // Supprimer le client
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Clients WHERE Id = {0}", clientId);
-
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                // Réinitialiser le formulaire et rafraîchir la liste des clients
-                ResetForm();
-                CloseModal("OpenModalLargeDeleteClient");
-                await RefreshClientList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données client");
-            }
+            // Réinitialiser le formulaire et rafraîchir la liste des clients
+            ResetForm();
+            CloseModal("OpenModalLargeDeleteClient");
+            await RefreshClientList();
         }
 
         private async Task SubmitDeleteClient()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                var clientId = managerClientViewModel.Client.Id;
-
-                // Créer ou récupérer l'utilisateur concessionnaire par défaut
-                var dealerClient = await DbContext.Clients.FirstOrDefaultAsync(c => c.Lname == "ConcessionnaireLock" && c.Fname == "Concessionnaire") ?? new Clients
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    Lname = "ConcessionnaireLock",
-                    Fname = "Concessionnaire",
-                    Address = "local",
-                    City = "local",
-                    PostalCode = "60840",
-                    Type = TypeClient.Client,
-                    AdditionalInformation = "Client concessionnaire par défaut",
-                    DateCreated = DateTime.Now
-                };
+                    var clientId = managerClientViewModel.Client.Id;
 
-                if (dealerClient.Id == Guid.Empty)
-                {
-                    DbContext.Clients.Add(dealerClient);
+                    // Créer ou récupérer l'utilisateur concessionnaire par défaut
+                    var dealerClient = await DbContext.Clients.FirstOrDefaultAsync(c => c.Lname == "ConcessionnaireLock" && c.Fname == "Concessionnaire") ?? new Clients
+                    {
+                        Lname = "ConcessionnaireLock",
+                        Fname = "Concessionnaire",
+                        Address = "local",
+                        City = "local",
+                        PostalCode = "60840",
+                        Type = TypeClient.Client,
+                        AdditionalInformation = "Client concessionnaire par défaut",
+                        DateCreated = DateTime.Now
+                    };
+
+                    if (dealerClient.Id == Guid.Empty)
+                    {
+                        DbContext.Clients.Add(dealerClient);
+                        await DbContext.SaveChangesAsync();
+                    }
+
+                    await DbContext.Database.ExecuteSqlRawAsync("UPDATE Vehicles SET IdClient = {0} WHERE IdClient = {1}", dealerClient.Id, clientId);
+                    await DbContext.Database.ExecuteSqlRawAsync("UPDATE OtherVehicles SET IdClient = {0} WHERE IdClient = {1}", dealerClient.Id, clientId);
+
+                    // Supprimer les devis et leurs éléments
+                    var quotes = await DbContext.Quotes.Where(q => q.Client.Id == clientId).ToListAsync();
+                    foreach (var quote in quotes)
+                    {
+                        await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM QuotesItems WHERE IdQuote = {0}", quote.Id);
+                    }
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Quotes WHERE IdClient = {0}", clientId);
+                    // Supprimer les téléphones et emails
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Phones WHERE IdClient = {0}", clientId);
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Emails WHERE IdClient = {0}", clientId);
+
+                    // Supprimer l'ancien client
+                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Clients WHERE Id = {0}", clientId);
+
                     await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();  
                 }
-
-                await DbContext.Database.ExecuteSqlRawAsync("UPDATE Vehicles SET IdClient = {0} WHERE IdClient = {1}", dealerClient.Id, clientId);
-                await DbContext.Database.ExecuteSqlRawAsync("UPDATE OtherVehicles SET IdClient = {0} WHERE IdClient = {1}", dealerClient.Id, clientId);
-
-                // Supprimer les devis et leurs éléments
-                var quotes = await DbContext.Quotes.Where(q => q.Client.Id == clientId).ToListAsync();
-                foreach (var quote in quotes)
+                catch (Exception ex)
                 {
-                    await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM QuotesItems WHERE IdQuote = {0}", quote.Id);
+                    await transaction.RollbackAsync();
+                    // Gérer l'exception (par exemple, journalisation, affichage d'un message d'erreur)
+                    Console.WriteLine($"Une erreur s'est produite lors du remplacement du client : {ex.Message}");
                 }
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Quotes WHERE IdClient = {0}", clientId);
-                // Supprimer les téléphones et emails
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Phones WHERE IdClient = {0}", clientId);
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Emails WHERE IdClient = {0}", clientId);
-
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                // Supprimer l'ancien client
-                await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM Clients WHERE Id = {0}", clientId);
-
-                await DbContext.SaveChangesAsync();
-
-
-                // Réinitialiser le formulaire et rafraîchir la liste des clients
-                ResetForm();
-                CloseModal("OpenModalLargeDeleteClient");
-                await RefreshClientList();
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                // Gérer l'exception (par exemple, journalisation, affichage d'un message d'erreur)
-                Console.WriteLine($"Une erreur s'est produite lors du remplacement du client : {ex.Message}");
-            }
+            });
+            // Réinitialiser le formulaire et rafraîchir la liste des clients
+            ResetForm();
+            CloseModal("OpenModalLargeDeleteClient");
+            await RefreshClientList();
         }
 
         private async Task SubmitAddVehicleStepTow()

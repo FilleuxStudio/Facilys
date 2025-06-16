@@ -98,24 +98,29 @@ namespace Facilys.Components.Pages
 
         private async Task SubmitDeleteInvoice()
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = DbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
             {
+                using var transaction = await DbContext.Database.BeginTransactionAsync();
+                try
+                {
 
-                DbContext.Invoices.Remove(managerInvoiceViewModel.Invoice);
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                    DbContext.Invoices.Remove(managerInvoiceViewModel.Invoice);
+                    await DbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
-                // Réinitialiser le formulaire et rafraîchir la liste des clients
-                ResetForm();
-                CloseModal("OpenModaDeleteInvoice");
-                await RefreshInvoiceList();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données de facture");
-            }
 
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex.Message, "Erreur lors de la suppréssion des données de facture");
+                }
+            });
+
+            // Réinitialiser le formulaire et rafraîchir la liste des clients
+            ResetForm();
+            CloseModal("OpenModaDeleteInvoice");
+            await RefreshInvoiceList();
         }
 
         private async Task GenerateInvoicePdf(Guid IdInvoice)
