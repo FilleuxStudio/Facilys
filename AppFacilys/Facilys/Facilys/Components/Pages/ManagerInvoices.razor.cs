@@ -27,7 +27,7 @@ namespace Facilys.Components.Pages
             managerInvoiceViewModel.Invoice = new();
             managerInvoiceViewModel.Invoices = [];
             managerInvoiceViewModel.Edition = new();
-            managerInvoiceViewModel.CompanySettings= new();
+            managerInvoiceViewModel.CompanySettings = new();
             modalManager.RegisterModal("OpenModaDeleteInvoice");
         }
 

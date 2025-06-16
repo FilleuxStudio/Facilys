@@ -387,6 +387,13 @@ namespace Facilys.Components.Pages
             }
         }
 
+        private async Task TriggerFileInput()
+        {
+            await JSRuntime.InvokeVoidAsync("eval",
+                "document.getElementById('fileInputOcr').click()");
+        }
+
+
         private async Task OnFileReadOcr(InputFileChangeEventArgs e)
         {
             var file = e.File;

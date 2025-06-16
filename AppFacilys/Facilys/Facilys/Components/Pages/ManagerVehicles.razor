@@ -171,8 +171,11 @@
                                 <button type="button" @onclick="@(() => OpenModal("OpenModalDataOCR"))" class="btn btn-secondary me-2"><i class="fas fa-edit"></i></button>
                             }
 
-                            <InputFile OnChange="@OnFileReadOcr" hidden id="fileInputOcr" accept="image/*" />
-                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInputOcr').click(); return false;">Lecture OCR carte grise</button>
+                            <button class="btn btn-primary" @onclick="TriggerFileInput"> Analyser la carte grise</button>
+                            <InputFile OnChange="OnFileReadOcr" id="fileInputOcr" accept="image/*" style="display: none;" />
+
+                            @* <InputFile OnChange="@OnFileReadOcr" hidden id="fileInputOcr" accept="image/*" />
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInputOcr').click(); return false;">Lecture OCR carte grise</button> *@
 
                             <button type="submit" class="btn btn-primary px-4">Ajouter</button>
                         </div>
